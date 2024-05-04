@@ -10,11 +10,12 @@ const selectedPlan = ref()
 const selectedStatus = ref()
 const totalPage = ref(1)
 const totalParish = ref(0)
-const parish = ref([])
+const committee = ref([])
+
 const isPermissionDialogVisible = ref(false)
 const isAddPermissionDialogVisible = ref(false)
 const permissionName = ref('')
-const isCreateParishVisible = ref(false)
+const isCreateCommitteeVisible = ref(false)
 const isEditParishVisible = ref(false)
 let parishData = ref([])
 
@@ -70,37 +71,36 @@ const filteredUsers = computed(() => {
 // Table Headers
 const headers = [
   {
-    title: 'Paris Name',
+    title: 'Committee Name',
+    key: 'committeName',
+  },
+  {
+    title: 'Parish Name',
     key: 'parishname',
   },
-
   {
-    title: 'Phone Number',
-    key: 'phone1',
+    title: 'From',
+    key: 'from',
+  },
+  {
+    title: 'To',
+    key: 'to',
   },
 
   {
-    title: 'Country',
-    value: 'country',
-  },
-  {
-    title: 'State',
-    key: 'states',
+    title: 'created at',
+    key: 'created_at',
   },
 
-  {
-    title: 'City',
-    key: 'city',
-  },
-  {
-    title: 'email',
-    value: 'email',
-  },
+  // {
+  //   title: 'email',
+  //   value: 'email',
+  // },
   
-  {
-    title: 'Category',
-    key: 'category',
-  },
+  // {
+  //   title: 'Category',
+  //   key: 'category',
+  // },
 
  
 
@@ -113,20 +113,16 @@ const headers = [
 ]
 
 // 👉 Fetching Parish
-const fetchAllParish = () => {
-  AllAdminActions.fetchAllParish({
+const fetchAllCommittee = () => {
+  AllAdminActions.fetchAllcommittee({
     q: searchQuery.value,
     status: selectedStatus.value,
     plan: selectedPlan.value,
     role: selectedRole.value,
     options: options.value,
   }).then(response => {
-    parish.value = response.data.allParish
-
-    console.log(parish.value)
-    
-    // Store data in local storage
-    // localStorage.setItem('tableData', JSON.stringify(response.data.users))
+    // parish.value = response.data.allParish
+    committee.value = response.data.Allcommittee
     totalPage.value = response.data.totalPage
     totalParish.value = response.data.totalParish
     options.value.page = response.data.page
@@ -135,7 +131,7 @@ const fetchAllParish = () => {
   })
 }
 
-watchEffect(fetchAllParish)
+watchEffect(fetchAllCommittee)
 
 // 👉 search filters
 const roles = [
@@ -277,7 +273,7 @@ const deleteUser = id => {
   AllAdminActions.deleteUser(id)
 
   // refetch User
-  fetchAllParish()
+  fetchAllCommittee()
 }
 
 const editPermission = name => {
@@ -420,91 +416,25 @@ const editPermission = name => {
 
               <VBtn
                 prepend-icon="tabler-plus"
-                @click="isCreateParishVisible = !isCreateParishVisible"
+                @click="isCreateCommitteeVisible = !isCreateCommitteeVisible"
               >
-                Add New Parish
+                Add Committee
               </VBtn>
             </div>
           </VCardText>
 
           <VDivider />
-
-          <!-- SECTION datatable <pre>{{ users }}</pre> -->
+         
+          <!-- SECTION datatable <pre>{{ committee }}</pre> -->
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="parish"
+            :items="committee"
             :items-length="totalParish"
             :headers="headers"
             class="text-no-wrap"
             @update:options="options = $event"
           >
-            <!--  👉 Parish -->
-
-
-            <template #item.parish="{ item }">
-              <div class="d-flex align-center">
-                <VAvatar
-                  size="34"
-                  :variant="!item.raw.avatar ? 'tonal' : undefined"
-                  :color="!item.raw.avatar ? resolveUserRoleVariant(item.raw.city).color : undefined"
-                  class="me-3"
-                >
-                  <VImg
-                    v-if="item.raw.avatar"
-                    :src="item.raw.avatar"
-                  />
-                  <span v-else>{{ avatarText(item.raw.email) }}</span>
-                </VAvatar>
-
-                <div class="d-flex flex-column">
-                  <h6 class="text-base">
-                    <RouterLink
-                      :to="{ name: 'apps-user-view-id', params: { id: item.raw.country } }"
-                      class="font-weight-medium user-list-name"
-                    >
-                      {{ item.raw.country }}
-                    </RouterLink>
-                  </h6>
-                  <span class="text-sm text-medium-emphasis">{{ item.raw.email }}</span>
-                </div>
-              </div>
-            </template>
-
-            <!-- 👉 Role -->
-            <template #item.category="{ item }">
-              <div class="d-flex align-center gap-4">
-                <VAvatar
-                  :size="30"
-                  :color="resolveUserRoleVariant(item.raw.category).color"
-                  variant="tonal"
-                >
-                  <VIcon
-                    :size="20"
-                    :icon="resolveUserRoleVariant(item.raw.category).icon"
-                  />
-                </VAvatar>
-                <span class="text-capitalize">{{ item.raw.category }}</span>
-              </div>
-            </template>
-
-            <!-- 👉 Plan -->
-            <template #item.plan="{ item }">
-              <span class="text-capitalize font-weight-medium">{{ item.raw.currentPlan }}</span>
-            </template>
-
-            <!-- Status -->
-            <template #item.city="{ item }">
-              <VChip
-                :color="resolveUserStatusVariant(item.raw.city)"
-                size="small"
-                label
-                class="text-capitalize"
-              >
-                {{ item.raw.city }}
-              </VChip>
-            </template>
-
             <!-- Actions -->
             <template #item.actions="{ item }">
               <IconBtn @click="deleteUser(item.raw.id)">
@@ -585,7 +515,7 @@ const editPermission = name => {
           sm="6"
           md="4"
         >
-          <CreateParishDialog v-model:is-dialog-visible="isCreateParishVisible" />
+          <CreateCommitteeDialog v-model:is-dialog-visible="isCreateCommitteeVisible" />
         </VCol>
 
         <!-- 👉 Edit parish dialog -->

@@ -5,7 +5,7 @@ export default [
 
     children: [
       {
-        title: 'Dashboard',
+        title: 'User Dashboard',
         to: 'access-control',
       },
 

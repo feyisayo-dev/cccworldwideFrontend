@@ -4,17 +4,27 @@ export default [
     icon: { icon: 'tabler-smart-home' },
     children: [
       {
-        title: 'Dashboard',
+        title: 'Admin Dashboard',
         to: 'dashboards-admin-dashboard',
       },
       {
-        title: 'User',
+        title: 'User settings',
         icon: { icon: 'tabler-users' },
         children: [
           { title: 'View Members', to: 'dashboards-viewuser-dashboard' },
           { title: 'Add Parish', to: 'dashboards-parish-dashboard' },
        
 
+          // { title: 'Add Parish', to: { name: 'dashboards-parish-dashboard', params: { id: 21 } } },
+        ],
+      },
+
+      {
+        title: 'Committee settings',
+        icon: { icon: 'tabler-users' },
+        children: [
+          { title: 'Add Committee', to: 'dashboards-addcommitte-dashboard' },
+          
           // { title: 'Add Parish', to: { name: 'dashboards-parish-dashboard', params: { id: 21 } } },
         ],
       },

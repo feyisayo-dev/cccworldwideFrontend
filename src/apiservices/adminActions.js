@@ -37,6 +37,8 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
     // 👉 Fetch All parish  data on table
     fetchAllParish(params) { return api.get('/getAllParishes', { params }) },
 
+    // 👉 Fetch All committee
+    fetchAllcommittee(params) { return api.get('/getAllCommittee', { params }) },
 
     async fetchStateParish(statename) {
       try {
@@ -49,33 +51,31 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
   
   
 
-    // // 👉 Add User
-    // addParish(parishData) {
+    // 👉 Add User
+    addParish(parishData) {
 
-    //   console.log('Post Data from admin action', postData)
+      console.log('Post Data from admin action', postData)
 
-    //   // return new Promise((resolve, reject) => {
-    //   //   api.post('/apps/users/user', {
-    //   //     user: parishData,
-    //   //   }).then(response => resolve(response))
-    //   //     .catch(error => reject(error))
-    //   // })
+      // return new Promise((resolve, reject) => {
+      //   api.post('/apps/users/user', {
+      //     user: parishData,
+      //   }).then(response => resolve(response))
+      //     .catch(error => reject(error))
+      // })
 
-    // },
+    },
 
     
-    async addNewParish(postData) {
-      // console.log('Post Data from admin action', postData)
-      try {
-        // Fetch parish data based on the provided state name
-      // Assuming the response contains parish data
+    async addNewCommittee(postData) {
+      console.log('Post Data from admin action', postData)
 
-        return await api.post('/AddParish', {
-          postData,
-        })
-      } catch (error) {
-        throw new Error('Failed to fetch parish by state')
-      }
+      // try {
+      //   return await api.post('/addcommittee', {
+      //     postData,
+      //   })
+      // } catch (error) {
+      //   throw new Error('Failed to fetch parish by state')
+      // }
 
     },
   
