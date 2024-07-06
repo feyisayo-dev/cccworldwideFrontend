@@ -518,6 +518,7 @@ const editPermission = name => {
                 variant="text"
                 @click="openEditParishDialog(item)"
               >
+                icon
                 <VIcon
                   size="22"
                   icon="tabler-edit"

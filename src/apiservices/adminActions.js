@@ -33,12 +33,17 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
     
     },
 
+    // 👉 Fetch All ministry  data on table
+    fetchMinistryFromApi(params) { return api.get('/AllMinistry', { params }) },
 
     // 👉 Fetch All parish  data on table
     fetchAllParish(params) { return api.get('/getAllParishes', { params }) },
 
     // 👉 Fetch All committee
     fetchAllcommittee(params) { return api.get('/getAllCommittee', { params }) },
+
+    // 👉 Fetch All title
+    fetchAlltitle(params) { return api.get('/getAlltitle', { params }) },
 
     async fetchStateParish(statename) {
       try {
@@ -79,7 +84,7 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
 
     },
   
-    fetchMinistryFromApi(params) { return api.get('/AllMinistry', { params }) },
+    
 
   },
 })

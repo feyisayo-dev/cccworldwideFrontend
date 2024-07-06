@@ -20,12 +20,22 @@ export default [
       },
 
       {
-        title: 'Committee settings',
+        title: 'Committee Set Up',
         icon: { icon: 'tabler-users' },
         children: [
           { title: 'Add Committee', to: 'dashboards-addcommitte-dashboard' },
           
           // { title: 'Add Parish', to: { name: 'dashboards-parish-dashboard', params: { id: 21 } } },
+        ],
+      },
+
+      
+      {
+        title: 'Anointing/Title Set Up',
+        icon: { icon: 'tabler-users' },
+        children: [
+          { title: 'Add Title/Anointing', to: 'dashboards-addtitle-dashboard' },
+          
         ],
       },
 

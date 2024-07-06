@@ -1,30 +1,32 @@
 <script setup>
 import { paginationMeta } from '@/@fake-db/utils'
 import { useAllAdminActions } from '@/apiservices/adminActions'
+import api from '@/apiservices/api'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
+const isConfirmDialogVisible = ref(false)
 const AllAdminActions = useAllAdminActions()
 const searchQuery = ref('')
 const selectedRole = ref()
 const selectedPlan = ref()
 const selectedStatus = ref()
 const totalPage = ref(1)
-const totalParish = ref(0)
-const committee = ref([])
-
+const totalTitle = ref(0)
+const titleName = ref([])
+const titleId = ref(0)
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
 const isPermissionDialogVisible = ref(false)
 const isAddPermissionDialogVisible = ref(false)
 const permissionName = ref('')
-const isCreateCommitteeVisible = ref(false)
-const isEditParishVisible = ref(false)
-let parishData = ref([])
+const isCreateTitleVisible = ref(false)
+const isEditTitleVisible = ref(false)
+let TitleData = ref([])
 
-const openEditParishDialog = parish => {
-  // Set the clicked parish data to a variable accessible by the EditParishDialog component
-  parishData.value =  parish.raw
-
-  // Open the edit dialog
-  isEditParishVisible.value = true
+const openEditTitleDialog = Title => {
+  // Set the clicked Title data to a variable accessible by the EditTitleDialog component
+  TitleData.value =  Title.raw
+  isEditTitleVisible.value = true
 }
 
 
@@ -68,29 +70,41 @@ const filteredUsers = computed(() => {
 
 
 
+
 // Table Headers
 const headers = [
   {
-    title: 'Committee Name',
-    key: 'committeName',
+    title: 'Gender',
+    key: 'gender',
   },
   {
-    title: 'Parish Name',
-    key: 'parishname',
+    title: 'Title Name',
+    key: 'title',
   },
   {
-    title: 'From',
-    key: 'from',
-  },
-  {
-    title: 'To',
-    key: 'to',
+    title: 'Status',
+    key: 'status',
   },
 
   {
-    title: 'created at',
-    key: 'created_at',
+    title: 'Amount',
+    key: 'amount',
   },
+
+  {
+    title: 'Level',
+    key: 'level',
+  },
+
+  // {
+  //   title: 'created at',
+  //   key: 'created_at',
+  // },
+
+  // {
+  //   title: 'updated at',
+  //   key: 'updated_at',
+  // },
 
   // {
   //   title: 'email',
@@ -112,28 +126,36 @@ const headers = [
   },
 ]
 
-// 👉 Fetching Parish
-const fetchAllCommittee = () => {
-  AllAdminActions.fetchAllcommittee({
+// 👉 Fetching Title
+const fetchAllTitle = () => {
+  AllAdminActions.fetchAlltitle({
     q: searchQuery.value,
     status: selectedStatus.value,
     plan: selectedPlan.value,
     role: selectedRole.value,
     options: options.value,
   }).then(response => {
-    // parish.value = response.data.allParish
-    committee.value = response.data.Allcommittee
-    totalPage.value = response.data.totalPage
-    totalParish.value = response.data.totalParish
-    options.value.page = response.data.page
-    console.log("this is the title value", response.data.Allcommittee)
+    // Title.value = response.data.allTitle
+ 
+    const processedTitles = response.data.titles.map(title => {
+      const sum = (parseInt(title.p1) || 0) + (parseInt(title.p2) || 0) + (parseInt(title.p3) || 0) + (parseInt(title.p4) || 0) + (parseInt(title.p5) || 0) + (parseInt(title.p6) || 0) + (parseInt(title.p7) || 0) + (parseInt(title.p8) || 0) + (parseInt(title.p9) || 0)
 
+      return { ...title, amount: sum }
+    })
+
+    titleName.value = processedTitles
+
+
+    // totalPage.value = response.data.totalPage
+    // totalTitle.value = response.data.totalTitle
+    // options.value.page = response.data.page
+    console.log("this is the title value", processedTitles)
   }).catch(error => {
     console.error(error)
   })
 }
 
-watchEffect(fetchAllCommittee)
+watchEffect(fetchAllTitle)
 
 // 👉 search filters
 const roles = [
@@ -271,16 +293,57 @@ const userListMeta = [
   },
 ]
 
-const deleteUser = id => {
-  AllAdminActions.deleteUser(id)
+const deleteTitle = id => {
 
-  // refetch User
-  fetchAllCommittee()
+  isConfirmDialogVisible.value= true
+
+  titleId.value=id
 }
 
 const editPermission = name => {
   isPermissionDialogVisible.value = true
   permissionName.value = name
+}
+
+const onDeleteTitle = message => {
+
+  // eslint-disable-next-line sonarjs/no-collapsible-if
+  if (message) {
+    //if true
+
+
+    if (titleId.value) {
+      try {
+        // API call to delete the item
+        api.delete(`/title/${titleId.value}/delete`)
+          .then(response => {
+
+        
+
+            const apiResponseDetails = response.data
+
+            apiResponseStatus.value = apiResponseDetails.status
+            apiResponseMessage.value = apiResponseDetails.message
+
+            fetchAllTitle()
+
+            // // Handle additional logic after deletion if needed
+            // console.log('Deleted title  with ID:', titleId.value)
+          })
+          .catch(error => {
+            console.error('Error deleting item:', error)
+          })
+          .finally(() => {
+            isConfirmDialogVisible.value = false
+            titleId.value = null // Reset title item ID
+          })
+      } catch (error) {
+        console.error('Error:', error)
+      }
+   
+ 
+    }
+  }
 }
 </script>
 
@@ -414,32 +477,32 @@ const editPermission = name => {
 
                 <VBtn>
               -->
-              <!-- 👉 Add parish button -->
+              <!-- 👉 Add Title button -->
 
               <VBtn
                 prepend-icon="tabler-plus"
-                @click="isCreateCommitteeVisible = !isCreateCommitteeVisible"
+                @click="isCreateTitleVisible = !isCreateTitleVisible"
               >
-                Add Committee
+                Add Title
               </VBtn>
             </div>
           </VCardText>
 
           <VDivider />
          
-          <!-- SECTION datatable <pre>{{ committee }}</pre> -->
+          <!-- SECTION datatable <pre>{{ titleName }}</pre> -->
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="committee"
-            :items-length="totalParish"
+            :items="titleName"
+            :items-length="totalTitle"
             :headers="headers"
             class="text-no-wrap"
             @update:options="options = $event"
           >
             <!-- Actions -->
             <template #item.actions="{ item }">
-              <IconBtn @click="deleteUser(item.raw.id)">
+              <IconBtn @click="deleteTitle(item.raw.id)">
                 <VIcon icon="tabler-trash" />
               </IconBtn>
 
@@ -448,7 +511,7 @@ const editPermission = name => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="openEditParishDialog(item)"
+                @click="openEditTitleDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -469,13 +532,13 @@ const editPermission = name => {
               <VDivider />
               <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
                 <p class="text-sm text-disabled mb-0">
-                  {{ paginationMeta(options, totalParish) }}
+                  {{ paginationMeta(options, totalTitle) }}
                 </p>
 
                 <VPagination
                   v-model="options.page"
-                  :length="Math.ceil(totalParish / options.itemsPerPage)"
-                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalParish / options.itemsPerPage)"
+                  :length="Math.ceil(totalTitle / options.itemsPerPage)"
+                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalTitle / options.itemsPerPage)"
                 >
                   <template #prev="slotProps">
                     <VBtn
@@ -504,37 +567,44 @@ const editPermission = name => {
           </VDataTableServer>
           <!-- SECTION -->
         </VCard>
-        <!-- 👉 Add New User Permission -->
-        <AddEditPermissionDialog
-          v-model:isDialogVisible="isPermissionDialogVisible"
-          v-model:permission-name="permissionName"
-        />
-        <AddEditPermissionDialog v-model:isDialogVisible="isAddPermissionDialogVisible" />
 
-        <!-- 👉 Create parish dialog -->
+        <!-- 👉 Create Title dialog -->
         <VCol
           cols="12"
           sm="6"
           md="4"
         >
-          <CreateCommitteeDialog v-model:is-dialog-visible="isCreateCommitteeVisible" />
+          <CreateTitleDialog v-model:is-dialog-visible="isCreateTitleVisible" />
         </VCol>
 
-        <!-- 👉 Edit parish dialog -->
+        <!-- 👉 Edit Title dialog -->
         <VCol
          
           cols="12"
           sm="6"
           md="4"
         >
-          <EditParishDialog
-            v-model:is-dialog-visible="isEditParishVisible"
-            :parish-data="parishData"
+          <EditTitleDialog
+            v-model:is-dialog-visible="isEditTitleVisible"
+            :title-data="TitleData"
           />
         </VCol>
       </vcol>
     </vrow>
   </section>
+
+  <!-- 👉 Confirm Dialog -->
+  <ConfirmDialog
+    v-model:isDialogVisible="isConfirmDialogVisible"
+    :api-response="apiResponseStatus"
+    confirmation-question="You are about to delete this title  Did you want to continue ?"
+    cancel-msg="Cancelled!!"
+    cancel-title="Cancelled"
+    :confirm-msg="apiResponseMessage"
+    confirm-title="Deleted!"
+    @confirm="onDeleteTitle"
+    @cancel="onCancel"
+  />
 </template>
 
 <style lang="scss">
