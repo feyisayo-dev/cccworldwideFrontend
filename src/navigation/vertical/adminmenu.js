@@ -39,6 +39,16 @@ export default [
         ],
       },
 
+      {
+        title: 'Ministry Set Up',
+        icon: { icon: 'tabler:user-pause' },
+        children: [
+          { title: 'Add/Edit Ministry', to: 'dashboards-addministry-dashboard' },
+          
+        ],
+      },
+      
+
       // {
       //   title: 'Users',
       //   icon: { icon: 'tabler-smart-home' },

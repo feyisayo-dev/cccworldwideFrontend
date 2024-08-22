@@ -3,6 +3,7 @@ import { paginationMeta } from '@/@fake-db/utils'
 import { useAllAdminActions } from '@/apiservices/adminActions'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
+const isConfirmDialogVisible = ref(false)
 const AllAdminActions = useAllAdminActions()
 const searchQuery = ref('')
 const selectedRole = ref()
@@ -17,6 +18,9 @@ const permissionName = ref('')
 const isCreateParishVisible = ref(false)
 const isEditParishVisible = ref(false)
 let parishData = ref([])
+const deleteParishData = ref([])
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
 
 const openEditParishDialog = parish => {
   // Set the clicked parish data to a variable accessible by the EditParishDialog component
@@ -38,39 +42,10 @@ const options = ref({
 
 
 
-// Retrieve stored data from local storage on component mount
-// const storedData = JSON.parse(localStorage.getItem('tableData') || '[]')
-
-// users.value = storedData
-
-// Function to filter users based on search query
-const filteredUsers = computed(() => {
-  return users.value.filter(user => {
-
-    const fullNameMatch = user.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-    // Add additional keys for filtering
-    const emailMatch = user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-
-    const genderMatch = user.gender.toLowerCase() === searchQuery.value.toLowerCase()
-
-    const roleMatch = user.role.toLowerCase() === searchQuery.value.toLowerCase()
-
-
-    // Combine the results using logical OR (||) for flexibility
-    return fullNameMatch || emailMatch || genderMatch || roleMatch
-
-    // Add more conditions with logical OR (||) as needed
-  })
-})
-
-
-
 // Table Headers
 const headers = [
   {
-    title: 'Paris Name',
+    title: 'Parish Name',
     key: 'parishname',
   },
 
@@ -115,18 +90,11 @@ const headers = [
 // 👉 Fetching Parish
 const fetchAllParish = () => {
   AllAdminActions.fetchAllParish({
-    q: searchQuery.value,
-    status: selectedStatus.value,
-    plan: selectedPlan.value,
-    role: selectedRole.value,
-    options: options.value,
   }).then(response => {
     parish.value = response.data.allParish
 
     console.log(parish.value)
     
-    // Store data in local storage
-    // localStorage.setItem('tableData', JSON.stringify(response.data.users))
     totalPage.value = response.data.totalPage
     totalParish.value = response.data.totalParish
     options.value.page = response.data.page
@@ -273,11 +241,50 @@ const userListMeta = [
   },
 ]
 
-const deleteUser = id => {
-  AllAdminActions.deleteUser(id)
+const deleteParish = data => {
+  isConfirmDialogVisible.value= true
 
-  // refetch User
-  fetchAllParish()
+  // Extract parishcode and category
+  deleteParishData.value = {
+    parishcode: data.parishcode,
+    category: data.category,
+  }
+
+}
+
+
+const onDeleteParish = message => {
+  // Check if the function receives the correct data
+
+  if (message) {
+    try {
+      // Make the API call and handle the response
+      AllAdminActions.deleteParish( deleteParishData.value)
+        .then(response => {
+          // console.log("Response from server:", response.data)
+
+          // Handle successful response here, e.g., updating UI, showing a success message, etc.
+          const apiStatus=response.data
+
+          console.log("Parish Delete response==>", JSON.stringify(apiStatus))
+
+          apiResponseStatus.value=apiStatus.status
+          apiResponseMessage.value=apiStatus.message
+          fetchAllParish()
+        })
+        .catch(error => {
+          console.error("Error submitting data:", error)
+
+          // Handle the error here, e.g., showing an error message
+        })
+
+    } catch (error) {
+      console.log("Caught error in try-catch block:", error)
+    }
+
+
+
+  } 
 }
 
 const editPermission = name => {
@@ -429,7 +436,7 @@ const editPermission = name => {
 
           <VDivider />
 
-          <!-- SECTION datatable <pre>{{ users }}</pre> -->
+          <!-- SECTION datatable <pre>{{ parish }}</pre> -->
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
@@ -507,7 +514,7 @@ const editPermission = name => {
 
             <!-- Actions -->
             <template #item.actions="{ item }">
-              <IconBtn @click="deleteUser(item.raw.id)">
+              <IconBtn @click="deleteParish(item.raw)">
                 <VIcon icon="tabler-trash" />
               </IconBtn>
 
@@ -518,7 +525,6 @@ const editPermission = name => {
                 variant="text"
                 @click="openEditParishDialog(item)"
               >
-                icon
                 <VIcon
                   size="22"
                   icon="tabler-edit"
@@ -573,12 +579,6 @@ const editPermission = name => {
           </VDataTableServer>
           <!-- SECTION -->
         </VCard>
-        <!-- 👉 Add New User Permission -->
-        <AddEditPermissionDialog
-          v-model:isDialogVisible="isPermissionDialogVisible"
-          v-model:permission-name="permissionName"
-        />
-        <AddEditPermissionDialog v-model:isDialogVisible="isAddPermissionDialogVisible" />
 
         <!-- 👉 Create parish dialog -->
         <VCol
@@ -604,6 +604,19 @@ const editPermission = name => {
       </vcol>
     </vrow>
   </section>
+
+  <!-- 👉 Confirm delete parish Dialog -->
+  <ConfirmDialog
+    v-model:isDialogVisible="isConfirmDialogVisible"
+    :api-response="apiResponseStatus"
+    confirmation-question="You are about to delete this parish  Did you want to continue ?"
+    cancel-msg="Cancelled!!"
+    cancel-title="Cancelled"
+    :confirm-msg="apiResponseMessage"
+    confirm-title="Deleted!"
+    @confirm="onDeleteParish"
+    @cancel="onCancel"
+  />
 </template>
 
 <style lang="scss">

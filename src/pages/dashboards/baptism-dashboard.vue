@@ -2,6 +2,8 @@
 import { paginationMeta } from '@/@fake-db/utils'
 import { useUserListStore } from '@/apiservices/membersList'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
+import api from '@/apiservices/api'
+import { ref,  watchEffect } from 'vue'
 
 const userListStore = useUserListStore()
 const searchQuery = ref('')
@@ -11,10 +13,13 @@ const selectedStatus = ref()
 const totalPage = ref(1)
 const totalUsers = ref(0)
 const users = ref([])
+const newDetails = ref([])
 const usersTiles = ref([])
-let userData = ref([])
+const isCreateBaptismVisible = ref(false)
+let baptismData = ref([])
 const isEditDialogVisible = ref(false)
 const permissionName = ref('')
+const userDetails = ref(null)
 
 const options = ref({
   page: 1,
@@ -35,41 +40,21 @@ const headers = [
   },
 
   {
-    title: 'Phone Number',
+    title: 'Status',
     color: 'info',
-    key: 'mobile',
+    key: 'Status',
   },
 
   {
-    title: 'Gender',
-    value: 'Gender',
+    title: 'Amount',
+    value: 'Amount',
   },
 
   {
-    title: 'Email',
-    value: 'email',
+    title: 'Year of joining',
+    value: 'Year_of_Joining',
   },
   
-  // {
-  //   title: 'email',
-  //   key: 'email',
-  // },
-
-  {
-    title: 'Role',
-    key: 'role',
-  },
-
- 
-
-  // {
-  //   title: 'Billing',
-  //   key: 'billing',
-  // },
-  // {
-  //   title: 'Status',
-  //   key: 'status',
-  // },
   {
     title: 'Actions',
     key: 'actions',
@@ -77,68 +62,103 @@ const headers = [
   },
 ]
 
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
+
+console.log("<=======This is the UserId=========>", userData.UserId)
+
+const postData = {
+  UserId: userData.UserId,
+}
+
 // 👉 Fetching users
-const fetchUsers = () => {
-  userListStore.fetchUsers({})
-    .then(response => {
-      users.value = response.data.members
-      console.log(users.value)
-      
-      // Process the users data to create the combined 'member' field
-      const processedUsers = response.data.members.map(user => {
-        const memberName = `${user.Title} ${user.fname} ${user.sname}` // Combine Title, fname, and sname
+const fetchBaptism = () => {
+  userListStore.fetchBaptismforUser({
+    postData: postData,
+  })
+    .then(async response => {
+      if (Array.isArray(response.data.records)) {
+        users.value = response.data.records.map(record => {
+          if (record.Status === "0") {
+            record.Status = "Pending"
+          } else if (record.Status === "1") {
+            record.Status = "Approved"
+          }
+          
+          return record
+        })
         
-        return { ...user, member: memberName }
-      })
+        console.log("<========This is the response======>", response.data)
 
-      // Assign the processed data to usersTiles
-      usersTiles.value = processedUsers
-      console.log(usersTiles.value)
+        // Loop through each record to fetch user details
+        for (const user of users.value) {
+          const UserID = user.UserId
 
-      totalPage.value = response.data.totalPage
-      totalUsers.value = response.data.totalUsers
-      options.value.page = response.data.page
+          console.log("This is the UserId", UserID)
+
+          // Fetch user details and add member name to each user object
+          await fetchUserDetails(UserID)
+
+          if (usersTiles.value.length > 0) {
+            console.log("<===this is user tiles member===>", usersTiles.value[0].member)
+            user.member = usersTiles.value[0].member
+          }
+        }
+
+        console.log("<========This is the users array======>", users.value)
+
+        totalPage.value = response.data.totalPage
+        totalUsers.value = response.data.totalUsers
+        options.value.page = response.data.page
+      } else {
+        console.error('Expected an array of records but received:', response.data.records)
+      }
     })
     .catch(error => {
-      console.error(error)
+      console.error('Error fetching baptism records:', error)
     })
 }
 
+const fetchUserDetails = async userId => {
+  try {
+    const response = await api.get(`/member/${userId}`)
 
-watchEffect(fetchUsers)
+    if (response.data && response.data.member && response.data.member.length > 0) {
+      const userDetailsData = response.data.member[0]
 
-// 👉 search filters
-const roles = [
-  {
-    title: 'Admin',
-    value: 'admin',
-  },
-  {
-    title: 'Client',
-    value: 'client',
-  },
-]
+      console.log("Fetched user details:", userDetailsData)
 
-const isAddNewUserDrawerVisible = ref(false)
+      const memberName = `${userDetailsData.Title || ''} ${userDetailsData.fname || ''} ${userDetailsData.sname || ''}`.trim()
 
-const addNewUser = userData => {
-  userListStore.addUser(userData)
-
-  // refetch User
-  fetchUsers()
+      // This ensures `usersTiles` is an array, but it only has one object (the fetched member details).
+      usersTiles.value = [{ ...userDetailsData, member: memberName }]
+      console.log("Processed user details:", usersTiles.value)
+    } else {
+      console.error("No member data found.")
+    }
+  } catch (error) {
+    if (error.response && error.response.data) {
+      console.error("Error fetching user details:", error.response.data.message)
+    } else {
+      console.error("Error fetching user details:", error.message)
+    }
+  }
 }
 
-const deleteUser = id => {
-  userListStore.deleteUser(id)
+
+watchEffect(fetchBaptism)
+
+
+const deleteBaptism = id => {
+  userListStore.deleteBaptism(id)
 
   // refetch User
-  fetchUsers()
+  fetchBaptism()
 }
 
-const editUserDialog = name => {
+const EditBaptismDialog = name => {
   isEditDialogVisible.value = true
   
-  userData.value =  users.raw
+  baptismData.value =  users.value.raw
   
 }
 </script>
@@ -272,14 +292,12 @@ const editUserDialog = name => {
                 </VBtn>
               -->
               <!-- 👉 Add user button -->
-              <!-- 
-                <VBtn
+              <VBtn
                 prepend-icon="tabler-plus"
-                @click="isAddNewUserDrawerVisible = true"
-                >
-                Add New User
-                </VBtn>
-              -->
+                @click="isCreateBaptismVisible = !isCreateBaptismVisible"
+              >
+                Baptism Registration
+              </VBtn>
             </div>
           </VCardText>
 
@@ -289,7 +307,7 @@ const editUserDialog = name => {
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="usersTiles"
+            :items="users"
             :items-length="totalUsers"
             :headers="headers"
             class="text-no-wrap"
@@ -297,7 +315,7 @@ const editUserDialog = name => {
           >
             <!-- Actions -->
             <template #item.actions="{ item }">
-              <IconBtn @click="deleteUser(item.raw.id)">
+              <IconBtn @click="deleteBaptism(item.raw.id)">
                 <VIcon icon="tabler-trash" />
               </IconBtn>
 
@@ -306,7 +324,7 @@ const editUserDialog = name => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="editUserDialog(item)"
+                @click="EditBaptismDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -342,7 +360,7 @@ const editUserDialog = name => {
                       <VListItemTitle>Edit</VListItemTitle>
                     </VListItem>
 
-                    <VListItem @click="deleteUser(item.raw.id)">
+                    <VListItem @click="deleteBaptism(item.raw.id)">
                       <template #prepend>
                         <VIcon icon="tabler-trash" />
                       </template>
@@ -393,14 +411,24 @@ const editUserDialog = name => {
           </VDataTableServer>
           <!-- SECTION -->
         </VCard>
-      
+        
+        <VCol
+          cols="12"
+          sm="6"
+          md="4"
+        >
+          <CreateBaptismDialog
+            v-model:is-dialog-visible="isCreateBaptismVisible"
+            :user-id="postData"
+          />
+        </VCol>
         <!-- 👉 Add New User Permission -->
-        <EditUserDialog
+        <EditBaptismDialog
           v-model:isDialogVisible="isEditDialogVisible"
-          :user-data="userData"
+          :baptism-data="baptismData"
         />
-      </vcol>
-    </vrow>
+      </VCol>
+    </VRow>
   </section>
 </template>
 

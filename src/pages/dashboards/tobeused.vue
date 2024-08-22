@@ -1,7 +1,9 @@
 <script setup>
 import { paginationMeta } from '@/@fake-db/utils'
+import { useAllAdminActions } from '@/apiservices/adminActions'
 import { useUserListStore } from '@/apiservices/membersList'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
+
 
 const userListStore = useUserListStore()
 const searchQuery = ref('')
@@ -10,10 +12,11 @@ const selectedPlan = ref()
 const selectedStatus = ref()
 const totalPage = ref(1)
 const totalUsers = ref(0)
-const users = ref([])
-const usersTiles = ref([])
-let userData = ref([])
-const isEditDialogVisible = ref(false)
+const member = ref([])
+const isPermissionDialogVisible = ref(false)
+const isAddPermissionDialogVisible = ref(false)
+const AllAdminActions = useAllAdminActions()
+
 const permissionName = ref('')
 
 const options = ref({
@@ -25,13 +28,67 @@ const options = ref({
 })
 
 
+const openEditMemberDialog = member => {
+  // Set the clicked parish data to a variable accessible by the EditParishDialog component
+  memberData.value =  member.raw
+
+  // Open the edit dialog
+  isPermissionDialogVisible.value = true
+}
+
+
+// Retrieve stored data from local storage on component mount
+// const storedData = JSON.parse(localStorage.getItem('tableData') || '[]')
+
+// users.value = storedData
+
+// // Function to filter users based on search query
+// const filteredUsers = computed(() => {
+//   return users.value.filter(user => {
+
+//     const fullNameMatch = user.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+//     // Add additional keys for filtering
+//     const emailMatch = user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+
+//     const genderMatch = user.gender.toLowerCase() === searchQuery.value.toLowerCase()
+
+//     const roleMatch = user.role.toLowerCase() === searchQuery.value.toLowerCase()
+
+
+//     // Combine the results using logical OR (||) for flexibility
+//     return fullNameMatch || emailMatch || genderMatch || roleMatch
+
+//     // Add more conditions with logical OR (||) as needed
+//   })
+// })
+
+const FetchAllMembers = () => {
+  AllAdminActions.FetchAllMembers({
+    q: searchQuery.value,
+    status: selectedStatus.value,
+    plan: selectedPlan.value,
+    role: selectedRole.value,
+    options: options.value,
+  }).then(response => {
+    member.value = response.data.members
+
+    console.log("This is the data gotten", response.data)
+    
+  }).catch(error => {
+    console.error(error)
+  })
+}
+
+watchEffect(FetchAllMembers)
 
 // Headers
 const headers = [
   {
-    title: 'Member Name',
+    title: 'Member',
     color: 'primary',
-    key: 'member',
+    key: 'user',
   },
 
   {
@@ -40,14 +97,13 @@ const headers = [
     key: 'mobile',
   },
 
+  // {
+  //   title: 'Name',
+  //   value: 'fullName',
+  // },
   {
     title: 'Gender',
-    value: 'Gender',
-  },
-
-  {
-    title: 'Email',
-    value: 'email',
+    value: 'gender',
   },
   
   // {
@@ -78,34 +134,30 @@ const headers = [
 ]
 
 // 👉 Fetching users
-const fetchUsers = () => {
-  userListStore.fetchUsers({})
-    .then(response => {
-      users.value = response.data.members
-      console.log(users.value)
-      
-      // Process the users data to create the combined 'member' field
-      const processedUsers = response.data.members.map(user => {
-        const memberName = `${user.Title} ${user.fname} ${user.sname}` // Combine Title, fname, and sname
-        
-        return { ...user, member: memberName }
-      })
+// const fetchUsers = () => {
+//   userListStore.fetchUsers({
+//     q: searchQuery.value,
+//     status: selectedStatus.value,
+//     plan: selectedPlan.value,
+//     role: selectedRole.value,
+//     options: options.value,
+//   }).then(response => {
+//     users.value = response.data.users
 
-      // Assign the processed data to usersTiles
-      usersTiles.value = processedUsers
-      console.log(usersTiles.value)
+//     // Store data in local storage
 
-      totalPage.value = response.data.totalPage
-      totalUsers.value = response.data.totalUsers
-      options.value.page = response.data.page
-    })
-    .catch(error => {
-      console.error(error)
-    })
-}
+//     localStorage.setItem('tableData', JSON.stringify(response.data.users))
 
+//     console.log('<======Data=====>', response)
+//     totalPage.value = response.data.totalPage
+//     totalUsers.value = response.data.totalUsers
+//     options.value.page = response.data.page
+//   }).catch(error => {
+//     console.error(error)
+//   })
+// }
 
-watchEffect(fetchUsers)
+// watchEffect(fetchUsers)
 
 // 👉 search filters
 const roles = [
@@ -119,28 +171,142 @@ const roles = [
   },
 ]
 
+const plans = [
+  {
+    title: 'Basic',
+    value: 'basic',
+  },
+  {
+    title: 'Company',
+    value: 'company',
+  },
+  {
+    title: 'Enterprise',
+    value: 'enterprise',
+  },
+  {
+    title: 'Team',
+    value: 'team',
+  },
+]
+
+const status = [
+  {
+    title: 'Pending',
+    value: 'pending',
+  },
+  {
+    title: 'Active',
+    value: 'active',
+  },
+  {
+    title: 'Inactive',
+    value: 'inactive',
+  },
+]
+
+const resolveUserRoleVariant = role => {
+  const roleLowerCase = role.toLowerCase()
+  if (roleLowerCase === 'subscriber')
+    return {
+      color: 'warning',
+      icon: 'tabler-circle-check',
+    }
+  if (roleLowerCase === 'author')
+    return {
+      color: 'success',
+      icon: 'tabler-user',
+    }
+  if (roleLowerCase === 'maintainer')
+    return {
+      color: 'primary',
+      icon: 'tabler-chart-pie-2',
+    }
+  if (roleLowerCase === 'editor')
+    return {
+      color: 'info',
+      icon: 'tabler-edit',
+    }
+  if (roleLowerCase === 'admin')
+    return {
+      color: 'secondary',
+      icon: 'tabler-device-laptop',
+    }
+  
+  return {
+    color: 'primary',
+    icon: 'tabler-user',
+  }
+}
+
+const resolveUserStatusVariant = stat => {
+  const statLowerCase = stat.toLowerCase()
+  if (statLowerCase === 'pending')
+    return 'warning'
+  if (statLowerCase === 'active')
+    return 'success'
+  if (statLowerCase === 'inactive')
+    return 'secondary'
+  
+  return 'primary'
+}
+
 const isAddNewUserDrawerVisible = ref(false)
 
 const addNewUser = userData => {
   userListStore.addUser(userData)
 
   // refetch User
-  fetchUsers()
+  // fetchUsers()
 }
+
+// 👉 List
+const userListMeta = [
+  {
+    icon: 'tabler-user',
+    color: 'primary',
+    title: 'Session',
+    stats: '21,459',
+    percentage: +29,
+    subtitle: 'Total Users',
+  },
+  {
+    icon: 'tabler-user-plus',
+    color: 'error',
+    title: 'Paid Users',
+    stats: '4,567',
+    percentage: +18,
+    subtitle: 'Last week analytics',
+  },
+  {
+    icon: 'tabler-user-check',
+    color: 'success',
+    title: 'Active Users',
+    stats: '19,860',
+    percentage: -14,
+    subtitle: 'Last week analytics',
+  },
+  {
+    icon: 'tabler-user-exclamation',
+    color: 'warning',
+    title: 'Pending Users',
+    stats: '237',
+    percentage: +42,
+    subtitle: 'Last week analytics',
+  },
+]
 
 const deleteUser = id => {
   userListStore.deleteUser(id)
 
   // refetch User
-  fetchUsers()
+  // fetchUsers()
 }
 
-const editUserDialog = name => {
-  isEditDialogVisible.value = true
-  
-  userData.value =  users.raw
-  
-}
+// const editPermission = name => {
+//   isPermissionDialogVisible.value = true
+//   permissionName.value = name
+// }
 </script>
 
 <template>
@@ -289,12 +455,78 @@ const editUserDialog = name => {
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="usersTiles"
+            :items="member"
             :items-length="totalUsers"
             :headers="headers"
             class="text-no-wrap"
             @update:options="options = $event"
           >
+            <!--  👉 User -->
+
+
+            <template #item.member="{ item }">
+              <div class="d-flex align-center">
+                <VAvatar
+                  size="34"
+                  :variant="!item.raw.avatar ? 'tonal' : undefined"
+                  :color="!item.raw.avatar ? resolveUserRoleVariant(item.raw.role).color : undefined"
+                  class="me-3"
+                >
+                  <VImg
+                    v-if="item.raw.avatar"
+                    :src="item.raw.avatar"
+                  />
+                  <span v-else>{{ avatarText(item.raw.fname) }}</span>
+                </VAvatar>
+
+                <div class="d-flex flex-column">
+                  <h6 class="text-base">
+                    <RouterLink
+                      :to="{ name: 'apps-user-view-id', params: { id: item.raw.id } }"
+                      class="font-weight-medium user-list-name"
+                    >
+                      {{ item.raw.sname }}
+                    </RouterLink>
+                  </h6>
+                  <span class="text-sm text-medium-emphasis">{{ item.raw.email }}</span>
+                </div>
+              </div>
+            </template>
+
+            <!-- 👉 Role -->
+            <template #item.role="{ item }">
+              <div class="d-flex align-center gap-4">
+                <VAvatar
+                  :size="30"
+                  :color="resolveUserRoleVariant(item.raw.role).color"
+                  variant="tonal"
+                >
+                  <VIcon
+                    :size="20"
+                    :icon="resolveUserRoleVariant(item.raw.role).icon"
+                  />
+                </VAvatar>
+                <span class="text-capitalize">{{ item.raw.role }}</span>
+              </div>
+            </template>
+
+            <!-- 👉 Plan -->
+            <template #item.plan="{ item }">
+              <span class="text-capitalize font-weight-medium">{{ item.raw.currentPlan }}</span>
+            </template>
+
+            <!-- Status -->
+            <template #item.gender="{ item }">
+              <VChip
+                :color="resolveUserStatusVariant(item.raw.gender)"
+                size="small"
+                label
+                class="text-capitalize"
+              >
+                {{ item.raw.gender }}
+              </VChip>
+            </template>
+
             <!-- Actions -->
             <template #item.actions="{ item }">
               <IconBtn @click="deleteUser(item.raw.id)">
@@ -306,7 +538,7 @@ const editUserDialog = name => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="editUserDialog(item)"
+                @click="openEditMemberDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -395,10 +627,11 @@ const editUserDialog = name => {
         </VCard>
       
         <!-- 👉 Add New User Permission -->
-        <EditUserDialog
-          v-model:isDialogVisible="isEditDialogVisible"
-          :user-data="userData"
+        <AddEditPermissionDialog
+          v-model:isDialogVisible="isPermissionDialogVisible"
+          v-model:member-data="memberData"
         />
+        <AddEditPermissionDialog v-model:isDialogVisible="isAddPermissionDialogVisible" />
       </vcol>
     </vrow>
   </section>

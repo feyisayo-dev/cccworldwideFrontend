@@ -28,8 +28,8 @@ const errors = ref({
 })
 
 const refVForm = ref()
-const email = ref('manquadry@gmail.com')
-const password = ref('123456')
+const email = ref('')
+const password = ref('')
 const rememberMe = ref(false)
 
 // The login function 

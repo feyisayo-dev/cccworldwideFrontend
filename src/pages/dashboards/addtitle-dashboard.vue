@@ -13,6 +13,7 @@ const selectedStatus = ref()
 const totalPage = ref(1)
 const totalTitle = ref(0)
 const titleName = ref([])
+const Title = ref([])
 const titleId = ref(0)
 const apiResponseStatus = ref('')
 const apiResponseMessage = ref('')
@@ -135,7 +136,7 @@ const fetchAllTitle = () => {
     role: selectedRole.value,
     options: options.value,
   }).then(response => {
-    // Title.value = response.data.allTitle
+    Title.value = response.data.allTitle
  
     const processedTitles = response.data.titles.map(title => {
       const sum = (parseInt(title.p1) || 0) + (parseInt(title.p2) || 0) + (parseInt(title.p3) || 0) + (parseInt(title.p4) || 0) + (parseInt(title.p5) || 0) + (parseInt(title.p6) || 0) + (parseInt(title.p7) || 0) + (parseInt(title.p8) || 0) + (parseInt(title.p9) || 0)
@@ -593,7 +594,7 @@ const onDeleteTitle = message => {
     </vrow>
   </section>
 
-  <!-- 👉 Confirm Dialog -->
+  <!-- 👉 Confirm delete title Dialog -->
   <ConfirmDialog
     v-model:isDialogVisible="isConfirmDialogVisible"
     :api-response="apiResponseStatus"

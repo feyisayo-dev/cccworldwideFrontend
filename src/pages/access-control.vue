@@ -1,5 +1,4 @@
 <script setup>
-import EcommerceCongratulationsJohn from '@/views/dashboards/ecommerce/EcommerceCongratulationsJohn.vue'
 import EcommerceEarningReports from '@/views/dashboards/ecommerce/EcommerceEarningReports.vue'
 import EcommerceExpensesRadialBarCharts from '@/views/dashboards/ecommerce/EcommerceExpensesRadialBarCharts.vue'
 import EcommerceGeneratedLeads from '@/views/dashboards/ecommerce/EcommerceGeneratedLeads.vue'
@@ -10,20 +9,76 @@ import EcommerceRevenueReport from '@/views/dashboards/ecommerce/EcommerceRevenu
 import EcommerceStatistics from '@/views/dashboards/ecommerce/EcommerceStatistics.vue'
 import EcommerceTotalProfitLineCharts from '@/views/dashboards/ecommerce/EcommerceTotalProfitLineCharts.vue'
 import EcommerceTransactions from '@/views/dashboards/ecommerce/EcommerceTransactions.vue'
+import { paginationMeta } from '@/@fake-db/utils'
+import { useUserListStore } from '@/apiservices/membersList'
+import { VDataTableServer } from 'vuetify/labs/VDataTable'
+import congoImg from '@images/illustrations/congo-illustration.png'
+
+
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
+const selectedUserData = ref(null)
+
+console.log("<=======This is the UserId=========>", userData.UserId)
+console.log("<=======This is the UserId=========>", userData)
+console.log("<=======This is the UserId=========>", userData.Title)
+console.log("<=======This is the UserId=========>", userData.fname)
+console.log("<=======This is the UserId=========>", userData.sname)
+
+const isEditDialogVisible = ref(false)
+
+const userListStore = useUserListStore()
+const totalPage = ref(1)
+const totalUser = ref(0)
+const user = ref([])
+const userTiles = ref([])
+
+const EditUserDialog = () => {
+  selectedUserData.value = userData
+  isEditDialogVisible.value = true
+  console.log("Clicked", selectedUserData.value)
+}
 </script>
+
 
 <template>
   <VRow class="match-height">
-    <!-- 👉 Congratulation John -->
     <VCol
       cols="12"
       md="5"
       lg="4"
     >
-      <EcommerceCongratulationsJohn />
+      <VCard>
+        <VRow no-gutters>
+          <VCol cols="8">
+            <VCardText>
+              <h6 class="text-lg text-no-wrap font-weight-medium">
+                Hello {{ userData.Title }} {{ userData.fname }} {{ userData.sname }} 🎉
+              </h6>
+              <p class="mb-2">
+                {{ userData.parishname }}
+              </p>
+              <h4 class="text-h4 font-weight-medium text-primary mb-1">
+                Welcome to your portal
+              </h4>
+              <VBtn @click="EditUserDialog">
+                Edit profile
+              </VBtn>
+            </VCardText>
+          </VCol>
+
+          <VCol cols="4">
+            <VCardText class="pb-0 px-0 position-relative h-100">
+              <VImg
+                :src="congoImg"
+                height="147"
+                class="congo-john-img w-100"
+              />
+            </VCardText>
+          </VCol>
+        </VRow>
+      </VCard>
     </VCol>
 
-    <!-- 👉 Ecommerce Transition -->
     <VCol
       cols="12"
       md="7"
@@ -46,7 +101,7 @@ import EcommerceTransactions from '@/views/dashboards/ecommerce/EcommerceTransac
         >
           <EcommerceExpensesRadialBarCharts />
         </VCol>
-        
+
         <!-- 👉 Total Profit Line -->
         <VCol
           cols="12"
@@ -120,8 +175,19 @@ import EcommerceTransactions from '@/views/dashboards/ecommerce/EcommerceTransac
       <EcommerceInvoiceTable />
     </VCol>
   </VRow>
+  <EditUserDialog
+    v-if="isEditDialogVisible"
+    v-model:isDialogVisible="isEditDialogVisible"
+    :user-data="selectedUserData"
+  />
 </template>
 
-<style lang="scss">
-@use "@core/scss/template/libs/apex-chart.scss";
+
+
+<style>
+.congo-john-img {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 1.25rem;
+}
 </style>

@@ -26,6 +26,8 @@ const emit = defineEmits([
 const allAdminActions = useAllAdminActions()
 
 const currentStep = ref(0)
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
 
 const form = ref({
   countryList: [],
@@ -208,7 +210,7 @@ const onSubmit = message => {
 
   if (message) {
 
-    addNewParish (form.value.parishName, form.value.parishEmail, form.value.parishPhone1, form.value.parishPhone2, form.value.parishAddress, form.value.parishCategory, form.value.selectedCountry, form.value.selectedState, form.value.city, form.value.seletedParish )
+    UpdateParish (form.value.parishname, form.value.email, form.value.phone1, form.value.phone2, form.value.address, form.value.parishCategory, form.value.selectedCountry, form.value.selectedState, form.value.city, form.value.seletedParish, form.value.parishcode)
     
   }
 
@@ -294,7 +296,7 @@ const fetchParish = async () => {
 
       const response = await allAdminActions.fetchStateParish(form.value.selectedState)
       
-      console.log( 'State selected', response)
+      console.log('This is the response from db', response)
       
       const data = response.data
 
@@ -327,9 +329,9 @@ const fetchParish = async () => {
 
 
 //FetchAll 
-const addNewParish = async  (parishName, parishEmail, parishPhone1, parishPhone2, parishAddress, category, selectedCountry, selectedState, city, selectedParish ) => {
+const UpdateParish = async (parishName, parishEmail, parishPhone1, parishPhone2, parishAddress, category, selectedCountry, selectedState, city, selectedParish, parishcode) => {
+  console.log("This is the data gotten", parishName, parishEmail, parishPhone1, parishPhone2, parishAddress, category, selectedCountry, selectedState, city, selectedParish, parishcode)
 
- 
   const postData = {
     email: parishEmail,
     phone1: parishPhone1,
@@ -341,16 +343,27 @@ const addNewParish = async  (parishName, parishEmail, parishPhone1, parishPhone2
     address: parishAddress,
     name: parishName,
     reportTo: selectedParish,
+    parishcode: parishcode,
   }
-  
 
+  try {
+    const response = await allAdminActions.updateAparish(postData)
+    
+    const apiStatus = response.data
 
-  allAdminActions.addNewParish(postData)
+    console.log("API Response:", apiStatus)
 
+    apiResponseStatus.value = apiStatus.status
+    if(apiResponseStatus.value === '200'){
+      
+    }
+    apiResponseMessage.value = apiStatus.message
+  } catch (error) {
+    console.error("Error submitting data:", error)
 
-  // fetchAllParish()
-
+  }
 }
+
 
 
 
@@ -364,7 +377,7 @@ onMounted(() => {
 watchEffect(() => {
   fetchStates()
   
-  // fetchParish()
+  fetchParish()
 
 })
 
@@ -440,6 +453,7 @@ watchEffect(() => {
               <VWindowItem>
                 <VCol cols="12">
                   <VTextField
+                    v-model="form.parishname"
                     label="Enter Parish Name"
                     variant="outlined"
                     autofocus
@@ -601,7 +615,7 @@ watchEffect(() => {
                  
                     <VAutocomplete
                     v-model="form.seletedParish"
-                    label=" Select Parish"
+                    label=" Parish to report to"
                     :items="form.parishList"
                     item-value="id"
                     item-title="name"
@@ -612,7 +626,7 @@ watchEffect(() => {
                   -->
                   <VAutocomplete
                     v-model="form.seletedParish"
-                    label=" Select Parish "
+                    label=" Reporting to"
                     :items="form.parishList"
                     item-value="parishcode"
                     :item-title="item => `${item.name}-${item.parishaddress}`"
@@ -782,11 +796,11 @@ watchEffect(() => {
   <!-- 👉 Confirm Dialog -->
   <ConfirmDialog
     v-model:isDialogVisible="isConfirmDialogVisible"
-    api-response="Here am coming from ParishDialog"
+    :api-response="apiResponseStatus"
     confirmation-question="You are about to update  this parish info Did you want to continue ?"
     cancel-msg="Registration Cancelled!!"
     cancel-title="Cancelled"
-    confirm-msg="Your registration is successfully."
+    :confirm-msg="apiResponseMessage"
     confirm-title="Registered!"
     @confirm="onSubmit"
     @cancel="onCancel"

@@ -9,6 +9,11 @@ export const useUserListStore = defineStore('UserListStore', {
 
     fetchUsers(params) { return api.get('/Allmember', { params }) },
 
+    fetchBaptism(params) { return api.get('/fetchAllBaptismRecords', { params }) },
+
+    AddBaptism(params) { return api.post('/AddBaptismRecord', { params }) },
+    fetchBaptismforUser(params) { return api.get('/fetchBaptismRecord', { params }) },
+
     // 👉 Add User
     addUser(userData) {
       return new Promise((resolve, reject) => {
@@ -28,6 +33,12 @@ export const useUserListStore = defineStore('UserListStore', {
 
     // 👉 Delete User
     deleteUser(id) {
+      return new Promise((resolve, reject) => {
+        axios.delete(`/apps/users/${id}`).then(response => resolve(response)).catch(error => reject(error))
+      })
+    },
+
+    deleteBaptism(id) {
       return new Promise((resolve, reject) => {
         axios.delete(`/apps/users/${id}`).then(response => resolve(response)).catch(error => reject(error))
       })

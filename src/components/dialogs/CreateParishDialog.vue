@@ -38,6 +38,7 @@ const form = ref({
   parishAddress: '',
   city: '',
   prefixedParishName: '',
+  addNewParish: [],
 
 
 })
@@ -201,39 +202,109 @@ watch(props, () => {
     currentStep.value = 0
 })
 
-const onSubmit = message => {
+// const onSubmit = message => {
 
-  if (message) {
+//   if (message) {
 
-    const response =   addNewParish (form.value.parishName, form.value.parishEmail, form.value.parishPhone1, form.value.parishPhone2, form.value.parishAddress, form.value.parishCategory, form.value.selectedCountry, form.value.selectedState, form.value.city, form.value.seletedParish )
-      .then(response => {
 
-        // console.log("Get Add parish response  here now", JSON.stringify(response.data))
-        const apiStatus=response.data
 
-        console.log("Get Add parish response here now", JSON.stringify(apiStatus.status))
 
-        apiResponseStatus.value=apiStatus.status
-        apiResponseMessage.value=apiStatus.message
+
+
+    
+//     // addNewParish (form.value.parishName, form.value.parishEmail, form.value.parishPhone1, form.value.parishPhone2, form.value.parishAddress, form.value.parishCategory, form.value.selectedCountry, form.value.selectedState, form.value.city, form.value.seletedParish )
+    
+//     const postData = {
+//       email: form.value.parishEmail,
+//       phone1: form.value.parishPhone1,
+//       phone2: form.value.parishPhone2,
+//       country: form.value.selectedCountry,
+//       category: form.value.parishCategory,
+//       state: form.value.selectedState,
+//       city: form.value.city,
+//       address: form.value.parishAddress,
+//       name: form.value.parishName,
+//       reportTo: form.value.seletedParish,
+//     }
+
+
+
+
+    
+//     // .then(responses => {
+
+//     //   alert('get here')
+
+//     //   // console.log("Get Add parish response  here now", JSON.stringify(response.data))
+//     //   const apiStatus=responses.data
+
+//     //   console.log("Get Add parish response here now", JSON.stringify(apiStatus.status))
+
+//     //   apiResponseStatus.value=apiStatus.status
+//     //   apiResponseMessage.value=apiStatus.message
 
        
-      }).catch(e => {
-        // const { errors: formErrors } = e.response.data
+//     // }).catch(e => {
+//     //   // const { errors: formErrors } = e.response.data
 
-        // errors.value = formErrors
-        // console.error(e.response.data)
-      })
+//     //   // errors.value = formErrors
+//     //   console.error(e.responses.data)
+//     // })
 
     
     
 
+//   }
+// }
+
+const onSubmit = message => {
+  if (message) {
+    const postData = {
+      email: form.value.parishEmail,
+      phone1: form.value.parishPhone1,
+      phone2: form.value.parishPhone2,
+      country: form.value.selectedCountry,
+      category: form.value.parishCategory,
+      state: form.value.selectedState,
+      city: form.value.city,
+      address: form.value.parishAddress,
+      name: form.value.parishName,
+      reportTo: form.value.seletedParish,
+    }
+
+    try {
+      // Make the API call and handle the response
+      allAdminActions.addNewParish(postData)
+        .then(response => {
+          // console.log("Response from server:", response.data)
+
+          // Handle successful response here, e.g., updating UI, showing a success message, etc.
+          const apiStatus=response.data
+
+          // console.log("Get Add parish response here now", JSON.stringify(apiStatus.status))
+
+          apiResponseStatus.value=apiStatus.status
+          apiResponseMessage.value=apiStatus.message
+          
+        })
+        .catch(error => {
+          console.error("Error submitting data:", error)
+
+          // Handle the error here, e.g., showing an error message
+        })
+
+    } catch (error) {
+      console.log("Caught error in try-catch block:", error)
+    }
   }
 }
+
 
 const selectedRadio = ref('primary')
 
 const parishLevel = [
   'National',
+  'Region',
   'State',
   'Area',
   'Province',
@@ -292,7 +363,6 @@ const fetchStates = async () => {
   }
 }
 
-
 // 👉 FetchAll parish from state
 const fetchParish = async () => {
 
@@ -335,41 +405,6 @@ const fetchParish = async () => {
 
   }
 }
-
-
-//Add parish
-const addNewParish =   (parishName, parishEmail, parishPhone1, parishPhone2, parishAddress, category, selectedCountry, selectedState, city, selectedParish ) => {
-
- 
-  const postData = {
-    email: parishEmail,
-    phone1: parishPhone1,
-    phone2: parishPhone2,
-    country: selectedCountry,
-    category: category,
-    state: selectedState,
-    city: city,
-    address: parishAddress,
-    name: parishName,
-    reportTo: selectedParish,
-  }
-  
-
-  try {
-   
-    return  allAdminActions.addNewParish(postData)
-    
-   
-
-  } catch (error) {
-    // throw new Error('Failed to fetch parish by state')
-  }
-
- 
-
-}
-
-
 
 
 onMounted(() => {

@@ -1,20 +1,35 @@
 <script setup>
 import { paginationMeta } from '@/@fake-db/utils'
-import { useUserListStore } from '@/apiservices/membersList'
+import { useAllAdminActions } from '@/apiservices/adminActions'
+import api from '@/apiservices/api'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
-const userListStore = useUserListStore()
+const isConfirmDialogVisible = ref(false)
+const AllAdminActions = useAllAdminActions()
 const searchQuery = ref('')
 const selectedRole = ref()
 const selectedPlan = ref()
 const selectedStatus = ref()
 const totalPage = ref(1)
-const totalUsers = ref(0)
-const users = ref([])
-const usersTiles = ref([])
-let userData = ref([])
-const isEditDialogVisible = ref(false)
+const totalMinistry = ref(0)
+const ministry = ref([])
+const ministryId = ref(0)
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
+const isPermissionDialogVisible = ref(false)
+const isAddPermissionDialogVisible = ref(false)
 const permissionName = ref('')
+const isCreateMinistryVisible = ref(false)
+const isEditMinistryVisible = ref(false)
+let ministryData = ref([])
+
+const openEditMinistryDialog = ministry => {
+  // Set the clicked ministry data to a variable accessible by the Dialog component
+  ministryData.value =  ministry.raw
+  isEditMinistryVisible.value = true
+}
+
+
 
 const options = ref({
   page: 1,
@@ -25,51 +40,17 @@ const options = ref({
 })
 
 
-
-// Headers
+// Table Headers
 const headers = [
+{
+    title: 'ID',
+    key: 'id',
+  },
   {
-    title: 'Member Name',
-    color: 'primary',
-    key: 'member',
+    title: 'Ministry',
+    key: 'ministry',
   },
 
-  {
-    title: 'Phone Number',
-    color: 'info',
-    key: 'mobile',
-  },
-
-  {
-    title: 'Gender',
-    value: 'Gender',
-  },
-
-  {
-    title: 'Email',
-    value: 'email',
-  },
-  
-  // {
-  //   title: 'email',
-  //   key: 'email',
-  // },
-
-  {
-    title: 'Role',
-    key: 'role',
-  },
-
- 
-
-  // {
-  //   title: 'Billing',
-  //   key: 'billing',
-  // },
-  // {
-  //   title: 'Status',
-  //   key: 'status',
-  // },
   {
     title: 'Actions',
     key: 'actions',
@@ -77,69 +58,67 @@ const headers = [
   },
 ]
 
-// 👉 Fetching users
-const fetchUsers = () => {
-  userListStore.fetchUsers({})
-    .then(response => {
-      users.value = response.data.members
-      console.log(users.value)
-      
-      // Process the users data to create the combined 'member' field
-      const processedUsers = response.data.members.map(user => {
-        const memberName = `${user.Title} ${user.fname} ${user.sname}` // Combine Title, fname, and sname
+// 👉 Fetching ministry
+const fetchAllMinistry = () => {
+  AllAdminActions.fetchMinistryFromApi({
+  }).then(response => {
+    ministry.value = response.data.ministry
+ 
+    console.log("this is the title value", ministry.value)
+  }).catch(error => {
+    console.error(error)
+  })
+}
+
+watchEffect(fetchAllMinistry)
+
+
+const deleteMinistry = id => {
+
+  isConfirmDialogVisible.value= true
+
+  ministryId.value=id
+}
+
+const onDeleteMinistry = message => {
+
+  // eslint-disable-next-line sonarjs/no-collapsible-if
+  if (message) {
+    //if true
+
+
+    if (ministryId.value) {
+      try {
+        // API call to delete the item
+        api.delete(`/DeleteMinistry/${ministryId.value}/delete`)
+          .then(response => {
+
         
-        return { ...user, member: memberName }
-      })
 
-      // Assign the processed data to usersTiles
-      usersTiles.value = processedUsers
-      console.log(usersTiles.value)
+            const apiResponseDetails = response.data
 
-      totalPage.value = response.data.totalPage
-      totalUsers.value = response.data.totalUsers
-      options.value.page = response.data.page
-    })
-    .catch(error => {
-      console.error(error)
-    })
-}
+            apiResponseStatus.value = apiResponseDetails.status
+            apiResponseMessage.value = apiResponseDetails.message
 
+            fetchAllMinistry()
 
-watchEffect(fetchUsers)
-
-// 👉 search filters
-const roles = [
-  {
-    title: 'Admin',
-    value: 'admin',
-  },
-  {
-    title: 'Client',
-    value: 'client',
-  },
-]
-
-const isAddNewUserDrawerVisible = ref(false)
-
-const addNewUser = userData => {
-  userListStore.addUser(userData)
-
-  // refetch User
-  fetchUsers()
-}
-
-const deleteUser = id => {
-  userListStore.deleteUser(id)
-
-  // refetch User
-  fetchUsers()
-}
-
-const editUserDialog = name => {
-  isEditDialogVisible.value = true
-  
-  userData.value =  users.raw
-  
+            // // Handle additional logic after deletion if needed
+            // console.log('Deleted title  with ID:', ministryId.value)
+          })
+          .catch(error => {
+            console.error('Error deleting item:', error)
+          })
+          .finally(() => {
+            isConfirmDialogVisible.value = false
+            ministryId.value = null // Reset title item ID
+          })
+      } catch (error) {
+        console.error('Error:', error)
+      }
+   
+ 
+    }
+  }
 }
 </script>
 
@@ -270,34 +249,35 @@ const editUserDialog = name => {
                 >
                 Export
                 </VBtn>
+
+                <VBtn>
               -->
-              <!-- 👉 Add user button -->
-              <!-- 
-                <VBtn
+              <!-- 👉 Add ministry button -->
+
+              <VBtn
                 prepend-icon="tabler-plus"
-                @click="isAddNewUserDrawerVisible = true"
-                >
-                Add New User
-                </VBtn>
-              -->
+                @click="isCreateMinistryVisible = !isCreateMinistryVisible"
+              >
+                Add ministry
+              </VBtn>
             </div>
           </VCardText>
 
           <VDivider />
-
-          <!-- SECTION datatable <pre>{{ users }}</pre> -->
+         
+          <!-- SECTION datatable <pre>{{ ministry }}</pre> -->
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="usersTiles"
-            :items-length="totalUsers"
+            :items="ministry"
+            :items-length="totalMinistry"
             :headers="headers"
             class="text-no-wrap"
             @update:options="options = $event"
           >
             <!-- Actions -->
             <template #item.actions="{ item }">
-              <IconBtn @click="deleteUser(item.raw.id)">
+              <IconBtn @click="deleteMinistry(item.raw.id)">
                 <VIcon icon="tabler-trash" />
               </IconBtn>
 
@@ -306,7 +286,7 @@ const editUserDialog = name => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="editUserDialog(item)"
+                @click="openEditMinistryDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -319,38 +299,7 @@ const editUserDialog = name => {
                 variant="text"
                 size="small"
                 color="medium-emphasis"
-              >
-                <VIcon
-                  size="24"
-                  icon="tabler-dots-vertical"
-                />
-
-                <VMenu activator="parent">
-                  <VList>
-                    <VListItem :to="{ name: 'apps-user-view-id', params: { id: item.raw.id } }">
-                      <template #prepend>
-                        <VIcon icon="tabler-eye" />
-                      </template>
-
-                      <VListItemTitle>View</VListItemTitle>
-                    </VListItem>
-
-                    <VListItem link>
-                      <template #prepend>
-                        <VIcon icon="tabler-pencil" />
-                      </template>
-                      <VListItemTitle>Edit</VListItemTitle>
-                    </VListItem>
-
-                    <VListItem @click="deleteUser(item.raw.id)">
-                      <template #prepend>
-                        <VIcon icon="tabler-trash" />
-                      </template>
-                      <VListItemTitle>Delete</VListItemTitle>
-                    </VListItem>
-                  </VList>
-                </VMenu>
-              </VBtn>
+              />
             </template>
 
             <!-- pagination -->
@@ -358,13 +307,13 @@ const editUserDialog = name => {
               <VDivider />
               <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
                 <p class="text-sm text-disabled mb-0">
-                  {{ paginationMeta(options, totalUsers) }}
+                  {{ paginationMeta(options, totalMinistry) }}
                 </p>
 
                 <VPagination
                   v-model="options.page"
-                  :length="Math.ceil(totalUsers / options.itemsPerPage)"
-                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalUsers / options.itemsPerPage)"
+                  :length="Math.ceil(totalMinistry / options.itemsPerPage)"
+                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalMinistry / options.itemsPerPage)"
                 >
                   <template #prev="slotProps">
                     <VBtn
@@ -393,15 +342,43 @@ const editUserDialog = name => {
           </VDataTableServer>
           <!-- SECTION -->
         </VCard>
-      
-        <!-- 👉 Add New User Permission -->
-        <EditUserDialog
-          v-model:isDialogVisible="isEditDialogVisible"
-          :user-data="userData"
-        />
+
+        <!-- 👉 Create ministry dialog -->
+        <VCol
+          cols="12"
+          sm="6"
+          md="4"
+        >
+          <CreateMinistryDialog v-model:is-dialog-visible="isCreateMinistryVisible" />
+        </VCol>
+        <!-- 👉 Edit ministry dialog -->
+        <VCol
+         
+          cols="12"
+          sm="6"
+          md="4"
+        >
+          <EditMinistryDialog
+            v-model:is-dialog-visible="isEditMinistryVisible"
+            :ministry-data="ministryData"
+          />
+        </VCol>
       </vcol>
     </vrow>
   </section>
+
+  <!-- 👉 Confirm delete title Dialog -->
+  <ConfirmDialog
+    v-model:isDialogVisible="isConfirmDialogVisible"
+    :api-response="apiResponseStatus"
+    confirmation-question="You are about to delete this title  Did you want to continue ?"
+    cancel-msg="Cancelled!!"
+    cancel-title="Cancelled"
+    :confirm-msg="apiResponseMessage"
+    confirm-title="Deleted!"
+    @confirm="onDeleteMinistry"
+    @cancel="onCancel"
+  />
 </template>
 
 <style lang="scss">

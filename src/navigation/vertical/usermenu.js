@@ -14,6 +14,12 @@ export default [
         to: 'dashboards-analytics',
       },
 
+      {
+        title: 'Baptism Registration',
+        icon: { icon: 'tabler:user-pause' },
+        to: 'dashboards-baptism-dashboard',
+      },
+
       // {
       //   title: 'eCommerce',
       //   to: 'dashboards-ecommerce',

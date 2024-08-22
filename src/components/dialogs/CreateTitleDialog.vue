@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-setup-props-destructure -->
 <script setup>
 import { useAllAdminActions } from '@/apiservices/adminActions'
 import api from '@/apiservices/api'
@@ -6,11 +7,20 @@ import { onMounted, ref } from 'vue'
 
 
 const props = defineProps({
+  // eslint-disable-next-line vue/prop-name-casing
+  TitleData: {
+    type: Object,
+    required: true,
+    default: () => ({}),  
+  },
   isDialogVisible: {
     type: Boolean,
     required: true,
+
+    // default: false,  // Default to false if not provided
   },
 })
+
 
 const emit = defineEmits([
   'update:isDialogVisible',
@@ -18,6 +28,8 @@ const emit = defineEmits([
 ])
 
 const AllAdminActions = useAllAdminActions()
+
+// const titleName = ref([])
 const currentStep = ref(0)
 const apiResponseStatus = ref('')
 const apiResponseMessage = ref('')
@@ -42,6 +54,35 @@ const form = ref({
 })
 
 
+// const fetchAllTitle = () => {
+//   AllAdminActions.fetchAlltitle({
+//     // q: searchQuery.value,
+//     // status: selectedStatus.value,
+//     // plan: selectedPlan.value,
+//     // role: selectedRole.value,
+//     // options: options.value,
+//   }).then(response => {
+//     // Title.value = response.data.allTitle
+ 
+//     const processedTitles = response.data.titles.map(title => {
+//       const sum = (parseInt(title.p1) || 0) + (parseInt(title.p2) || 0) + (parseInt(title.p3) || 0) + (parseInt(title.p4) || 0) + (parseInt(title.p5) || 0) + (parseInt(title.p6) || 0) + (parseInt(title.p7) || 0) + (parseInt(title.p8) || 0) + (parseInt(title.p9) || 0)
+
+//       return { ...title, amount: sum }
+//     })
+
+//     titleName.value = processedTitles
+
+
+//     // totalPage.value = response.data.totalPage
+//     // totalTitle.value = response.data.totalTitle
+//     // options.value.page = response.data.page
+//     console.log("this is the title value", processedTitles)
+//   }).catch(error => {
+//     console.error(error)
+//   })
+// }
+
+// watchEffect(fetchAllTitle)
 
 const dialogVisibleUpdate = val => {
   emit('update:isDialogVisible', val)
@@ -54,11 +95,9 @@ watch(props, () => {
 })
 
 const onSubmit = message => {
-
-  if (message) {//if true
-
-    try{
-      //called the endpoint to add committee
+  if (message) {
+    try {
+      // Call the endpoint to add the title
       api.post('/Addtitle', {
         gender: form.value.gender,
         title: form.value.title,
@@ -73,33 +112,34 @@ const onSubmit = message => {
         p7: form.value.p7,
         p8: form.value.p8,
         p9: form.value.p9,
-      }).then(response => {
-
-        const apiResponseDetails=response.data
-
-        // console.log('Add title reponse ==> ', JSON.stringify(response.data))
-
-        apiResponseStatus.value=apiResponseDetails.status
-        apiResponseMessage.value=apiResponseDetails.message
-          .finally(() => {
-            isConfirmDialogVisible.value = false
-           
-          })
-      }).catch(e => {
-       
-        console.log(e)
-        
       })
+        .then(response => {
+          const apiResponseDetails = response.data
 
-   
-    }  catch (error) {
+          // Perform necessary actions with the response data
+          apiResponseStatus.value = apiResponseDetails.status
+          apiResponseMessage.value = apiResponseDetails.message
+
+          // Check status and reload
+          if (apiResponseStatus.value === 200) {
+            window.location.reload()
+          }
+
+        }).catch(error => {
+          console.error("Error submitting data:", error)
+        }).finally(() => {
+          isConfirmDialogVisible.value = false
+
+          isConfirmDialogVisible.value = false
+
+          // Any other cleanup code can go here
+        })
+    } catch (error) {
       console.error('Error:', error)
     }
-      
-       
-   
   }
 }
+
 
 onMounted(() => {
   //GET userData from local storage---->
@@ -110,6 +150,7 @@ onMounted(() => {
   form.value.gender=userData.value.gender//
 
 })
+
 
 
 

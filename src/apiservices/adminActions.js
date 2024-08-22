@@ -39,6 +39,9 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
     // 👉 Fetch All parish  data on table
     fetchAllParish(params) { return api.get('/getAllParishes', { params }) },
 
+    FetchAllMembers(params) { return api.get('/Allmember', { params }) },
+
+
     // 👉 Fetch All committee
     fetchAllcommittee(params) { return api.get('/getAllCommittee', { params }) },
 
@@ -47,27 +50,72 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
 
     async fetchStateParish(statename) {
       try {
-        // Fetch parish data based on the provided state name
+        console.log('This is the state name', statename)
+        
         return await api.get(`/getParishByState/${statename}`)// Assuming the response contains parish data
       } catch (error) {
         throw new Error('Failed to fetch parish by state')
       }
     },
   
-  
+    updateAparish(UpdateParishData) {
+      return new Promise((resolve, reject) => {
+        console.log("This is the data gotten to the all Admin Actions", UpdateParishData)
+        api.post('/updateAparish', {
+          postData: UpdateParishData,  // Wrap parishData inside postData key
+        })
+          .then(response => {
+            resolve(response)  // Resolve the promise with the API response
+          })
+          .catch(error => {
+            reject(error)  // Reject the promise with the error
+          })
+      })
+    },
 
-    // 👉 Add User
-    addParish(parishData) {
+    updateMinistry(ministryData) {
+      return new Promise((resolve, reject) => {
+        console.log("This is the data gotten to the all Admin Actions", ministryData)
+        api.post('/updateMinistry', {
+          postData: ministryData,  // Wrap parishData inside postData key
+        })
+          .then(response => {
+            resolve(response)  // Resolve the promise with the API response
+          })
+          .catch(error => {
+            reject(error)  // Reject the promise with the error
+          })
+      })
+    },
 
-      console.log('Post Data from admin action', postData)
+    // 👉 Add Parish
+    addNewParish(parishData) {
+      return new Promise((resolve, reject) => {
+        api.post('/AddParish', {
+          postData: parishData,  // Wrap parishData inside postData key
+        })
+          .then(response => {
+            resolve(response)  // Resolve the promise with the API response
+          })
+          .catch(error => {
+            reject(error)  // Reject the promise with the error
+          })
+      })
+    },
 
-      // return new Promise((resolve, reject) => {
-      //   api.post('/apps/users/user', {
-      //     user: parishData,
-      //   }).then(response => resolve(response))
-      //     .catch(error => reject(error))
-      // })
-
+    // 👉 Delete Parish
+    deleteParish(deleteParishData) {
+      return new Promise((resolve, reject) => {
+        api.post('/deleteAParish', {
+          postData: deleteParishData,  // Wrap parishData inside postData key
+        })
+          .then(response => {
+            resolve(response)  // Resolve the promise with the API response
+          })
+          .catch(error => {
+            reject(error)  // Reject the promise with the error
+          })
+      })
     },
 
     

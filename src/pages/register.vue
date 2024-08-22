@@ -14,6 +14,8 @@ const isPasswordVisible = ref(false)
 const isConfirmPasswordVisible = ref(false)
 const registerMultistepIllustration = useGenerateImageVariant(registerMultistepIllustrationLight, registerMultistepIllustrationDark)
 const allAdminActions = useAllAdminActions()
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
 
 const items = [{
   title: 'Account',
@@ -26,7 +28,7 @@ const items = [{
   icon: 'tabler-users',
 },
 {
-  title: 'Anoiting Details',
+  title: 'Anointing Details',
   subtitle: 'Joinning/Anoiting Details',
   icon: 'tabler-credit-card',
 },
@@ -64,17 +66,20 @@ const form = ref({
   phoneNo: '',
   altPhoneno: '',
   address: '',
-  selectedCountry: 'Select Country of residence',
-  selectedState: 'Select state of residence',
+  selectedCountry: '',
+  residentialCountry: '',
+  selectedState: '',
   selectedchurchCountry: ' ',
   selectedChurchState: 'Select state',
   state: '',
   city: '',
   Country: '',
-  seletedParish: 'Select parish',
+  selectedParish: 'Select parish',
   getTitleByGendervalue: '',
   selectedParishState: 'Select state',
   getParisByState: '',
+  userParish: '',
+  userParishCode: '',
   confirm_title: 'Registered!',
   getCountryById: '',
 
@@ -126,85 +131,85 @@ const fetchMinistryFromApi = async () => {
 }
 
 
-const register =    () => {
-  
-  try{
-    const response = api.post('/Addmember', {
-      // email: form.value.email,  // Assuming email and password are reactive variables
-      // password: form.value.password,
-      // sname: form.value.sname,  // Assuming email and password are reactive variables
-      // fname: form.value.fname,
-      // mname: form.value.mname,  // Assuming email and password are reactive variables
-      // Gender: form.value.Gender,
-      // dob: form.value.dob,
-      // MStatus: form.value.MStatus,
-      // Status: form.value.VineyardStatus,
-      // Title: form.value.title,
-      // dot: form.value.dot,
-      // ministry: form.value.selectedMinistry,
-      // mobile: form.value.phoneNo,
-      // Altmobile: form.value.altphoneNo,
-      // address: form.value.address,
-      // Country: form.value.selectedCountry.name,
-      // State: form.value.selectedState,
-      // City: form.value.city,
-      // parishcode: form.value.seletedParish,
-      email: ',ka@gmail.com',  // Assuming email and password are reactive variables
-      password: '123456',
-      sname: '123456', // Assuming email and password are reactive variables
-      fname: 'Kudi',
-      mname: 'Ola',  // Assuming email and password are reactive variables
-      Gender: 'female',
-      dob: 'qwewe',
-      MStatus: 'nsshs',
-      Status: 'nsshs',
-      Title: 'nsshs',
-      dot: 'nsshs',
-      ministry: 'nsshs',
-      mobile: 'nsshs',
-      Altmobile: 'nsshs',
-      address: 'nsshs',
-      Country: 'nsshs',
-      State: 'nsshs',
+const register = async () => {
+  try {
+    // Determine the value for Status based on MStatus
+    const status = form.value.MStatus === 'Vineyard Worker'
+      ? form.value.VineyardStatus
+      : null
+
+    // Make the API request
+    const response = await api.post('/Addmember', {
+      email: form.value.email,
+      password: form.value.password,
+      sname: form.value.sname,
+      fname: form.value.fname,
+      mname: form.value.mname,
+      Gender: form.value.Gender,
+      dob: form.value.dob,
+      MStatus: form.value.MStatus,
+      Status: status,
+      Title: form.value.title,
+      dot: form.value.dot,
+      ministry: form.value.selectedMinistry,
+      mobile: form.value.phoneNo,
+      Altmobile: form.value.altPhoneno,
+      address: form.value.address,
+      Country: form.value.residentialCountry,
+      State: form.value.selectedState,
       City: form.value.city,
-      parishcode: form.value.seletedParish,
-    }).then(response => {
-
-  
-
-
-      console.log('Got usersData here register ', JSON.stringify(response.data))
-
-    }).catch(e => {
-      // const { errors: formErrors } = e.response.data
-
-      // errors.value = formErrors
-      console.error(e.response.data)
+      parishcode: form.value.userParishCode,
+      parishname: form.value.userParish,
     })
 
-   
-  }  catch (error) {
-    // console.error('Error:', error)
+    // Handle the response
+    console.log('Got usersData here register', JSON.stringify(response.data))
+
+    const apiResponseDetails = response.data
+
+    // Perform necessary actions with the response data
+    apiResponseStatus.value = apiResponseDetails.status
+    apiResponseMessage.value = apiResponseDetails.message
+
+    // Check status and reload if successful
+    if (apiResponseStatus.value === 200) {
+      window.location.href = '/login'
+    }
+
+  } catch (error) {
+    // Handle any errors
+    console.error('Error:', error.response ? error.response.data : error.message)
+  } finally {
+    // Close the confirmation dialog and perform any cleanup
+    isConfirmDialogVisible.value = false
   }
+}
 
 
+const onCountryChange = () => {
+  form.value.selectedParishState = ''
+  form.value.selectedParish = ''
+  form.value.churchStateList = []
+  form.value.parishList = []
 
+  getChurchState()
 }
 
 // 👉 FetchAll parish from state
-const fetchParishes = async () => {
-  if ((form.value.selectedState)) {
-    try{
-      form.value.parishList=[]
-      form.value.seletedParish='Select your parish'
+const fetchParishes = async state => {
+  if (state) {
+    try {
+      form.value.parishList = []
+      form.value.selectedParish = ''  // Clear the selected parish
+      console.log("<=====This is the state of the church======>", state)
 
-      const response = await allAdminActions.fetchStateParish(form.value.selectedParishState)
+      const response = await allAdminActions.fetchStateParish(state)
+
+
       const data = response.data
-      if(data.Allparish&&data.Allparish.length>0) {
-
+      if (data.Allparish && data.Allparish.length > 0) {
         form.value.parishList = data.Allparish.map(parish => ({
-        // parishcode: parish.parishcode,
-          parishname: parish.parishname,
+          parishname: `${parish.parishname} ${parish.address}`,
           country: parish.country,
           states: parish.states,
           city: parish.city,
@@ -213,16 +218,11 @@ const fetchParishes = async () => {
           parishcode: parish.parishcode,
         }))
       }
-    
+      console.log("<=====This is the response======>", form.value.parishList)
 
-    }catch (error) {
-      console('Error fetching data:')
+    } catch (error) {
+      console.log('Error fetching data:', error)
     }
-
- 
-
-
-
   }
 }
 
@@ -261,11 +261,15 @@ onMounted(() => {
 })
 
 const  getResidentialState = () => {
-  form.value.stateList = []
-  form.value.selectedState = 'Select state of residence'
+  // form.value.stateList = []
+  // form.value.selectedState = ''
+  console.log("<=========This is the country id picked for residential==========>", form.value.selectedCountry)
 
   if (form.value.selectedCountry) {
     form.value.getCountryById = form.value.countryList.find(country => country.id === form.value.selectedCountry)
+    console.log("<=========This is the country picked for residential==========>", form.value.getCountryById)
+    form.value.residentialCountry = form.value.getCountryById.name
+
   }
  
   if (form.value.getCountryById && Array.isArray( form.value.getCountryById.states) &&  form.value.getCountryById.states.length > 0) {
@@ -285,28 +289,29 @@ const  getResidentialState = () => {
   }
 }
 
-const  getChurchState = () => {
+const getChurchState = () => {
   if (form.value.selectedchurchCountry) {
+    console.log("<=========This is the country picked for parish==========>", form.value.selectedchurchCountry)
 
     form.value.churchStateList = []
-    form.value.selectedChurchState = 'Select state'
-  
+    form.value.selectedParishState = ''
+
     try {
-      const data=form.value.selectedchurchCountry.states
-      
-      if(Array.isArray(data) && data.length>0){
+      const data = form.value.selectedchurchCountry.states
+
+      if (Array.isArray(data) && data.length > 0) {
         form.value.churchStateList = data.map(churchState => ({
           country_id: churchState.country_id,
           name: churchState.name,
         }))
-       
       }
 
     } catch (error) {
-      
+      console.error('Error fetching states:', error)
     }
   }
 }
+
 
 const  getGenderTitle = () => {
   if (form.value.Gender) {
@@ -319,43 +324,21 @@ const  getGenderTitle = () => {
   }
 }
 
-const  getStateParish = () => {
+const getStateParish = () => {
   if (form.value.selectedParishState) {
-
-    const state=form.value.selectedParishState
-
-    fetchParishes()
-  
+    console.log("<=========This is the state picked for parish==========>", form.value.selectedParishState)
+    fetchParishes(form.value.selectedParishState)
+  } else {
+    console.log("No state is selected")
   }
 }
+
 
 //submit to call the register function 
 const onSubmit = message => {
 
   // eslint-disable-next-line sonarjs/no-all-duplicated-branches
   if (message) {
-
-     
-    //   // eslint-disable-next-line sonarjs/no-use-of-empty-return-value
-    //   register()
-
-    //     .then(response => {
-    //       // Registration successful
-    //       alert(response)
-
-    //       // Additional logic if needed
-    //     })
-    //     .catch(error => {
-    //       // Registration failed
-    //       alert('Registration failed: ' + error)
-
-    //       // Additional error handling logic if needed
-    //     })
-   
-    // } else {
-    //   alert(message)
-    // }
-
     register()
   }
 }
@@ -366,13 +349,30 @@ const onSubmit = message => {
 //   alert('Cancelled')
 // }
 
+watch(() => form.value.selectedParish, newValue => {
 
+  if (newValue) {
+    // Find the parish object corresponding to the selected parish code
+    const selectedParishObject = form.value.parishList.find(parish => parish.parishcode === newValue)
+
+    if (selectedParishObject) {
+      console.log("Selected Parish Name:", selectedParishObject.parishname)
+      form.value.userParish = selectedParishObject.parishname
+      form.value.userParishCode = newValue
+
+
+    } else {
+      console.log("Parish not found")
+    }
+  }
+})
 
 watchEffect(() => {
-  getResidentialState()
-  getChurchState()
+  // getResidentialState()
+  // getChurchState()
   getGenderTitle()
-  getStateParish()
+
+  // getStateParish()
 })
 
 const isConfirmDialogVisible = ref(false)
@@ -650,7 +650,7 @@ const refetchData = hideOverlay => {
                     md="6"
                   >
                     <VPhoneInput
-                      v-model="form.altphoneNo"
+                      v-model="form.altPhoneno"
                       label="Alternative Phone number"
                       country-label="Country"
                       country-aria-label="Country for phone number"
@@ -673,7 +673,7 @@ const refetchData = hideOverlay => {
                   >
                     <VAutocomplete
                       v-model="form.selectedCountry"
-                      label="Country"
+                      label="Country of residence"
                       :items="form.countryList"
                       item-title="name"
                       item-value="id"
@@ -692,34 +692,6 @@ const refetchData = hideOverlay => {
                         </VListItem>
                       </template>
                     </VAutocomplete>
-                  
-                    <!--
-                      <pre>{{ form.countryList }}</pre>
-                      <pre>{{ form.selectedCountry }}</pre>
-                      
-                   
-
-                      <AppAutocomplete
-                      v-model="form.selectedCountry"
-                      label="Country"
-                      :items="form.countryList"
-                      item-title="name"
-                      item-value="id"
-                      density="compact"
-                      @change="getChurchState"
-                      >
-                      <template #item="{ props: listItemProp, item }">
-                      <VListItem v-bind="listItemProp">
-                      <template #prepend>
-                      <VAvatar
-                      :image="item.raw.flag_img"
-                      size="30"
-                      />
-                      </template>
-                      </VListItem>
-                      </template>
-                      </AppAutocomplete>  
-                    -->
                   </VCol>
                   <VCol
                     cols="12"
@@ -727,7 +699,7 @@ const refetchData = hideOverlay => {
                   >
                     <VAutocomplete
                       v-model="form.selectedState"
-                      label="State"
+                      label="State of residence"
                       :items="form.stateList"
                       item-title="name"
                     />
@@ -754,17 +726,6 @@ const refetchData = hideOverlay => {
                 </p>
                 <VRow>
                   <VCol cols="12">
-                    <!--
-                      <AppCombobox
-                      v-model="form.selectedchurchCountry"
-                      label="Country"
-                      :items="form.countryList"
-                      item-title="name"
-                      item-value="id"
-                      @change="getChurchState"
-                      />
-                    -->
-
                     <AppCombobox
                       v-model="form.selectedchurchCountry"
                       label="Country"
@@ -773,7 +734,7 @@ const refetchData = hideOverlay => {
                       item-value="id"
                       density="compact"
                       variant="outlined"
-                      @change="getChurchState"
+                      @change="onCountryChange"
                     >
                       <template #item="{ props: listItemProp, item }">
                         <VListItem v-bind="listItemProp">
@@ -792,12 +753,12 @@ const refetchData = hideOverlay => {
                     cols="6"
                     md="6"
                   >
-                    <AppSelect
+                    <VAutocomplete
                       v-model="form.selectedParishState"
                       label="State"
                       :items="form.churchStateList"
                       item-title="name"
-                      placeholder=" Select state "
+                      placeholder="Select state"
                       @change="getStateParish"
                     />
                   </VCol>
@@ -806,20 +767,20 @@ const refetchData = hideOverlay => {
                     cols="6"
                     md="6"
                   >
-                    <!-- <span style="color: rgb(26, 196, 26);">Parish Address :{{ form.parish }}</span> -->
-                    <AppSelect
-                      v-model="form.seletedParish"
+                    <VAutocomplete
+                      v-model="form.selectedParish"
                       label="Parish"
                       :items="form.parishList"
                       item-value="parishcode"
-                      :item-title="item => `${item.name}-${item.parishaddress}`"
-                      :hint="`${form.seletedParish}`"
+                      :item-title="item => item.parishname || 'Select Parish'"
+                      :hint="`${form.selectedParish}`"
                       persistent-hint
                       double-line
                     />
                   </VCol>
                 </VRow>
               </VWindowItem>
+
               <!-- This is review & summary step view -->
               <VWindowItem>
                 <div class="text-base">
@@ -889,17 +850,17 @@ const refetchData = hideOverlay => {
                       WhatsApp Phone number  {{ form.phoneNo }}
                     </p>
                     <p class="mb-1">
-                      Alternative Phone number {{ form.altphoneNo }}
+                      Alternative Phone number {{ form.altPhoneno }}
                     </p>
                     <p class="mb-1">
                       Residential Address {{ form.address }}
                     </p>
                     <p class="mb-1">
-                      Country {{ form.selectedCountry.name }}
+                      Country {{ form.residentialCountry }}
                     </p>
                   
                     <p class="mb-1">
-                      State {{ form.city }}
+                      State {{ form.selectedState }}
                     </p>
                     <VDivider class="my-4" />
                     <h6 class="text-base font-weight-medium mb-2">
@@ -913,7 +874,7 @@ const refetchData = hideOverlay => {
                       State {{ form.selectedParishState }}
                     </p>
                     <p class="mb-1">
-                      Parish {{ form.seletedParish.name }}
+                      Parish: {{ form.userParish }} - {{ form.userParishCode }}
                     </p>
                   </vdivider>
                 </div>
@@ -959,16 +920,17 @@ const refetchData = hideOverlay => {
             <!-- 👉 Confirm Dialog -->
             <ConfirmDialog
               v-model:isDialogVisible="isConfirmDialogVisible"
-              confirmation-question="You are about to confirm this registration Did you want to continue ?"
+              :api-response="apiResponseStatus"
+              confirmation-question="You are about to confirm this ministry Did you want to continue ?"
               cancel-msg="Registration Cancelled!!"
               cancel-title="Cancelled"
-              confirm-msg="Your registration is successfully."
+              :confirm-msg="apiResponseMessage"
               confirm-title="Registered!"
               @confirm="onSubmit"
               @cancel="onCancel"
             />
-          </vform>
-        </vcardtext>
+          </VForm>
+        </VCardText>
       </VCard>
     </VCol>
     <VCol
