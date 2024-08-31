@@ -1,9 +1,9 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <script setup>
-import { useUserListStore } from '@/apiservices/membersList'
+import { useAllAdminActions } from '@/apiservices/adminActions'
 import laptopGirl from '@images/illustrations/laptop-girl.png'
 import { onMounted, ref } from 'vue'
-import { useAllAdminActions } from '@/apiservices/adminActions'
-
+import api from '@/apiservices/api'
 
 const props = defineProps({
   isDialogVisible: {
@@ -22,18 +22,13 @@ const emit = defineEmits([
   'updatedData',
 ])
 
-import api from '@/apiservices/api'
-
 const allAdminActions = useAllAdminActions()
-
 const userData = JSON.parse(localStorage.getItem('userData') || 'null')
 
-console.log("<===This is the userData>", userData)
-
-const isConfirmDialogVisible = ref(false)
-
+const currentStep = ref(0)
 const apiResponseStatus = ref('')
 const apiResponseMessage = ref('')
+
 
 const form = ref({
   countryList: [],
@@ -128,6 +123,10 @@ const onSubmit = message => {
   }
 }
 
+const onCancel = () => {
+  console.log('Cancel clicked')
+}
+
 
 const fetchCountries = async () => {
   allAdminActions.fetchCountries({
@@ -147,6 +146,18 @@ const fetchCountries = async () => {
   }).catch(error => {
     console.error(error)
   })
+}
+
+const createApp = [
+  {
+    icon: 'custom-home',
+    title: 'Edit Profile',
+  },
+]
+
+const dialogVisibleUpdate = val => {
+  emit('update:isDialogVisible', val)
+  currentStep.value = 0
 }
 
 const getResidentialState = () => {
@@ -218,6 +229,11 @@ const fetchMinistryFromApi = async () => {
 }
 
 
+watch(props, () => {
+  if (!props.isDialogVisible)
+    currentStep.value = 0
+})
+
 watchEffect(() => {
   getResidentialState()
   getGenderTitle()
@@ -227,16 +243,6 @@ onMounted(() => {
   fetchMinistryFromApi()
   fetchCountries()
 })
-
-
-const refInputEl = ref()
-const isConfirmDialogOpen = ref(false)
-const isAccountDeactivated = ref(false)
-const validateAccountDeactivation = [v => !!v || 'Please confirm account deactivation']
-
-const resetForm = () => {
-  form.value = structuredClone(form)
-}
 
 const resetAvatar = () => {
   form.value.avatar = userData.avatar || avatar1
@@ -256,12 +262,29 @@ const changeAvatar = file => {
     }
   }
 }
+
+const isConfirmDialogVisible = ref(false)
 </script>
 
 <template>
-  <VRow>
-    <VCol cols="12">
-      <VCard title="Profile Details">
+  <VDialog
+    :model-value="props.isDialogVisible"
+    max-width="950"
+    @update:model-value="dialogVisibleUpdate"
+  >
+    <!-- 👉 dialog close btn -->
+    <DialogCloseBtn
+      size="small"
+      @click="emit('update:isDialogVisible', false)"
+    />
+    <VCard class="create-app-dialog">
+      <VCardText class="pa-5 pa-sm-10">
+        <h5 class="text-h5 text-center mb-2">
+          Edit User Details
+        </h5>
+        <p class="text-sm text-center mb-8">
+          Provide data with this form to edit your details.
+        </p>
         <VCardText class="d-flex">
           <!-- 👉 Avatar -->
           <VAvatar
@@ -314,232 +337,252 @@ const changeAvatar = file => {
           </form>
         </VCardText>
 
-        <VDivider />
+        <VDivider class="mb-4" />
 
-        <VCardText class="pt-2">
-          <!-- 👉 Form -->
-          <VForm class="mt-6">
-            <VRow>
-              <!-- 👉 First Name -->
-              <VCol
-                md="4"
-                cols="12"
-              >
-                <AppTextField
-                  v-model="form.fname"
-                  label="First Name"
-                />
-              </VCol>
+        <VRow>
+          <VCol
+            cols="6"
+            sm="3"
+          >
+            <AppStepper
+              v-model:current-step="currentStep"
+              direction="vertical"
+              :items="createApp"
+              icon-size="24"
+              class="stepper-icon-step-bg"
+            />
+          </VCol>
 
-              <!-- 👉 Middle Name -->
-              <VCol
-                md="4"
-                cols="12"
-              >
-                <AppTextField
-                  v-model="form.mname"
-                  label="Middle Name"
-                />
-              </VCol>
+          <VCol
+            cols="18"
+            sm="7"
+            md="8"
+            lg="9"
+          >
+            <VWindow
+              v-model="currentStep"
+              class="disable-tab-transition stepper-content"
+            >
+              <!-- 👉 category -->
+              <VWindowItem>
+                <VRow>
+                  <!-- 👉 First Name -->
+                  <VCol
+                    md="4"
+                    cols="12"
+                  >
+                    <AppTextField
+                      v-model="form.fname"
+                      label="First Name"
+                    />
+                  </VCol>
+                  <!-- 👉 Middle Name -->
+                  <VCol
+                    md="4"
+                    cols="12"
+                  >
+                    <AppTextField
+                      v-model="form.mname"
+                      label="Middle Name"
+                    />
+                  </VCol>
 
-              <!-- 👉 Last Name -->
-              <VCol
-                md="4"
-                cols="12"
-              >
-                <AppTextField
-                  v-model="form.sname"
-                  label="Last Name"
-                />
-              </VCol>
+                  <!-- 👉 Last Name -->
+                  <VCol
+                    md="4"
+                    cols="12"
+                  >
+                    <AppTextField
+                      v-model="form.sname"
+                      label="Last Name"
+                    />
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <!-- 👉 Email -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.email"
+                      label="E-mail"
+                      type="email"
+                    />
+                  </VCol>
 
-              <!-- 👉 Email -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.email"
-                  label="E-mail"
-                  type="email"
-                />
-              </VCol>
+                  <!-- 👉 Phone -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.mobile"
+                      label="Phone Number"
+                    />
+                  </VCol>
 
-              <!-- 👉 Phone -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.mobile"
-                  label="Phone Number"
-                />
-              </VCol>
+                  <!-- 👉 Alt Phone -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.Altmobile"
+                      label="Alternate Phone Number"
+                    />
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <!-- 👉 dob -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.dob"
+                      type="date"
+                      label="Date of birth"
+                    />
+                  </VCol>
 
-              <!-- 👉 Alt Phone -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.Altmobile"
-                  label="Alternate Phone Number"
-                />
-              </VCol>
-
-              <!-- 👉 dob -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.dob"
-                  type="date"
-                  label="Date of birth"
-                />
-              </VCol>
-
-              <!-- 👉 Address -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.Residence"
-                  label="Address"
-                />
-              </VCol>
-
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.dot"
-                  type="date"
-                  label="Date of first anointment"
-                />
-              </VCol>
-
-              <!-- 👉 Country -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VAutocomplete
-                  v-model="form.preSelectedCountry"
-                  label="Country"
-                  :items="form.countryList"
-                  item-title="name"
-                  item-value="name"
-                  density="compact"
-                  variant="outlined"
-                  @change="getResidentialState"
-                />
-              </VCol>
+                  <!-- 👉 Address -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.Residence"
+                      label="Address"
+                    />
+                  </VCol>
+                
+                  <!-- 👉 date of anointment -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.dot"
+                      type="date"
+                      label="Date of first anointment"
+                    />
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <!-- 👉 Country -->
+                  <VCol
+                    cols="12"
+                    md="6"
+                  >
+                    <VAutocomplete
+                      v-model="form.preSelectedCountry"
+                      label="Country"
+                      :items="form.countryList"
+                      item-title="name"
+                      item-value="name"
+                      density="compact"
+                      variant="outlined"
+                      @change="getResidentialState"
+                    />
+                  </VCol>
 
 
-              <!-- 👉 State -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VAutocomplete
-                  v-model="form.State"
-                  label="State"
-                  :items="form.stateList"
-                  item-title="name"
-                />
-              </VCol>
+                  <!-- 👉 State -->
+                  <VCol
+                    cols="12"
+                    md="6"
+                  >
+                    <VAutocomplete
+                      v-model="form.State"
+                      label="State"
+                      :items="form.stateList"
+                      item-title="name"
+                    />
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <!-- 👉 City -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppTextField
+                      v-model="form.City"
+                      label="City"
+                    />
+                  </VCol>
 
-              <!-- 👉 City -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppTextField
-                  v-model="form.City"
-                  label="City"
-                />
-              </VCol>
+                  <!-- 👉 title -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppSelect
+                      v-model="form.Title"
+                      label="Present Title"
+                      :items="form.titleList"
+                    />
+                  </VCol>
 
-              <!-- 👉 Language -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppSelect
-                  v-model="form.Title"
-                  label="Present Title"
-                  :items="form.titleList"
-                />
-              </VCol>
+                  <!-- 👉 Status -->
+                  <VCol
+                    cols="12"
+                    md="4"
+                  >
+                    <AppSelect
+                      v-model="form.MStatus"
+                      label="Member Status"
+                      placeholder=" Select status "
+                      :items="['Member/Laity', 'Vineyard Worker']"
+                    />
+                  </VCol>
+                </VRow>
+                <VRow>
+                  <VCol
+                    v-if="form.MStatus == 'Vineyard Worker'"
+                    cols="12"
+                    md="4"
+                  >
+                    <AppSelect
+                      v-model="form.Status"
+                      label="Vineyard Status"
+                      placeholder=" Select Vineyard status "
+                      :items="['Shepherd','Asst. Shepherd','Wolider','Wolima','Church Worker','Pastor']"
+                    />
+                  </VCol>
 
-              <!-- 👉 Status -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppSelect
-                  v-model="form.MStatus"
-                  label="Member Status"
-                  placeholder=" Select status "
-                  :items="['Member/Laity', 'Vineyard Worker']"
-                />
-              </VCol>
+                  <!-- 👉 Ministry -->
+                  <VCol
+                    cols="12"
+                    md="6"
+                  >
+                    <AppSelect
+                      id="ministrySelect"
+                      v-model="form.ministry"
+                      label="Ministry"
+                      :items="form.ministryList"
+                    />
+                  </VCol>
+                </VRow>
 
-              <VCol
-                v-if="form.MStatus == 'Vineyard Worker'"
-                cols="12"
-                md="4"
-              >
-                <AppSelect
-                  v-model="form.Status"
-                  label="Vineyard Status"
-                  placeholder=" Select Vineyard status "
-                  :items="['Shepherd','Asst. Shepherd','Wolider','Wolima','Church Worker','Pastor']"
-                />
-              </VCol>
-
-              <!-- 👉 Ministry -->
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <AppSelect
-                  id="ministrySelect"
-                  v-model="form.ministry"
-                  label="Ministry"
-                  :items="form.ministryList"
-                />
-              </VCol>
-
-              <!-- 👉 Form Actions -->
-              <VCol
-                cols="12"
-                class="d-flex flex-wrap gap-4"
-              >
-                <VBtn @click="isConfirmDialogVisible = true">
-                  Save changes
-                </VBtn>
-
-                <VBtn
-                  color="secondary"
-                  variant="tonal"
-                  type="reset"
-                  @click.prevent="resetForm"
+                <!-- 👉 Form Actions -->
+                <VCol
+                  cols="12"
+                  class="d-flex flex-wrap gap-4"
                 >
-                  Reset
-                </VBtn>
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
-
-  <!-- Confirm Dialog -->
+                  <VBtn @click="isConfirmDialogVisible = true">
+                    Save changes
+                  </VBtn>
+                </VCol>
+              </VWindowItem>
+            </VWindow>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+  </VDialog>
+  <!-- 👉 Confirm Dialog -->
   <ConfirmDialog
     v-model:isDialogVisible="isConfirmDialogVisible"
     :api-response="apiResponseStatus"
@@ -552,3 +595,9 @@ const changeAvatar = file => {
     @cancel="onCancel"
   />
 </template>
+
+<style lang="scss">
+.stepper-content .card-list {
+  --v-card-list-gap: 24px;
+}
+</style>

@@ -6,5 +6,7 @@ import misc from './misc'
 import pages from './pages'
 import tables from './tables'
 import uiElements from './ui-elements'
+import adminmenu from './adminmenu'
+import usermenu from './usermenu'
 
-export default [...dashboard, ...apps, ...pages, ...uiElements, ...forms, ...tables, ...charts, ...misc]
+export default [...adminmenu, ...usermenu, ...pages, ...uiElements, ...forms, ...tables, ...charts, ...misc]

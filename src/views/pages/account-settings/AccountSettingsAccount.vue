@@ -1,105 +1,241 @@
 <script setup>
 import avatar1 from '@images/avatars/avatar-14.png'
+import { useAllAdminActions } from '@/apiservices/adminActions'
+import api from '@/apiservices/api'
+import { ref } from 'vue'
 
-const accountData = {
-  avatarImg: avatar1,
-  firstName: 'john',
-  lastName: 'Doe',
-  email: 'johnDoe@example.com',
-  org: 'Pixinvent',
-  phone: '+1 (917) 543-9876',
-  address: '123 Main St, New York, NY 10001',
-  state: 'New York',
-  zip: '10001',
-  country: 'USA',
-  language: 'English',
-  timezone: '(GMT-11:00) International Date Line West',
-  currency: 'USD',
+const allAdminActions = useAllAdminActions()
+
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
+
+console.log("<===This is the userData>", userData)
+
+const isConfirmDialogVisible = ref(false)
+
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
+
+const form = ref({
+  countryList: [],
+  stateList: [],
+  ministryList: [],
+  titleList: [],
+  preSelectedCountry: userData.Country || '',
+  preSelectedState: userData.State || '',
+  Gender: userData.Gender || '',
+  MStatus: userData.MStatus || '',
+  Status: userData.Status || '',
+  sname: userData.sname || '',
+  mname: userData.mname || '',
+  fname: userData.fname || '',
+  getCountryById: '',
+  State: userData.State || '',
+  Country: userData.Country || '',
+  email: userData.email || '',
+  mobile: userData.mobile || '',
+  Altmobile: userData.Altmobile || '',
+  Residence: userData.Residence || '',
+  Title: userData.Title || '',
+  dot: userData.dot || '',
+  ministry: userData.ministry || '',
+  dob: userData.dob || '',
+  parishname: userData.parishname || '',
+  City: userData.City || '',
+  parishcode: userData.parishcode || '',
+  parishCountry: userData.parishCountry || '',
+  parishState: userData.parishState || '',
+  avatar: userData.avatar || avatar1,
+  avatarFile: userData.avatar,
+})
+
+const updateMember = async () => {
+  try {
+    // Create a FormData object
+    const formData = new FormData()
+
+    // Append all form fields to the FormData object
+    formData.append('email', form.value.email)
+    formData.append('sname', form.value.sname)
+    formData.append('fname', form.value.fname)
+    formData.append('mname', form.value.mname)
+    formData.append('Gender', form.value.Gender)
+    formData.append('dob', form.value.dob)
+    formData.append('mobile', form.value.mobile)
+    formData.append('Altmobile', form.value.Altmobile)
+    formData.append('Residence', form.value.Residence)
+    formData.append('Country', form.value.preSelectedCountry)
+    formData.append('State', form.value.preSelectedState)
+    formData.append('City', form.value.City)
+    formData.append('Title', form.value.Title)
+    formData.append('dot', form.value.dot)
+    formData.append('MStatus', form.value.MStatus)
+    formData.append('ministry', form.value.ministry)
+    formData.append('Status', form.value.Status)
+    formData.append('parishcode', form.value.parishcode)
+    formData.append('parishname', form.value.parishname)
+
+    // Only append the file if one is selected
+    if (form.value.avatarFile) {
+      formData.append('thumbnail', form.value.avatarFile)
+    }
+    alert(formData.get('Status'))
+
+
+    // Make the API request
+    const response = await api.post(`/member/${userData.UserId}/update`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    console.log('Member updated successfully', JSON.stringify(response.data))
+
+    const apiResponseDetails = response.data
+
+    apiResponseStatus.value = apiResponseDetails.status
+    apiResponseMessage.value = apiResponseDetails.message
+
+  } catch (error) {
+    // Handle any errors
+    console.error('Error updating member:', error.response ? error.response.data : error.message)
+  }
 }
+
+
+const onSubmit = message => {
+  if (message) {
+    updateMember()
+  }
+}
+
+
+const fetchCountries = async () => {
+  allAdminActions.fetchCountries({
+  }).then(response => {
+    const data=response.data
+
+    if(data.countries&&data.countries.length>0) {  
+      form.value.countryList = data.countries.map(country => ({
+        id: country.id,
+        name: country.name,
+        flag_img: country.flag_img,
+        states: country.states,
+      }))
+    }
+    console.log("<===This is the countries===>", form.value.countryList)
+
+  }).catch(error => {
+    console.error(error)
+  })
+}
+
+const getResidentialState = () => {
+  console.log("<=========This is the country name picked for residential==========>", form.value.preSelectedCountry)
+  console.log("<=========This is the country list==========>", form.value.countryList)
+
+  if (form.value.preSelectedCountry) {
+    form.value.getCountryById = form.value.countryList.find(country => country.name === form.value.preSelectedCountry)
+    console.log("<=========This is the country picked for residential==========>", form.value.getCountryById)
+    form.value.Country = form.value.getCountryById ? form.value.getCountryById.name : ''
+
+    if (form.value.getCountryById && Array.isArray(form.value.getCountryById.states) && form.value.getCountryById.states.length > 0) {
+      try {
+        const data = form.value.getCountryById.states
+
+        form.value.stateList = data.map(countryState => ({
+          country_id: countryState.country_id,
+          name: countryState.name,
+        }))
+      } catch (error) {
+        console.error("Error processing states:", error)
+      }
+    } else {
+      form.value.stateList = []
+    }
+  } else {
+    form.value.stateList = []
+  }
+}
+
+const getTitleByGender = async getByGendervalue => {
+  try {
+    const response = await api.get(`/getTitleByGender/${getByGendervalue}`)
+    const data = response.data.titles 
+    if(data&&data.length>0) {
+      form.value.titleList = data.map(genderTitles => ({
+        level: genderTitles.level,
+        title: genderTitles.title,
+       
+      }))
+    }  
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  }
+}
+
+const  getGenderTitle = () => {
+  if (form.value.Gender) {
+    const gender = form.value.Gender
+
+    getTitleByGender(gender)
+  }
+}
+
+const fetchMinistryFromApi = async () => {
+  allAdminActions.fetchMinistryFromApi({
+  }).then(response => {
+    const data=response.data
+    
+    // form.value.ministry = data.ministry
+
+    if (data.ministry && data.ministry.length > 0) {
+      form.value.ministryList = data.ministry.map(ministry => ministry.ministry)
+    }
+
+  }).catch(error => {
+    console.error(error)
+  })
+}
+
+
+watchEffect(() => {
+  getResidentialState()
+  getGenderTitle()
+})
+
+onMounted(() => {
+  fetchMinistryFromApi()
+  fetchCountries()
+})
+
 
 const refInputEl = ref()
 const isConfirmDialogOpen = ref(false)
-const accountDataLocal = ref(structuredClone(accountData))
 const isAccountDeactivated = ref(false)
 const validateAccountDeactivation = [v => !!v || 'Please confirm account deactivation']
 
 const resetForm = () => {
-  accountDataLocal.value = structuredClone(accountData)
+  form.value = structuredClone(form)
 }
 
+const resetAvatar = () => {
+  form.value.avatar = userData.avatar || avatar1
+}
+    
 const changeAvatar = file => {
-  const fileReader = new FileReader()
   const { files } = file.target
   if (files && files.length) {
+    form.value.avatarFile = files[0]
+
+    const fileReader = new FileReader()
+
     fileReader.readAsDataURL(files[0])
     fileReader.onload = () => {
       if (typeof fileReader.result === 'string')
-        accountDataLocal.value.avatarImg = fileReader.result
+        form.value.avatar = fileReader.result
     }
   }
 }
-
-// reset avatar image
-const resetAvatar = () => {
-  accountDataLocal.value.avatarImg = accountData.avatarImg
-}
-
-const timezones = [
-  '(GMT-11:00) International Date Line West',
-  '(GMT-11:00) Midway Island',
-  '(GMT-10:00) Hawaii',
-  '(GMT-09:00) Alaska',
-  '(GMT-08:00) Pacific Time (US & Canada)',
-  '(GMT-08:00) Tijuana',
-  '(GMT-07:00) Arizona',
-  '(GMT-07:00) Chihuahua',
-  '(GMT-07:00) La Paz',
-  '(GMT-07:00) Mazatlan',
-  '(GMT-07:00) Mountain Time (US & Canada)',
-  '(GMT-06:00) Central America',
-  '(GMT-06:00) Central Time (US & Canada)',
-  '(GMT-06:00) Guadalajara',
-  '(GMT-06:00) Mexico City',
-  '(GMT-06:00) Monterrey',
-  '(GMT-06:00) Saskatchewan',
-  '(GMT-05:00) Bogota',
-  '(GMT-05:00) Eastern Time (US & Canada)',
-  '(GMT-05:00) Indiana (East)',
-  '(GMT-05:00) Lima',
-  '(GMT-05:00) Quito',
-  '(GMT-04:00) Atlantic Time (Canada)',
-  '(GMT-04:00) Caracas',
-  '(GMT-04:00) La Paz',
-  '(GMT-04:00) Santiago',
-  '(GMT-03:30) Newfoundland',
-  '(GMT-03:00) Brasilia',
-  '(GMT-03:00) Buenos Aires',
-  '(GMT-03:00) Georgetown',
-  '(GMT-03:00) Greenland',
-  '(GMT-02:00) Mid-Atlantic',
-  '(GMT-01:00) Azores',
-  '(GMT-01:00) Cape Verde Is.',
-  '(GMT+00:00) Casablanca',
-  '(GMT+00:00) Dublin',
-  '(GMT+00:00) Edinburgh',
-  '(GMT+00:00) Lisbon',
-  '(GMT+00:00) London',
-]
-
-const currencies = [
-  'USD',
-  'EUR',
-  'GBP',
-  'AUD',
-  'BRL',
-  'CAD',
-  'CNY',
-  'CZK',
-  'DKK',
-  'HKD',
-  'HUF',
-  'INR',
-]
 </script>
 
 <template>
@@ -112,7 +248,7 @@ const currencies = [
             rounded
             size="100"
             class="me-6"
-            :image="accountDataLocal.avatarImg"
+            :image="form.avatar"
           />
 
           <!-- 👉 Upload Photo -->
@@ -166,22 +302,33 @@ const currencies = [
             <VRow>
               <!-- 👉 First Name -->
               <VCol
-                md="6"
+                md="4"
                 cols="12"
               >
                 <AppTextField
-                  v-model="accountDataLocal.firstName"
+                  v-model="form.fname"
                   label="First Name"
+                />
+              </VCol>
+
+              <!-- 👉 Middle Name -->
+              <VCol
+                md="4"
+                cols="12"
+              >
+                <AppTextField
+                  v-model="form.mname"
+                  label="Middle Name"
                 />
               </VCol>
 
               <!-- 👉 Last Name -->
               <VCol
-                md="6"
+                md="4"
                 cols="12"
               >
                 <AppTextField
-                  v-model="accountDataLocal.lastName"
+                  v-model="form.sname"
                   label="Last Name"
                 />
               </VCol>
@@ -189,67 +336,68 @@ const currencies = [
               <!-- 👉 Email -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
-                  v-model="accountDataLocal.email"
+                  v-model="form.email"
                   label="E-mail"
                   type="email"
-                />
-              </VCol>
-
-              <!-- 👉 Organization -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppTextField
-                  v-model="accountDataLocal.org"
-                  label="Organization"
                 />
               </VCol>
 
               <!-- 👉 Phone -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
-                  v-model="accountDataLocal.phone"
+                  v-model="form.mobile"
                   label="Phone Number"
+                />
+              </VCol>
+
+              <!-- 👉 Alt Phone -->
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="form.Altmobile"
+                  label="Alternate Phone Number"
+                />
+              </VCol>
+
+              <!-- 👉 dob -->
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="form.dob"
+                  type="date"
+                  label="Date of birth"
                 />
               </VCol>
 
               <!-- 👉 Address -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
-                  v-model="accountDataLocal.address"
+                  v-model="form.Residence"
                   label="Address"
                 />
               </VCol>
 
-              <!-- 👉 State -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppTextField
-                  v-model="accountDataLocal.state"
-                  label="State"
-                />
-              </VCol>
-
-              <!-- 👉 Zip Code -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppTextField
-                  v-model="accountDataLocal.zip"
-                  label="Zip Code"
+                  v-model="form.dot"
+                  type="date"
+                  label="Date of first anointment"
                 />
               </VCol>
 
@@ -258,48 +406,91 @@ const currencies = [
                 cols="12"
                 md="6"
               >
-                <AppSelect
-                  v-model="accountDataLocal.country"
+                <VAutocomplete
+                  v-model="form.preSelectedCountry"
                   label="Country"
-                  :items="['USA', 'Canada', 'UK', 'India', 'Australia']"
+                  :items="form.countryList"
+                  item-title="name"
+                  item-value="name"
+                  density="compact"
+                  variant="outlined"
+                  @change="getResidentialState"
+                />
+              </VCol>
+
+
+              <!-- 👉 State -->
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VAutocomplete
+                  v-model="form.State"
+                  label="State"
+                  :items="form.stateList"
+                  item-title="name"
+                />
+              </VCol>
+
+              <!-- 👉 City -->
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppTextField
+                  v-model="form.City"
+                  label="City"
                 />
               </VCol>
 
               <!-- 👉 Language -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppSelect
-                  v-model="accountDataLocal.language"
-                  label="Language"
-                  :items="['English', 'Spanish', 'Arabic', 'Hindi', 'Urdu']"
+                  v-model="form.Title"
+                  label="Present Title"
+                  :items="form.titleList"
                 />
               </VCol>
 
-              <!-- 👉 Timezone -->
+              <!-- 👉 Status -->
               <VCol
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppSelect
-                  v-model="accountDataLocal.timezone"
-                  label="Timezone"
-                  :items="timezones"
-                  :menu-props="{ maxHeight: 200 }"
+                  v-model="form.MStatus"
+                  label="Member Status"
+                  placeholder=" Select status "
+                  :items="['Member/Laity', 'Vineyard Worker']"
                 />
               </VCol>
 
-              <!-- 👉 Currency -->
               <VCol
+                v-if="form.MStatus == 'Vineyard Worker'"
                 cols="12"
-                md="6"
+                md="4"
               >
                 <AppSelect
-                  v-model="accountDataLocal.currency"
-                  label="Currency"
-                  :items="currencies"
-                  :menu-props="{ maxHeight: 200 }"
+                  v-model="form.Status"
+                  label="Vineyard Status"
+                  placeholder=" Select Vineyard status "
+                  :items="['Shepherd','Asst. Shepherd','Wolider','Wolima','Church Worker','Pastor']"
+                />
+              </VCol>
+
+              <!-- 👉 Ministry -->
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <AppSelect
+                  id="ministrySelect"
+                  v-model="form.ministry"
+                  label="Ministry"
+                  :items="form.ministryList"
                 />
               </VCol>
 
@@ -308,7 +499,9 @@ const currencies = [
                 cols="12"
                 class="d-flex flex-wrap gap-4"
               >
-                <VBtn>Save changes</VBtn>
+                <VBtn @click="isConfirmDialogVisible = true">
+                  Save changes
+                </VBtn>
 
                 <VBtn
                   color="secondary"
@@ -324,40 +517,18 @@ const currencies = [
         </VCardText>
       </VCard>
     </VCol>
-
-    <VCol cols="12">
-      <!-- 👉 Delete Account -->
-      <VCard title="Delete Account">
-        <VCardText>
-          <!-- 👉 Checkbox and Button  -->
-          <div>
-            <VCheckbox
-              v-model="isAccountDeactivated"
-              :rules="validateAccountDeactivation"
-              label="I confirm my account deactivation"
-            />
-          </div>
-
-          <VBtn
-            :disabled="!isAccountDeactivated"
-            color="error"
-            class="mt-3"
-            @click="isConfirmDialogOpen = true"
-          >
-            Deactivate Account
-          </VBtn>
-        </VCardText>
-      </VCard>
-    </VCol>
   </VRow>
 
   <!-- Confirm Dialog -->
   <ConfirmDialog
-    v-model:isDialogVisible="isConfirmDialogOpen"
-    confirmation-question="Are you sure you want to deactivate your account?"
-    confirm-title="Deactivated!"
-    confirm-msg="Your account has been deactivated successfully."
+    v-model:isDialogVisible="isConfirmDialogVisible"
+    :api-response="apiResponseStatus"
+    confirmation-question="You are about to confirm this edit Did you want to continue ?"
+    cancel-msg="Edit Cancelled!!"
     cancel-title="Cancelled"
-    cancel-msg="Account Deactivation Cancelled!"
+    :confirm-msg="apiResponseMessage"
+    confirm-title="Updated Successfully!"
+    @confirm="onSubmit"
+    @cancel="onCancel"
   />
 </template>

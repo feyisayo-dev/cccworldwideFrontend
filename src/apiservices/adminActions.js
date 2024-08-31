@@ -35,9 +35,14 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
 
     // 👉 Fetch All ministry  data on table
     fetchMinistryFromApi(params) { return api.get('/AllMinistry', { params }) },
+    fetchAllCommitteeMember() { return api.get('/getAllCommitteeMember') },
 
     // 👉 Fetch All parish  data on table
     fetchAllParish(params) { return api.get('/getAllParishes', { params }) },
+
+    fetchAllEvents(params) { return api.get('/AllEvent', { params }) },
+
+
 
     FetchAllMembers(params) { return api.get('/Allmember', { params }) },
 
@@ -52,12 +57,19 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
       try {
         console.log('This is the state name', statename)
         
-        return await api.get(`/getParishByState/${statename}`)// Assuming the response contains parish data
+        return await api.get(`/getParishByState/${statename}`)
       } catch (error) {
         throw new Error('Failed to fetch parish by state')
       }
     },
   
+    async getCommittee(parishcode) {
+      try {
+        return await api.get(`/getCommittee/${parishcode}`)
+      } catch (error) {
+        throw new Error('Failed to fetch committee')
+      }
+    },
     updateAparish(UpdateParishData) {
       return new Promise((resolve, reject) => {
         console.log("This is the data gotten to the all Admin Actions", UpdateParishData)

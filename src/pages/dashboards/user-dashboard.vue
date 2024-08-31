@@ -1,4 +1,5 @@
 <script setup>
+import EditMemberDialog from '@/components/dialogs/EditMemberDialog.vue'
 import EcommerceEarningReports from '@/views/dashboards/ecommerce/EcommerceEarningReports.vue'
 import EcommerceExpensesRadialBarCharts from '@/views/dashboards/ecommerce/EcommerceExpensesRadialBarCharts.vue'
 import EcommerceGeneratedLeads from '@/views/dashboards/ecommerce/EcommerceGeneratedLeads.vue'
@@ -13,6 +14,7 @@ import { paginationMeta } from '@/@fake-db/utils'
 import { useUserListStore } from '@/apiservices/membersList'
 import { VDataTableServer } from 'vuetify/labs/VDataTable'
 import congoImg from '@images/illustrations/congo-illustration.png'
+import { ref,  watchEffect } from 'vue'
 
 
 const userData = JSON.parse(localStorage.getItem('userData') || 'null')
@@ -32,12 +34,14 @@ const totalUser = ref(0)
 const user = ref([])
 const userTiles = ref([])
 
-const EditUserDialog = () => {
+const EditMemberDialogHandler  = () => {
   selectedUserData.value = userData
   isEditDialogVisible.value = true
   console.log("Clicked", selectedUserData.value)
 }
 </script>
+
+
 
 
 <template>
@@ -60,7 +64,7 @@ const EditUserDialog = () => {
               <h4 class="text-h4 font-weight-medium text-primary mb-1">
                 Welcome to your portal
               </h4>
-              <VBtn @click="EditUserDialog">
+              <VBtn @click="EditMemberDialogHandler">
                 Edit profile
               </VBtn>
             </VCardText>
@@ -69,7 +73,7 @@ const EditUserDialog = () => {
           <VCol cols="4">
             <VCardText class="pb-0 px-0 position-relative h-100">
               <VImg
-                :src="congoImg"
+                :src="userData.avatar || congoImg"
                 height="147"
                 class="congo-john-img w-100"
               />
@@ -175,10 +179,9 @@ const EditUserDialog = () => {
       <EcommerceInvoiceTable />
     </VCol>
   </VRow>
-  <EditUserDialog
-    v-if="isEditDialogVisible"
+  <EditMemberDialog
     v-model:isDialogVisible="isEditDialogVisible"
-    :user-data="selectedUserData"
+    :user-data="userData"
   />
 </template>
 

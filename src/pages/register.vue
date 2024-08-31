@@ -380,6 +380,22 @@ const isConfirmDialogVisible = ref(false)
 const refetchData = hideOverlay => {
   setTimeout(hideOverlay, 3000)
 }
+
+const isPasswordValid = computed(() => form.value.password.length >= 6)
+const doPasswordsMatch = computed(() => form.value.password === form.value.confirmPassword)
+
+const isNextButtonDisabled = computed(() => {
+  return currentStep.value === 0 && (!isPasswordValid.value || !doPasswordsMatch.value)
+})
+
+const isStep1Valid = computed(() => {
+  return (
+    form.value.sname &&
+    form.value.fname &&
+    form.value.Gender &&
+    form.value.dob
+  )
+})
 </script>
 
 
@@ -454,6 +470,7 @@ const refetchData = hideOverlay => {
                       variant="outlined"
                     />
                   </VCol> 
+
                   <VCol
                     cols="12"
                     md="6"
@@ -464,6 +481,8 @@ const refetchData = hideOverlay => {
                       variant="outlined"
                       :type="isPasswordVisible ? 'text' : 'password'"
                       :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                      hint="Password must be at least 6 characters long"
+                      persistent-hint
                       @click:append-inner="isPasswordVisible = !isPasswordVisible"
                     />
                   </VCol>
@@ -476,13 +495,16 @@ const refetchData = hideOverlay => {
                       v-model="form.confirmPassword"
                       label="Confirm Password"
                       variant="outlined"
-                      :type="isCPasswordVisible ? 'text' : 'password'"
-                      :append-inner-icon="isCPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                      @click:append-inner="isCPasswordVisible = !isCPasswordVisible"
+                      :type="isConfirmPasswordVisible ? 'text' : 'password'"
+                      :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                      hint="Make sure your passwords match"
+                      persistent-hint
+                      @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
                     />
                   </VCol>
                 </VRow>
               </VWindowItem>
+
               <!-- This is personal details step view -->
               <VWindowItem>
                 <VRow>
@@ -498,8 +520,9 @@ const refetchData = hideOverlay => {
                   <VCol cols="12">
                     <VTextField
                       v-model="form.sname"
-                      label="Enter Surname Name"
+                      label="Enter Surname"
                       variant="outlined"
+                      :rules="[v => !!v || 'Surname is required']"
                     />
                   </VCol>
 
@@ -511,6 +534,7 @@ const refetchData = hideOverlay => {
                       v-model="form.fname"
                       label="Enter First Name"
                       variant="outlined"
+                      :rules="[v => !!v || 'First Name is required']"
                     />
                   </VCol>
 
@@ -524,6 +548,7 @@ const refetchData = hideOverlay => {
                       variant="outlined"
                     />
                   </VCol>
+
                   <VCol
                     cols="12"
                     md="6"
@@ -531,11 +556,12 @@ const refetchData = hideOverlay => {
                     <VSelect
                       v-model="form.Gender"
                       :items="form.genderList"
-                      label=" Select you gender"
+                      label="Select your gender"
                       outlined
-                      @change="getGenderTitle"
+                      :rules="[v => !!v || 'Gender is required']"
                     />
                   </VCol>
+
                   <VCol
                     cols="12"
                     md="6"
@@ -543,11 +569,15 @@ const refetchData = hideOverlay => {
                     <AppTextField
                       v-model="form.dob"
                       type="date"
-                      label="DOB Your year of birth is not show to anyone"
+                      label="DOB"
+                      :rules="[v => !!v || 'Date of Birth is required']"
+                      hint="Your year of birth is not shown to anyone"
+                      persistent-hint
                     />
                   </VCol>
                 </VRow>
               </VWindowItem>
+
               <!-- This is Anoiting details step view -->
               <VWindowItem>
                 <VRow>
@@ -906,6 +936,7 @@ const refetchData = hideOverlay => {
 
               <VBtn
                 v-else
+                :disabled="isNextButtonDisabled"
                 @click="currentStep++"
               >
                 Next

@@ -1,652 +1,165 @@
 <script setup>
-import { paginationMeta } from '@/@fake-db/utils'
-import { useAllAdminActions } from '@/apiservices/adminActions'
-import { useUserListStore } from '@/apiservices/membersList'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
+import {
+  blankEvent,
+  useCalendar,
+} from '@/views/apps/calendar/useCalendar'
+import { useCalendarStore } from '@/views/apps/calendar/useCalendarStore'
+import { useResponsiveLeftSidebar } from '@core/composable/useResponsiveSidebar'
+import FullCalendar from '@fullcalendar/vue3'
 
+// Components
+import CalendarEventHandler from '@/views/apps/calendar/AddEventCalenderHandler.vue'
 
-const userListStore = useUserListStore()
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedPlan = ref()
-const selectedStatus = ref()
-const totalPage = ref(1)
-const totalUsers = ref(0)
-const member = ref([])
-const isPermissionDialogVisible = ref(false)
-const isAddPermissionDialogVisible = ref(false)
-const AllAdminActions = useAllAdminActions()
+const store = useCalendarStore()
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
 
-const permissionName = ref('')
+// 👉 Event
+const event = ref(structuredClone(blankEvent))
+const isEventHandlerSidebarActive = ref(false)
 
-const options = ref({
-  page: 1,
-  itemsPerPage: 10,
-  sortBy: [],
-  groupBy: [],
-  search: undefined,
+watch(isEventHandlerSidebarActive, val => {
+  if (!val)
+    event.value = structuredClone(blankEvent)
 })
 
+const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
+const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, jumpToDate } = useCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
 
-const openEditMemberDialog = member => {
-  // Set the clicked parish data to a variable accessible by the EditParishDialog component
-  memberData.value =  member.raw
-
-  // Open the edit dialog
-  isPermissionDialogVisible.value = true
-}
-
-
-// Retrieve stored data from local storage on component mount
-// const storedData = JSON.parse(localStorage.getItem('tableData') || '[]')
-
-// users.value = storedData
-
-// // Function to filter users based on search query
-// const filteredUsers = computed(() => {
-//   return users.value.filter(user => {
-
-//     const fullNameMatch = user.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-//     // Add additional keys for filtering
-//     const emailMatch = user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-
-//     const genderMatch = user.gender.toLowerCase() === searchQuery.value.toLowerCase()
-
-//     const roleMatch = user.role.toLowerCase() === searchQuery.value.toLowerCase()
-
-
-//     // Combine the results using logical OR (||) for flexibility
-//     return fullNameMatch || emailMatch || genderMatch || roleMatch
-
-//     // Add more conditions with logical OR (||) as needed
-//   })
-// })
-
-const FetchAllMembers = () => {
-  AllAdminActions.FetchAllMembers({
-    q: searchQuery.value,
-    status: selectedStatus.value,
-    plan: selectedPlan.value,
-    role: selectedRole.value,
-    options: options.value,
-  }).then(response => {
-    member.value = response.data.members
-
-    console.log("This is the data gotten", response.data)
-    
-  }).catch(error => {
-    console.error(error)
-  })
-}
-
-watchEffect(FetchAllMembers)
-
-// Headers
-const headers = [
-  {
-    title: 'Member',
-    color: 'primary',
-    key: 'user',
+// 👉 Check all
+const checkAll = computed({
+  get: () => store.selectedCalendars.length === store.availableCalendars.length,
+  set: val => {
+    if (val)
+      store.selectedCalendars = store.availableCalendars.map(i => i.label)
+    else if (store.selectedCalendars.length === store.availableCalendars.length)
+      store.selectedCalendars = []
   },
-
-  {
-    title: 'Phone Number',
-    color: 'info',
-    key: 'mobile',
-  },
-
-  // {
-  //   title: 'Name',
-  //   value: 'fullName',
-  // },
-  {
-    title: 'Gender',
-    value: 'gender',
-  },
-  
-  // {
-  //   title: 'email',
-  //   key: 'email',
-  // },
-
-  {
-    title: 'Role',
-    key: 'role',
-  },
-
- 
-
-  // {
-  //   title: 'Billing',
-  //   key: 'billing',
-  // },
-  // {
-  //   title: 'Status',
-  //   key: 'status',
-  // },
-  {
-    title: 'Actions',
-    key: 'actions',
-    sortable: false,
-  },
-]
-
-// 👉 Fetching users
-// const fetchUsers = () => {
-//   userListStore.fetchUsers({
-//     q: searchQuery.value,
-//     status: selectedStatus.value,
-//     plan: selectedPlan.value,
-//     role: selectedRole.value,
-//     options: options.value,
-//   }).then(response => {
-//     users.value = response.data.users
-
-//     // Store data in local storage
-
-//     localStorage.setItem('tableData', JSON.stringify(response.data.users))
-
-//     console.log('<======Data=====>', response)
-//     totalPage.value = response.data.totalPage
-//     totalUsers.value = response.data.totalUsers
-//     options.value.page = response.data.page
-//   }).catch(error => {
-//     console.error(error)
-//   })
-// }
-
-// watchEffect(fetchUsers)
-
-// 👉 search filters
-const roles = [
-  {
-    title: 'Admin',
-    value: 'admin',
-  },
-  {
-    title: 'Client',
-    value: 'client',
-  },
-]
-
-const plans = [
-  {
-    title: 'Basic',
-    value: 'basic',
-  },
-  {
-    title: 'Company',
-    value: 'company',
-  },
-  {
-    title: 'Enterprise',
-    value: 'enterprise',
-  },
-  {
-    title: 'Team',
-    value: 'team',
-  },
-]
-
-const status = [
-  {
-    title: 'Pending',
-    value: 'pending',
-  },
-  {
-    title: 'Active',
-    value: 'active',
-  },
-  {
-    title: 'Inactive',
-    value: 'inactive',
-  },
-]
-
-const resolveUserRoleVariant = role => {
-  const roleLowerCase = role.toLowerCase()
-  if (roleLowerCase === 'subscriber')
-    return {
-      color: 'warning',
-      icon: 'tabler-circle-check',
-    }
-  if (roleLowerCase === 'author')
-    return {
-      color: 'success',
-      icon: 'tabler-user',
-    }
-  if (roleLowerCase === 'maintainer')
-    return {
-      color: 'primary',
-      icon: 'tabler-chart-pie-2',
-    }
-  if (roleLowerCase === 'editor')
-    return {
-      color: 'info',
-      icon: 'tabler-edit',
-    }
-  if (roleLowerCase === 'admin')
-    return {
-      color: 'secondary',
-      icon: 'tabler-device-laptop',
-    }
-  
-  return {
-    color: 'primary',
-    icon: 'tabler-user',
-  }
-}
-
-const resolveUserStatusVariant = stat => {
-  const statLowerCase = stat.toLowerCase()
-  if (statLowerCase === 'pending')
-    return 'warning'
-  if (statLowerCase === 'active')
-    return 'success'
-  if (statLowerCase === 'inactive')
-    return 'secondary'
-  
-  return 'primary'
-}
-
-const isAddNewUserDrawerVisible = ref(false)
-
-const addNewUser = userData => {
-  userListStore.addUser(userData)
-
-  // refetch User
-  // fetchUsers()
-}
-
-// 👉 List
-const userListMeta = [
-  {
-    icon: 'tabler-user',
-    color: 'primary',
-    title: 'Session',
-    stats: '21,459',
-    percentage: +29,
-    subtitle: 'Total Users',
-  },
-  {
-    icon: 'tabler-user-plus',
-    color: 'error',
-    title: 'Paid Users',
-    stats: '4,567',
-    percentage: +18,
-    subtitle: 'Last week analytics',
-  },
-  {
-    icon: 'tabler-user-check',
-    color: 'success',
-    title: 'Active Users',
-    stats: '19,860',
-    percentage: -14,
-    subtitle: 'Last week analytics',
-  },
-  {
-    icon: 'tabler-user-exclamation',
-    color: 'warning',
-    title: 'Pending Users',
-    stats: '237',
-    percentage: +42,
-    subtitle: 'Last week analytics',
-  },
-]
-
-const deleteUser = id => {
-  userListStore.deleteUser(id)
-
-  // refetch User
-  // fetchUsers()
-}
-
-// const editPermission = name => {
-//   isPermissionDialogVisible.value = true
-//   permissionName.value = name
-// }
+})
 </script>
 
 <template>
-  <section>
-    <VRow>
-      <!--
-        <VCol
-        v-for="meta in userListMeta"
-        :key="meta.title"
-        cols="12"
-        sm="6"
-        lg="3"
+  <div>
+    <VCard>
+      <!-- `z-index: 0` Allows overlapping vertical nav on calendar -->
+      <VLayout style="z-index: 0;">
+        <!-- 👉 Navigation drawer -->
+        <VNavigationDrawer
+          v-model="isLeftSidebarOpen"
+          width="292"
+          absolute
+          touchless
+          location="start"
+          class="calendar-add-event-drawer"
+          :temporary="$vuetify.display.mdAndDown"
         >
-    
-        <VCard>
-        <VCardText class="d-flex justify-space-between">
-        <div>
-        <span>{{ meta.title }}</span>
-        <div class="d-flex align-center gap-2 my-1">
-        <h6 class="text-h4">
-        {{ meta.stats }}
-        </h6>
-        <span :class="meta.percentage > 0 ? 'text-success' : 'text-error'">( {{ meta.percentage > 0 ? '+' : '' }} {{ meta.percentage }}%)</span>
-        </div>
-        <span>{{ meta.subtitle }}</span>
-        </div>
-
-        <VAvatar
-        rounded
-        variant="tonal"
-        :color="meta.color"
-        :icon="meta.icon"
-        />
-        </VCardText>
-        </VCard>
-     
-        </VCol>
-      -->
-      <VCol cols="12">
-        <VCard title="Search Filter">
-          <!-- 👉 Filters -->
-          <VCardText>
-            <VRow>
-              <!-- 👉 Select Role -->
-              <!--
-                <VCol
-                cols="12"
-                sm="4"
-                >
-                <AppSelect
-                v-model="selectedRole"
-                label="Select Role"
-                :items="roles"
-                clearable
-                clear-icon="tabler-x"
-                />
-                </VCol>
-              -->
-              <!-- 👉 Select Plan -->
-              <!-- 
-                <VCol
-                cols="12"
-                sm="4"
-                >
-                <AppSelect
-                v-model="selectedPlan"
-                label="Select Plan"
-                :items="plans"
-                clearable
-                clear-icon="tabler-x"
-                />
-                </VCol>
-              -->
-              <!-- 👉 Select Status -->
-              <!--
-                <VCol
-                cols="12"
-                sm="4"
-                >
-                <AppSelect
-                v-model="selectedStatus"
-                label="Select Status"
-                :items="status"
-                clearable
-                clear-icon="tabler-x"
-                />
-                </VCol>
-              -->
-            </VRow>
-          </VCardText>
+          <div style="margin: 1.4rem;">
+            <VBtn
+              block
+              prepend-icon="tabler-plus"
+              @click="isEventHandlerSidebarActive = true"
+            >
+              Add event
+            </VBtn>
+          </div>
 
           <VDivider />
 
-          <VCardText class="d-flex flex-wrap py-4 gap-4">
-            <div class="me-3 d-flex gap-3">
-              <AppSelect
-                :model-value="options.itemsPerPage"
-                :items="[
-                  { value: 10, title: '10' },
-                  { value: 25, title: '25' },
-                  { value: 50, title: '50' },
-                  { value: 100, title: '100' },
-                  { value: -1, title: 'All' },
-                ]"
-                style="width: 6.25rem;"
-                @update:model-value="options.itemsPerPage = parseInt($event, 10)"
+          <div class="d-flex align-center justify-center pa-2 mb-3">
+            <AppDateTimePicker
+              :model-value="new Date().toJSON().slice(0, 10)"
+              :config="{ inline: true }"
+              class="calendar-date-picker"
+              @input="jumpToDate($event.target.value)"
+            />
+          </div>
+
+          <VDivider />
+          <div class="pa-7">
+            <p class="text-sm text-uppercase text-disabled mb-3">
+              FILTER
+            </p>
+
+            <div class="d-flex flex-column calendars-checkbox">
+              <VCheckbox
+                v-model="checkAll"
+                label="View all"
+              />
+              <VCheckbox
+                v-for="calendar in store.availableCalendars"
+                :key="calendar.label"
+                v-model="store.selectedCalendars"
+                :value="calendar.label"
+                :color="calendar.color"
+                :label="calendar.label"
               />
             </div>
-            <VSpacer />
+          </div>
+        </VNavigationDrawer>
 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
-              <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
-                <AppTextField
-                  v-model="searchQuery"
-                  placeholder="Search"
-                  density="compact"
-                />
-              </div>
-
-              <!-- 👉 Export button -->
-              <!-- 
-                <VBtn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="tabler-screen-share"
-                >
-                Export
-                </VBtn>
-              -->
-              <!-- 👉 Add user button -->
-              <!-- 
-                <VBtn
-                prepend-icon="tabler-plus"
-                @click="isAddNewUserDrawerVisible = true"
-                >
-                Add New User
-                </VBtn>
-              -->
-            </div>
-          </VCardText>
-
-          <VDivider />
-
-          <!-- SECTION datatable <pre>{{ users }}</pre> -->
-          <VDataTableServer
-            v-model:items-per-page="options.itemsPerPage"
-            v-model:page="options.page"
-            :items="member"
-            :items-length="totalUsers"
-            :headers="headers"
-            class="text-no-wrap"
-            @update:options="options = $event"
-          >
-            <!--  👉 User -->
-
-
-            <template #item.member="{ item }">
-              <div class="d-flex align-center">
-                <VAvatar
-                  size="34"
-                  :variant="!item.raw.avatar ? 'tonal' : undefined"
-                  :color="!item.raw.avatar ? resolveUserRoleVariant(item.raw.role).color : undefined"
-                  class="me-3"
-                >
-                  <VImg
-                    v-if="item.raw.avatar"
-                    :src="item.raw.avatar"
-                  />
-                  <span v-else>{{ avatarText(item.raw.fname) }}</span>
-                </VAvatar>
-
-                <div class="d-flex flex-column">
-                  <h6 class="text-base">
-                    <RouterLink
-                      :to="{ name: 'apps-user-view-id', params: { id: item.raw.id } }"
-                      class="font-weight-medium user-list-name"
-                    >
-                      {{ item.raw.sname }}
-                    </RouterLink>
-                  </h6>
-                  <span class="text-sm text-medium-emphasis">{{ item.raw.email }}</span>
-                </div>
-              </div>
-            </template>
-
-            <!-- 👉 Role -->
-            <template #item.role="{ item }">
-              <div class="d-flex align-center gap-4">
-                <VAvatar
-                  :size="30"
-                  :color="resolveUserRoleVariant(item.raw.role).color"
-                  variant="tonal"
-                >
-                  <VIcon
-                    :size="20"
-                    :icon="resolveUserRoleVariant(item.raw.role).icon"
-                  />
-                </VAvatar>
-                <span class="text-capitalize">{{ item.raw.role }}</span>
-              </div>
-            </template>
-
-            <!-- 👉 Plan -->
-            <template #item.plan="{ item }">
-              <span class="text-capitalize font-weight-medium">{{ item.raw.currentPlan }}</span>
-            </template>
-
-            <!-- Status -->
-            <template #item.gender="{ item }">
-              <VChip
-                :color="resolveUserStatusVariant(item.raw.gender)"
-                size="small"
-                label
-                class="text-capitalize"
-              >
-                {{ item.raw.gender }}
-              </VChip>
-            </template>
-
-            <!-- Actions -->
-            <template #item.actions="{ item }">
-              <IconBtn @click="deleteUser(item.raw.id)">
-                <VIcon icon="tabler-trash" />
-              </IconBtn>
-
-              <VBtn
-                icon
-                size="small"
-                color="medium-emphasis"
-                variant="text"
-                @click="openEditMemberDialog(item)"
-              >
-                <VIcon
-                  size="22"
-                  icon="tabler-edit"
-                />
-              </VBtn>
-
-              <VBtn
-                icon
-                variant="text"
-                size="small"
-                color="medium-emphasis"
-              >
-                <VIcon
-                  size="24"
-                  icon="tabler-dots-vertical"
-                />
-
-                <VMenu activator="parent">
-                  <VList>
-                    <VListItem :to="{ name: 'apps-user-view-id', params: { id: item.raw.id } }">
-                      <template #prepend>
-                        <VIcon icon="tabler-eye" />
-                      </template>
-
-                      <VListItemTitle>View</VListItemTitle>
-                    </VListItem>
-
-                    <VListItem link>
-                      <template #prepend>
-                        <VIcon icon="tabler-pencil" />
-                      </template>
-                      <VListItemTitle>Edit</VListItemTitle>
-                    </VListItem>
-
-                    <VListItem @click="deleteUser(item.raw.id)">
-                      <template #prepend>
-                        <VIcon icon="tabler-trash" />
-                      </template>
-                      <VListItemTitle>Delete</VListItemTitle>
-                    </VListItem>
-                  </VList>
-                </VMenu>
-              </VBtn>
-            </template>
-
-            <!-- pagination -->
-            <template #bottom>
-              <VDivider />
-              <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
-                <p class="text-sm text-disabled mb-0">
-                  {{ paginationMeta(options, totalUsers) }}
-                </p>
-
-                <VPagination
-                  v-model="options.page"
-                  :length="Math.ceil(totalUsers / options.itemsPerPage)"
-                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalUsers / options.itemsPerPage)"
-                >
-                  <template #prev="slotProps">
-                    <VBtn
-                      variant="tonal"
-                      color="default"
-                      v-bind="slotProps"
-                      :icon="false"
-                    >
-                      Previous
-                    </VBtn>
-                  </template>
-
-                  <template #next="slotProps">
-                    <VBtn
-                      variant="tonal"
-                      color="default"
-                      v-bind="slotProps"
-                      :icon="false"
-                    >
-                      Next
-                    </VBtn>
-                  </template>
-                </VPagination>
-              </div>
-            </template>
-          </VDataTableServer>
-          <!-- SECTION -->
-        </VCard>
-      
-        <!-- 👉 Add New User Permission -->
-        <AddEditPermissionDialog
-          v-model:isDialogVisible="isPermissionDialogVisible"
-          v-model:member-data="memberData"
-        />
-        <AddEditPermissionDialog v-model:isDialogVisible="isAddPermissionDialogVisible" />
-      </vcol>
-    </vrow>
-  </section>
+        <VMain>
+          <VCard flat>
+            <FullCalendar
+              ref="refCalendar"
+              :options="calendarOptions"
+            />
+          </VCard>
+        </VMain>
+      </VLayout>
+    </VCard>
+    <CalendarEventHandler
+      v-model:isDrawerOpen="isEventHandlerSidebarActive"
+      :event="event"
+      @add-event="addEvent"
+      @update-event="updateEvent"
+      @remove-event="removeEvent"
+    />
+  </div>
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-  inline-size: 31.6rem;
+@use "@core/scss/template/libs/full-calendar";
+
+.calendars-checkbox {
+  .v-label {
+    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+    opacity: var(--v-high-emphasis-opacity);
+  }
 }
 
-.text-capitalize {
-  text-transform: capitalize;
+.calendar-add-event-drawer {
+  &.v-navigation-drawer:not(.v-navigation-drawer--temporary) {
+    border-end-start-radius: 0.375rem;
+    border-start-start-radius: 0.375rem;
+  }
 }
 
-.user-list-name:not(:hover) {
-  color: rgba(var(--v-theme-on-background), var(--v-medium-emphasis-opacity));
+.calendar-date-picker {
+  display: none;
+
+  +.flatpickr-input {
+    +.flatpickr-calendar.inline {
+      border: none;
+      box-shadow: none;
+
+      .flatpickr-months {
+        border-block-end: none;
+      }
+    }
+  }
+
+  & ~ .flatpickr-calendar .flatpickr-weekdays {
+    margin-block: 0 4px;
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+.v-layout {
+  overflow: visible !important;
+
+  .v-card {
+    overflow: visible;
+  }
 }
 </style>
