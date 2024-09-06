@@ -39,6 +39,7 @@ declare module '@vue/runtime-core' {
     CreateBaptismDialog: typeof import('./src/components/dialogs/CreateBaptismDialog.vue')['default']
     CreateCommitteeDialog: typeof import('./src/components/dialogs/CreateCommitteeDialog.vue')['default']
     CreateCommitteeMemberDialog: typeof import('./src/components/dialogs/CreateCommitteeMemberDialog.vue')['default']
+    CreateMemberPaymentDialog: typeof import('./src/components/dialogs/CreateMemberPaymentDialog.vue')['default']
     CreateMinistryDialog: typeof import('./src/components/dialogs/CreateMinistryDialog.vue')['default']
     CreateParishDialog: typeof import('./src/components/dialogs/CreateParishDialog.vue')['default']
     CreateTitleDialog: typeof import('./src/components/dialogs/CreateTitleDialog.vue')['default']
@@ -368,5 +369,6 @@ declare module '@vue/runtime-core' {
     TwoFactorAuthDialog: typeof import('./src/components/dialogs/TwoFactorAuthDialog.vue')['default']
     UserInfoEditDialog: typeof import('./src/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./src/components/dialogs/UserUpgradePlanDialog.vue')['default']
+    ViewCommitteeMemberDialog: typeof import('./src/components/dialogs/ViewCommitteeMemberDialog.vue')['default']
   }
 }

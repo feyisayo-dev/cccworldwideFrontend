@@ -34,6 +34,33 @@ const totalUser = ref(0)
 const user = ref([])
 const userTiles = ref([])
 
+const statistics = [
+  {
+    title: 'Tithe',
+    stats: '230k',
+    icon: 'tabler-chart-pie-2',
+    color: 'primary',
+  },
+  {
+    title: 'Offering',
+    stats: '8.549k',
+    icon: 'tabler-users',
+    color: 'info',
+  },
+  {
+    title: 'Committee Payment',
+    stats: '1.423k',
+    icon: 'tabler-shopping-cart',
+    color: 'error',
+  },
+  {
+    title: 'Building levy',
+    stats: '$9745',
+    icon: 'tabler-currency-dollar',
+    color: 'success',
+  },
+]
+
 const EditMemberDialogHandler  = () => {
   selectedUserData.value = userData
   isEditDialogVisible.value = true
@@ -88,7 +115,39 @@ const EditMemberDialogHandler  = () => {
       md="7"
       lg="8"
     >
-      <EcommerceStatistics class="h-100" />
+      <VCard title="Stats">
+        <template #append>
+          <span class="text-sm text-disabled">Updated few seconds ago</span>
+        </template>
+
+        <VCardText class="pt-6">
+          <VRow>
+            <VCol
+              v-for="payment in statistics"
+              :key="payment.title"
+              cols="6"
+              md="3"
+            >
+              <div class="d-flex align-center gap-4">
+                <VAvatar
+                  :color="payment.color"
+                  variant="tonal"
+                  size="42"
+                >
+                  <VIcon :icon="payment.icon" />
+                </VAvatar>
+
+                <div class="d-flex flex-column">
+                  <span class="text-h5 font-weight-medium">{{ payment.stats }}</span>
+                  <span class="text-sm">
+                    {{ payment.title }}
+                  </span>
+                </div>
+              </div>
+            </VCol>
+          </VRow>
+        </VCardText>
+      </VCard>
     </VCol>
 
     <VCol

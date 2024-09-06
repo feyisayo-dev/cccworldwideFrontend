@@ -7,11 +7,9 @@ import { onMounted, ref } from 'vue'
 
 
 const props = defineProps({
-  // eslint-disable-next-line vue/prop-name-casing
-  churchData: {
+  committeeMemberData: {
     type: Object,
     required: true,
-    default: () => ({}),  
   },
   isDialogVisible: {
     type: Boolean,
@@ -40,6 +38,7 @@ console.log("<=======This is the UserId=========>", userData.parishname)
 const form = ref({
   ChruchName: userData.parishname || '',
   committeName: '',
+  committeRefno: '',
   chairmen: [''],
   chairpersons: [''],
   secretarys: [''],
@@ -51,7 +50,34 @@ const form = ref({
   Fmembers: [''],
   members: [''],
   committees: [],
+  edit: false,
 })
+
+const createApp = [
+  {
+    icon: 'tabler-clipboard',
+    title: 'Create Committee',
+    subtitle: 'Enter Details',
+  },
+]
+
+watchEffect(() => {
+  if (props.committeeMemberData && props.committeeMemberData.chairman) {
+    console.log('From view committee show details of committee==> ', JSON.stringify(props.committeeMemberData), 'chairmen committee details of committee==> ', props.committeeMemberData.chairman)
+    form.value.committeName = props.committeeMemberData.committeName
+    form.value.committeRefno = props.committeeMemberData.committeRefno
+    form.value.chairmen = props.committeeMemberData.chairman.split(',')
+    console.log('chairmen committee details of committee==> ', form.value.chairmen)
+    form.value.chairpersons = props.committeeMemberData.chairperson.split(',')
+    form.value.secretarys = props.committeeMemberData.secretary.split(',')
+    form.value.Fsecretarys = props.committeeMemberData.Fsecretary.split(',')
+    form.value.treasurers = props.committeeMemberData.treasurer.split(',')
+    form.value.Mmembers = props.committeeMemberData.Mmembers.split(',')
+    form.value.Fmembers = props.committeeMemberData.Fmembers.split(',')
+    form.value.edit = true
+  }
+})
+
 
 const addChairman = () => {
   form.value.chairmen.push('') 
@@ -189,41 +215,84 @@ watch(props, () => {
     currentStep.value = 0
 })
 
-const onSubmit = message => {
+const onSubmit = async message => {
   if (message) {
     try {
-      api.post('/AddMinistry', {
-        ministry: form.value.ministry,
-      })
-        .then(response => {
-          const apiResponseDetails = response.data
+      const formData = new FormData()
 
-          // Perform necessary actions with the response data
-          apiResponseStatus.value = apiResponseDetails.status
-          apiResponseMessage.value = apiResponseDetails.message
+      // Append basic details
+      formData.append('ChruchName', form.value.ChruchName)
+      formData.append('committeName', form.value.committeName)
+      formData.append('committeRefno', form.value.committeRefno)
 
-          // Check status and reload
-          if (apiResponseStatus.value === 200) {
-            window.location.reload()
-          }
+      // Append the list fields as comma-separated strings
+      formData.append('chairman', form.value.chairmen.join(','))
+      formData.append('chairperson', form.value.chairpersons.join(','))
+      formData.append('secretary', form.value.secretarys.join(','))
+      formData.append('Fsecretary', form.value.Fsecretarys.join(','))
+      formData.append('treasurer', form.value.treasurers.join(','))
+      formData.append('Mmembers', form.value.Mmembers.join(','))
+      formData.append('Fmembers', form.value.Fmembers.join(','))
 
-        }).catch(error => {
-          console.error("Error submitting data:", error)
-        }).finally(() => {
-          isConfirmDialogVisible.value = false
+      console.log([...formData]) 
+      console.log(form.value.chairpersons)
 
-          isConfirmDialogVisible.value = false
-
-          // Any other cleanup code can go here
+      let response = ref['']
+      if(props.committeeMemberData.chairman){
+        response = await api.post('/updateCommiteeMember/update', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         })
+      }else{
+        response = await api.post('/addcommitteeMember', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      }
+ 
+      
+
+      const apiResponseDetails = response.data
+
+      console.log("<===This is the details===>", apiResponseDetails)
+      apiResponseStatus.value = apiResponseDetails.status
+      apiResponseMessage.value = apiResponseDetails.message
+
+      if (apiResponseStatus.value === 200) {
+        emit('changes')
+      }
+
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error submitting data:', error)
+    } finally {
+      isConfirmDialogVisible.value = false
+
+      // Any other cleanup code can go here
     }
   }
 }
 
 
+
 const isConfirmDialogVisible = ref(false)
+
+watch(() => form.value.committeName, newValue => {
+  const selectedCommittee = form.value.committees.find(
+    committee => committee.committeName === newValue,
+  )
+
+  // Debugging logs
+  console.log("Committees:", form.value.committees)
+  console.log("Selected Committee:", selectedCommittee)
+  console.log("Committee Name in form:", form.value.committeName)
+  console.log("New Value:", newValue)
+
+  if (selectedCommittee) {
+    form.value.committeRefno = selectedCommittee.committeRefno
+  }
+})
 </script>
 
 <template>
@@ -240,7 +309,7 @@ const isConfirmDialogVisible = ref(false)
     <VCard class="create-app-dialog">
       <VCardText class="pa-5 pa-sm-10">
         <h5 class="text-h5 text-center mb-2">
-          Create New Committee
+          {{ form.edit ? 'Update Committee' : 'Create New Committee' }}
         </h5>
         <p class="text-sm text-center mb-8">
           Provide data with this form to create a new committee.
@@ -289,11 +358,12 @@ const isConfirmDialogVisible = ref(false)
                     md="6"
                   >
                     <VAutocomplete
-                      v-model="form.committees"
+                      v-model="form.committeName"
+                      :items="form.committees"
                       label="Committee Name"
                       variant="outlined"
                       item-title="committeName"   
-                      item-value="committeRefno"  
+                      item-value="committeName"
                     />
                   </VCol>
                 </VRow>
@@ -311,8 +381,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Chairman ${index + 1}`"
                       variant="outlined"
                       item-title="fullName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -358,8 +427,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Chrairperson ${index + 1}`"
                       variant="outlined"
                       item-title="fullName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -405,8 +473,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`secretary ${index + 1}`"
                       variant="outlined"
                       item-title="MemberName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -452,8 +519,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Financial secretary ${index + 1}`"
                       variant="outlined"
                       item-title="MemberName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -499,8 +565,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Treasurer ${index + 1}`"
                       variant="outlined"
                       item-title="MemberName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -546,8 +611,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Male member ${index + 1}`"
                       variant="outlined"
                       item-title="fullName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -593,8 +657,7 @@ const isConfirmDialogVisible = ref(false)
                       :label="`Female member ${index + 1}`"
                       variant="outlined"
                       item-title="fullName"   
-                      item-value="UserId"    
-                      return-object
+                      item-value="fullName"    
                       clearable
                       outlined
                     />
@@ -649,11 +712,11 @@ const isConfirmDialogVisible = ref(false)
   <ConfirmDialog
     v-model:isDialogVisible="isConfirmDialogVisible"
     :api-response="apiResponseStatus"
-    confirmation-question="You are about to confirm this ministry Did you want to continue ?"
+    confirmation-question="You are about to confirm this committee &#10; Do you want to continue ?"
     cancel-msg="Registration Cancelled!!"
     cancel-title="Cancelled"
     :confirm-msg="apiResponseMessage"
-    confirm-title="Registered!"
+    confirm-title="Successful!"
     @confirm="onSubmit"
     @cancel="onCancel"
   />

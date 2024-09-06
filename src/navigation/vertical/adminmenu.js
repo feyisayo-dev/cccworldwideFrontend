@@ -25,6 +25,7 @@ export default [
         icon: { icon: 'tabler-users' },
         children: [
           { title: 'Add Committee', to: 'dashboards-addcommitte-dashboard' },
+          { title: 'Add Committee Members', to: 'dashboards-addcommitteemember-dashboard' },
           
           // { title: 'Add Parish', to: { name: 'dashboards-parish-dashboard', params: { id: 21 } } },
         ],

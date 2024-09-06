@@ -8,27 +8,28 @@ const isConfirmDialogVisible = ref(false)
 const AllAdminActions = useAllAdminActions()
 const searchQuery = ref('')
 const totalPage = ref(1)
-const CommitteeMember = ref([])
+const MemberPayment = ref([])
 const CommitteeMemberId = ref(0)
 const apiResponseStatus = ref('')
 const apiResponseMessage = ref('')
-const isCreateCommitteeMemberVisible = ref(false)
-const isEditCommitteeMemberVisible = ref(false)
-const isViewCommitteeMemberVisible = ref(false)
-let committeeMemberData = ref([])
+const isCreateMemberPaymentVisible = ref(false)
+const isEditMemberPaymentVisible = ref(false)
+const isViewMemberPaymentVisible = ref(false)
+let MemberPaymentData = ref([])
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
 
 const onCancel = () => {
   console.log('Cancel clicked')
 }
 
-const openEditCommitteeMemberDialog = CommitteeMember => {
-  committeeMemberData.value =  CommitteeMember.raw
-  isEditCommitteeMemberVisible.value = true
+const openEditMemberPaymentDialog = MemberPayment => {
+  MemberPaymentData.value =  MemberPayment.raw
+  isEditMemberPaymentVisible.value = true
 }
 
-const openCommitteeMemberDialog = CommitteeMember => {
-  committeeMemberData.value =  CommitteeMember.raw
-  isViewCommitteeMemberVisible.value = true
+const openMemberPaymentDialog = MemberPayment => {
+  MemberPaymentData.value =  MemberPayment.raw
+  isViewMemberPaymentVisible.value = true
 }
 
 
@@ -41,17 +42,31 @@ const options = ref({
 })
 
 
-// Table Headers
 const headers = [
   {
-    title: 'Committee name',
-    key: 'committeName',
+    title: 'Payment for',
+    key: 'paymentFor',
   },
   {
-    title: 'Member Count',
-    key: 'totalMembers',
+    title: 'Paid for',
+    key: 'paidFor',
   },
-
+  {
+    title: 'Payment by',
+    key: 'paidBy',
+  },
+  {
+    title: 'Amount Paid',
+    key: 'amount',
+  },
+  {
+    title: 'Date Paid',
+    key: 'datePaid',
+  },
+  {
+    title: 'Role',
+    key: 'role',
+  },
   {
     title: 'Actions',
     key: 'actions',
@@ -61,96 +76,32 @@ const headers = [
 
 let totalCommitteeMembers = 0
 
-const fetchAllMCommitteeMember = () => {
-  AllAdminActions.fetchAllCommitteeMember({})
-    .then(response => {
-      CommitteeMember.value = response.data.committeeMembers
-      totalCommitteeMembers = CommitteeMember.value.length
+const fetchAllPayments = async () => {
+  try {
+    const response = await api.get(`/getMemberPayment/${userData.UserId}`)
 
-      CommitteeMember.value.forEach(member => {
-        let totalMembers = 0
-
-        // Process the Chairman position
-        if (member.chairman) {
-          member.chairmen = member.chairman.split(',').map((name, index) => ({
-            role: `Chairman ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.chairmen.length
-        }
-
-        // Process the Chairperson position
-        if (member.chairperson) {
-          member.chairpersons = member.chairperson.split(',').map((name, index) => ({
-            role: `Chairperson ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.chairpersons.length
-        }
-
-        // Process the Secretary position
-        if (member.secretary) {
-          member.secretaries = member.secretary.split(',').map((name, index) => ({
-            role: `Secretary ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.secretaries.length
-        }
-
-        if (member.Fsecretary) {
-          member.Fsecretaries = member.Fsecretary.split(',').map((name, index) => ({
-            role: `Financial secretary ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.Fsecretaries.length
-        }
-
-        // Process the Treasurer position
-        if (member.treasurer) {
-          member.treasurers = member.treasurer.split(',').map((name, index) => ({
-            role: `Treasurer ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.treasurers.length
-        }
-
-        // Process the Mmembers position
-        if (member.Mmembers) {
-          member.MmembersList = member.Mmembers.split(',').map((name, index) => ({
-            role: `Male member ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.MmembersList.length
-        }
-
-        // Process the Fmembers position
-        if (member.Fmembers) {
-          member.FmembersList = member.Fmembers.split(',').map((name, index) => ({
-            role: `Female member ${index + 1}`,
-            name: name.trim(),
-          }))
-          totalMembers += member.FmembersList.length
-        }
-
-        // Add the total member count to the member object
-        member.totalMembers = totalMembers
-        console.log(totalMembers)
-      })
-
-      console.log("this is the committee members value", CommitteeMember.value)
-    })
-    .catch(error => {
-      console.error(error)
-    })
+    MemberPayment.value = response.data.map(payment => ({
+      paymentFor: payment.payment_type,
+      paidFor: payment.paidfor,
+      paidBy: payment.paidby,
+      amount: payment.amount,
+      datePaid: payment.payment_date,
+      role: payment.roleName ? payment.roleName : 'Member', 
+    }))
+    console.log("Member Payment Data:", MemberPayment.value)
+  } catch (error) {
+    console.error('Error:', error)
+  }
 }
 
 
-watchEffect(fetchAllMCommitteeMember)
+
+watchEffect(fetchAllPayments)
 
 const changes = () => {
-  fetchAllMCommitteeMember()
-  isCreateCommitteeMemberVisible.value = false
-  isEditCommitteeMemberVisible.value = false 
+  fetchAllPayments()
+  isCreateMemberPaymentVisible.value = false
+  isEditMemberPaymentVisible.value = false 
 }
 
 const deleteCommiteeMembers = id => {
@@ -170,7 +121,7 @@ const onDeleteCommiteeMembers = () => {
           apiResponseStatus.value = apiResponseDetails.status
           apiResponseMessage.value = apiResponseDetails.message
 
-          fetchAllMCommitteeMember()
+          fetchAllPayments()
         })
         .catch(error => {
           console.error('Error deleting item:', error)
@@ -232,24 +183,24 @@ const onDeleteCommiteeMembers = () => {
 
                 <VBtn>
               -->
-              <!-- 👉 Add CommitteeMember button -->
+              <!-- 👉 Add MemberPayment button -->
 
               <VBtn
                 prepend-icon="tabler-plus"
-                @click="isCreateCommitteeMemberVisible = !isCreateCommitteeMemberVisible"
+                @click="isCreateMemberPaymentVisible = !isCreateMemberPaymentVisible"
               >
-                Add Committee Members
+                Add Committee Members Payment
               </VBtn>
             </div>
           </VCardText>
 
           <VDivider />
          
-          <!-- SECTION datatable <pre>{{ CommitteeMember }}</pre> -->
+          <!-- SECTION datatable <pre>{{ MemberPayment }}</pre> -->
           <VDataTableServer
             v-model:items-per-page="options.itemsPerPage"
             v-model:page="options.page"
-            :items="CommitteeMember"
+            :items="MemberPayment"
             :items-length="totalCommitteeMembers"
             :headers="headers"
             class="text-no-wrap"
@@ -266,7 +217,7 @@ const onDeleteCommiteeMembers = () => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="openEditCommitteeMemberDialog(item)"
+                @click="openEditMemberPaymentDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -279,7 +230,7 @@ const onDeleteCommiteeMembers = () => {
                 size="small"
                 color="medium-emphasis"
                 variant="text"
-                @click="openCommitteeMemberDialog(item)"
+                @click="openMemberPaymentDialog(item)"
               >
                 <VIcon
                   size="22"
@@ -336,32 +287,17 @@ const onDeleteCommiteeMembers = () => {
           <!-- SECTION -->
         </VCard>
 
-        <!-- 👉 Create CommitteeMember dialog -->
+        <!-- 👉 Create MemberPayment dialog -->
         <VCol
           cols="12"
           sm="6"
           md="4"
         >
-          <CreateCommitteeMemberDialog
-            v-model:is-dialog-visible="isCreateCommitteeMemberVisible" 
-            :committee-member-data="committeeMemberData"
+          <CreateMemberPaymentDialog
+            v-model:is-dialog-visible="isCreateMemberPaymentVisible" 
             @changes="changes"
           />
         </VCol>
-        <!-- 👉 Edit CommitteeMember dialog -->
-        <VCol
-         
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <CreateCommitteeMemberDialog
-            v-model:is-dialog-visible="isEditCommitteeMemberVisible"
-            :committee-member-data="committeeMemberData"
-            @changes="changes"
-          />
-        </VCol>
-
         <VCol
          
           cols="12"
@@ -369,8 +305,8 @@ const onDeleteCommiteeMembers = () => {
           md="4"
         >
           <ViewCommitteeMemberDialog
-            v-model:is-dialog-visible="isViewCommitteeMemberVisible"
-            :committee-member-data="committeeMemberData"
+            v-model:is-dialog-visible="isViewMemberPaymentVisible"
+            :committee-member-data="MemberPaymentData"
           />
         </VCol>
       </VCol>

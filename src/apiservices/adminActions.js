@@ -9,6 +9,9 @@ export const useAllAdminActions = defineStore('AllAdminActions', {
 
     // 👉  fetch All Countries 
     fetchCountries(params) { return api.get('/GetCountries', { params }) },
+    fetchAllPaymentsByUser(userId) { 
+      return api.get(`/getMemberPayment/${userId}`) 
+    },
 
     
     //// 👉   fetch All State 
