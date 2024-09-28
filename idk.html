@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/loader_style.css" />
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/fontawesome.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Protest+Guerrilla&display=swap" rel="stylesheet">
+  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/dialog.js"></script>
+
+  <title>CCC Worldwide</title>
+</head>
+
+<body>
+  <div id="app">
+    <div class="auth-wrapper">
+      <div class="container">
+        <!-- Navbar -->
+        <nav>
+          <img src="/ccclogo.png" alt="Navbar Image" />
+          <a id="ccc-responsive-menu" class="ccc-responsive-menu" href="#"><i class="fa fa-reorder"></i> Menu</a>
+          <ul class="ccc-menu">
+            <li><a class="ccc-home" href="#"><i class="fa fa-home"></i> HOME</a></li>
+            <li><a href="#history"><i class="fa-solid fa-globe"></i> HISTORY</a></li>
+            <li><a href="#doctrine"><i class="fa-solid fa-book"></i> DOCTRINE</a></li>
+            <li><a href="#"><i class="fa fa-bullhorn"></i> BLOG</a></li>
+            <li><a href="#"><i class="fa fa-tags"></i> CATEGORIES</a>
+              <ul class="ccc-sub-menu">
+                <li><a href="#">Sub-Menu 1</a></li>
+                <li><a href="#">Sub-Menu 2</a>
+                  <ul>
+                    <li><a href="#">Sub Sub-Menu 1</a></li>
+                    <li><a href="#">Sub Sub-Menu 2</a></li>
+                    <li><a href="#">Sub Sub-Menu 3</a></li>
+                    <li><a href="#">Sub Sub-Menu 4</a></li>
+                    <li><a href="#">Sub Sub-Menu 5</a></li>
+                  </ul>
+                </li>
+                <li><a href="#">Sub-Menu 3</a>
+                  <ul>
+                    <li><a href="#">Sub Sub-Menu 1</a></li>
+                    <li><a href="#">Sub Sub-Menu 2</a></li>
+                    <li><a href="#">Sub Sub-Menu 3</a></li>
+                    <li><a href="#">Sub Sub-Menu 4</a></li>
+                    <li><a href="#">Sub Sub-Menu 5</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#"><i class="fa fa-envelope"></i> CONTACT</a></li>
+            <li><a href="#"><i class="fa-solid fa-arrow-right-to-bracket"></i> REGISTER</a>
+              <ul class="ccc-sub-menu">
+                <li><a href="#" onclick="openDialog()">Register as a Church</a></li>
+                <li><a href="/register">Register as a member</a></li>
+              </ul>
+            </li>
+            <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> LOGIN</a></li>
+          </ul>
+        </nav>
+
+        <div class="background_wave">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+          <!-- Image Column -->
+          <div class="image-column">
+            <img src="/ccclogo.png" alt="Event Image" />
+          </div>
+
+          <!-- Text Column -->
+          <div class="text-column">
+            <h1>Welcome to CCC Worldwide</h1>
+            <p>Here’s a brief description of what CCC Worldwide offers. This could be a mission statement, a slogan, or
+              an
+              introduction to the services.</p>
+            <button class="LM">Learn More</button>
+          </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section" id="history">
+          <h2>History of Celestial Church of Christ</h2>
+          <p>
+            The Celestial Church of Christ World-wide was divinely established on September 29, 1947, in Porto Novo,
+            Republic of Benin (formerly Republic of Dahomey) by the Reverend Pastor Prophet Founder, Samuel Bilehou
+            Joseph
+            Oshoffa. The church's inception is considered a divine occurrence, marked by a heavenly order and divine
+            revelation.
+          </p>
+
+          <h3>The Divine Order</h3>
+          <p>
+            On that fateful day in 1947, during deep prayer, a winged angel, radiant with intense light, appeared to the
+            Founder. It was then that God’s message came:
+            <i>
+              “It is the wish of God to send you on an errand of preaching to the world. Many nominal Christians, when
+              faced with the problems of this world, turn to fetish priests and powers of darkness for help. As a
+              result,
+              on their death, they cannot see Christ because Satan has left his spiritual mark on them. To assist you in
+              your work, miraculous works of holy divine healing will be carried out in the name of Jesus Christ. These
+              miracles, along with God’s mark on you, will testify that you are sent by God.”
+            </i>
+            Thus, the Celestial Church of Christ was born.
+          </p>
+
+          <h3>Founding and Revelation of the Church's Name</h3>
+          <p>
+            The name of the Church, <i>“Eglise du Christianisme Céleste”</i> (Celestial Church of Christ), was revealed
+            through Mr. Alexander Yanga. He was undergoing spiritual healing and was in a trance for seven days. On the
+            seventh day, he requested a piece of chalk and inscribed the name on the wall.
+          </p>
+
+          <h3>Headquarters</h3>
+          <p>
+            The Church has its Supreme Headquarters in Porto Novo, Republic of Benin, its National (Diocesan)
+            Headquarters
+            at 12/15 Church Street, Makoko, Yaba, Lagos State, Nigeria, and its International Headquarters at Mission
+            House, Ketu, Lagos State, Nigeria.
+          </p>
+
+          <h3>The Founder’s Role</h3>
+          <p>
+            Apart from being a prophet, the Founder was given permission by divine order to use the angelic title
+            "EPASTORAL," which was translated to “Pastor.” This occurred after he spent five years as an “Evangelist”
+            following the establishment of the Church.
+          </p>
+        </div>
+
+        <div class="doctrine-section" id="doctrine">
+          <h2>Doctrine of Celestial Church of Christ</h2>
+          <h5>The Church is under the Absolute Dictate of the Holy Spirit</h5>
+
+          <div class="doctrine">
+            <div class="doctrine-header">
+              <h3>Tenets</h3>
+              <span>+</span>
+            </div>
+            <div class="doctrine-content">
+              <p><strong>It is ordained by the Holy Spirit that:</strong></p>
+              <p>Members of Celestial Church of Christ are forbidden to engage or participate in:</p>
+              <ol>
+                <li>Any form of idolatry, fetish ceremony or cults, black magic, and charms.</li>
+                <li>Smoking or snuffing tobacco, cigarettes, or any type of weed is forbidden.</li>
+                <li>Consumption of alcohol, wine, or strong drinks that can intoxicate is prohibited.</li>
+                <li>Consumption of pork or food offered to idols is forbidden.</li>
+                <li>Members are not to wear shoes in the Church while wearing their Sutana.</li>
+                <li>Male and female members must not sit together within the Church premises.</li>
+                <li>Females must cover their heads inside the Church.</li>
+                <li>During menstruation, female members should not enter the Church until purified.</li>
+                <li>Women are forbidden from entering the altar or leading the congregation.</li>
+                <li>Only white candles are allowed in the Church; colored candles are prohibited.</li>
+                <li>Fornication and adultery are strictly forbidden.</li>
+                <li>Holiness is essential for all worshippers in the Celestial Church of Christ.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="doctrine">
+            <div class="doctrine-header">
+              <h3>Mode of Worship</h3>
+              <span>+</span>
+            </div>
+            <div class="doctrine-content">
+              <p>The mode of worship includes the altar's setup, seating arrangement, and candle usage for different
+                services. The Holy Spirit revealed the seating arrangement through a Prophetess on October 5, 1947.</p>
+            </div>
+          </div>
+
+          <div class="doctrine">
+            <div class="doctrine-header">
+              <h3>Holy Rites or Sacrament</h3>
+              <span>+</span>
+            </div>
+            <div class="doctrine-content">
+              <p>Members of the Celestial Church of Christ participate in several sacraments, including Baptism, Holy
+                Communion, Washing of Feet, Pilgrimage to Imeko, Harvest Thanksgiving, and Holy Mary's Day.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="events" id="events">
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="dialog-container"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const touch = document.getElementById('ccc-responsive-menu');
+      const menu = document.querySelector('.ccc-menu');
+
+      touch.addEventListener('click', function (e) {
+        e.preventDefault();
+        menu.classList.toggle('active');
+      });
+    });
+  </script>
+  <script>
+    document.querySelectorAll('.doctrine-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('span');
+
+        header.classList.toggle('active');
+
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

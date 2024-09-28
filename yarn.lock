@@ -1303,7 +1303,7 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.npmjs.org/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-awesome-phonenumber@^6.2.0:
+awesome-phonenumber@^6.4.0:
   version "6.4.0"
   resolved "https://registry.npmjs.org/awesome-phonenumber/-/awesome-phonenumber-6.4.0.tgz"
   integrity sha512-GRtyAHsD/usULDEZ8a5QQVZnvLm+WqP8q5sDPf3DkzEDGSr2DcvygGhuhWc6cTP4r28cSo0weM5eStwxJgxDoA==
@@ -1609,10 +1609,10 @@ cosmiconfig@^7.1.0:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-country-telephone-data@^0.6.3:
-  version "0.6.3"
-  resolved "https://registry.npmjs.org/country-telephone-data/-/country-telephone-data-0.6.3.tgz"
-  integrity sha512-3tQLA0vec+NDVlcaHhXGqILq/oQRsv4fRi4EedCfJqUuJUjQGdcSPM8r2IJIT2kZ5yWbiOCkXMgy7YTo8FNS2w==
+countries-list@^3.1.0:
+  version "3.1.1"
+  resolved "https://registry.npmjs.org/countries-list/-/countries-list-3.1.1.tgz"
+  integrity sha512-nPklKJ5qtmY5MdBKw1NiBAoyx5Sa7p2yPpljZyQ7gyCN1m+eMFs9I6CT37Mxt8zvR5L3VzD3DJBE4WQzX3WF4A==
 
 cross-spawn@^7.0.2, cross-spawn@^7.0.3:
   version "7.0.3"
@@ -1756,6 +1756,11 @@ csstype@^2.6.8:
   version "2.6.21"
   resolved "https://registry.npmjs.org/csstype/-/csstype-2.6.21.tgz"
   integrity sha512-Z1PhmomIfypOpoMjRQB70jfvy/wxT50qW08YXO5lMIJkrdq4yOTR+AW7FqutScmB9NkLwxo+jU+kZLbofZZq/w==
+
+dayjs@^1.11.13:
+  version "1.11.13"
+  resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.11.13.tgz"
+  integrity sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==
 
 debug@^3.2.7:
   version "3.2.7"
@@ -2573,10 +2578,10 @@ find-up@^5.0.0:
     locate-path "^6.0.0"
     path-exists "^4.0.0"
 
-flag-icons@^7.1.0:
-  version "7.1.0"
-  resolved "https://registry.npmjs.org/flag-icons/-/flag-icons-7.1.0.tgz"
-  integrity sha512-AH4v++19bpC5P3Wh767top4wylJYJCWkFnvNiDqGHDxqSqdMZ49jpLXp8PWBHTTXaNQ+/A+QPrOwyiIGaiIhmw==
+flag-icons@^7.1.0, flag-icons@^7.2.3:
+  version "7.2.3"
+  resolved "https://registry.npmjs.org/flag-icons/-/flag-icons-7.2.3.tgz"
+  integrity sha512-X2gUdteNuqdNqob2KKTJTS+ZCvyWeLCtDz9Ty8uJP17Y4o82Y+U/Vd4JNrdwTAjagYsRznOn9DZ+E/Q52qbmqg==
 
 flat-cache@^3.0.4:
   version "3.0.4"
@@ -5050,13 +5055,13 @@ util-deprecate@^1.0.2:
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-v-phone-input@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmjs.org/v-phone-input/-/v-phone-input-4.1.1.tgz"
-  integrity sha512-/OLHVvXoiHjK6aa0b2hi8lKu0+aNKBf22OyUPLHjrl9K1UmXWeQjsB/cOl/GKvrLrFRHnn3blKzrLOy723Bq8w==
+v-phone-input@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.npmjs.org/v-phone-input/-/v-phone-input-4.3.2.tgz"
+  integrity sha512-ZJ7hS8QTQJH67Msf5rXJwyD83xEIIKUQ/38CxqgpkOTAkY0UcTg7lQ33w/6KdJR2ODeISQ98yvv7edbuGMcF4w==
   dependencies:
-    awesome-phonenumber "^6.2.0"
-    country-telephone-data "^0.6.3"
+    awesome-phonenumber "^6.4.0"
+    countries-list "^3.1.0"
   optionalDependencies:
     flag-icons "^7.1.0"
     world-flags-sprite "^0.0.2"

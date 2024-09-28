@@ -1,0 +1,391 @@
+body {
+    font-family: 'Lora', serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    margin: auto;
+    overflow: auto;
+    background: linear-gradient(315deg, rgba(101, 0, 94, 1) 3%, rgba(60, 132, 206, 1) 38%, rgba(48, 238, 226, 1) 68%, rgba(255, 25, 25, 1) 98%);
+    animation: gradient 15s ease infinite;
+    background-size: 400% 400%;
+    background-attachment: fixed;
+}
+
+
+html {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+p {
+    font-size: 1.25rem;
+    margin-top: 1rem;
+}
+
+.auth-wrapper {
+    padding: 20px;
+}
+
+nav {
+    display: flex;
+    background: transparent;
+}
+
+nav img {
+    height: 50px;
+    margin-right: 20px;
+}
+
+.ccc-menu {
+    display: block;
+}
+
+.ccc-menu li {
+    display: inline-block;
+    position: relative;
+    z-index: 100;
+}
+
+.ccc-menu li a {
+    font-weight: 600;
+    text-decoration: none;
+    padding: 20px 15px;
+    display: block;
+    color: black;
+    transition: all 0.2s ease-in-out;
+}
+
+.ccc-menu li a:hover,
+.ccc-menu li:hover>a {
+    color: black;
+    background: #f5f5f5;
+    transform: scaleX(1.1);
+}
+
+.ccc-sub-menu {
+    visibility: hidden;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    /* width: 170px; */
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    z-index: 99;
+    transform: translate(0, 20px);
+    transition: all 0.2s ease-out;
+}
+
+.ccc-sub-menu li {
+    list-style: none;
+    text-align: center;
+    width: 100%;
+}
+
+.ccc-sub-menu li a {
+    display: block;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+    text-decoration: none;
+}
+
+
+.ccc-menu li:hover .ccc-sub-menu {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+.ccc-sub-menu li a:hover {
+    background: #9ca3da;
+    color: #fff;
+}
+
+.ccc-responsive-menu {
+    display: none;
+    width: 100%;
+    padding: 20px 15px;
+    background: #374147;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+@media (max-width: 767px) {
+    .ccc-menu {
+        display: none;
+    }
+
+    .ccc-responsive-menu {
+        display: block;
+    }
+
+    .ccc-menu li {
+        display: block;
+    }
+
+    .ccc-menu li a {
+        background: #fff;
+        color: #797979;
+    }
+
+    .ccc-menu li:hover>a {
+        background: #9ca3da;
+        color: #fff;
+    }
+
+    .ccc-sub-menu {
+        position: relative;
+        width: 100%;
+    }
+
+    .ccc-menu li:hover .ccc-sub-menu {
+        position: relative;
+    }
+}
+
+/* Main Content Styles */
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.image-column {
+    flex: 1;
+}
+
+.image-column img {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1.78;
+}
+
+.text-column {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.text-column h1 {
+    font-family: 'Protest Guerrilla';
+}
+
+.history-section,
+.doctrine-section {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.history-section h2 {
+    font-family: 'Protest Guerrilla', serif;
+    font-size: 36px;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.history-section h3 {
+    font-family: 'Protest Guerrilla', serif;
+    font-size: 24px;
+    color: #34495e;
+    margin-top: 30px;
+}
+
+.history-section p {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.history-section i {
+    color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+    .history-section {
+        padding: 20px;
+    }
+
+    .history-section h2 {
+        font-size: 28px;
+    }
+
+    .history-section h3 {
+        font-size: 20px;
+    }
+
+    .history-section p {
+        font-size: 16px;
+    }
+}
+
+
+.doctrine-header {
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.doctrine-header h2 {
+    font-family: 'Protest Guerrilla', serif;
+    font-size: 36px;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.doctrine-header h3,
+.doctrine-header h5 {
+    font-family: 'Protest Guerrilla', serif;
+    font-size: 24px;
+    color: #34495e;
+    margin-top: 30px;
+}
+
+.doctrine-header span {
+    transition: transform 0.2s ease;
+}
+
+.doctrine-content {
+    display: none;
+    padding: 15px;
+    background-color: #fafafa;
+    border-top: 1px solid #ddd;
+}
+
+.doctrine-content p,
+.doctrine-content ol {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #555;
+}
+
+.doctrine-content ol {
+    padding-left: 20px;
+}
+
+.doctrine-content ol li {
+    margin-bottom: 10px;
+}
+
+/* Plus/Minus icon rotation */
+.doctrine-header.active span {
+    transform: rotate(45deg);
+}
+
+.doctrine-section h2 {
+    font-family: 'Protest Guerrilla', serif;
+    font-size: 36px;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.doctrine-section h5 {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.background_wave {
+    position: absolute;
+    z-index: -10;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+.wave {
+    background: rgb(255 255 255 / 25%);
+    border-radius: 1000% 1000% 0 0;
+    position: fixed;
+    width: 200%;
+    height: 12em;
+    animation: wave 10s -3s linear infinite;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.wave:nth-of-type(2) {
+    bottom: -1.25em;
+    animation: wave 18s linear reverse infinite;
+    opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+    bottom: -2.5em;
+    animation: wave 20s -1s reverse infinite;
+    opacity: 0.9;
+}
+
+@keyframes wave {
+    2% {
+        transform: translateX(1);
+    }
+
+    25% {
+        transform: translateX(-25%);
+    }
+
+    50% {
+        transform: translateX(-50%);
+    }
+
+    75% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(1);
+    }
+}
+
+.LM {
+    background: linear-gradient(315deg, blue 3%, rgb(215, 221, 40) 38%, white 68%, rgba(255, 25, 25, 1) 98%);
+    font-family: 'Protest Guerrilla', serif;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+}
+#dialog-container{
+    z-index: 10;
+    position: absolute;
+}

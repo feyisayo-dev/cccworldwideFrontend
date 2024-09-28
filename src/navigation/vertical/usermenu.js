@@ -19,6 +19,11 @@ export default [
         icon: { icon: 'tabler:user-pause' },
         to: 'dashboards-baptism-dashboard',
       },
+      {
+        title: 'Payments',
+        icon: { icon: 'tabler:user-pause' },
+        to: 'dashboards-addmemberpayment-dashboard',
+      },
 
       // {
       //   title: 'eCommerce',

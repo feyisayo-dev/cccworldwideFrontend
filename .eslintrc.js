@@ -227,4 +227,10 @@ module.exports = {
       }, alias: { 'extensions': ['.ts', '.js', '.tsx', '.jsx', '.mjs'], 'map': [["@", "./src"], ["@themeConfig", "./themeConfig.js"], ["@core", "./src/@core"], ["@layouts", "./src/@layouts"], ["@images", "./src/assets/images/"], ["@styles", "./src/styles/"], ["@configured-variables", "./src/styles/variables/_template.scss"], ["@axios", "./src/plugins/axios"], ["@validators", "./src/@core/utils/validators"], ["apexcharts", "node_modules/apexcharts-clevision"]] },
     },
   },
+  configureWebpack: {
+    output: {
+      publicPath: process.env.NODE_ENV === 'production' ? '/assets/' : '/'
+    }
+  },
+
 }

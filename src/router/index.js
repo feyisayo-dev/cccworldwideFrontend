@@ -17,23 +17,17 @@ const router = createRouter({
 
         //get user role for user data
 
-        const userRole= (userData['role'])
+        const userRole = (userData['role'])
 
 
         // const userRole= trim(userData[0].userAbilities)
 
-        
 
-        if (userRole==='Admin') {
-          // return { name: 'dashboards-analytics' }
 
+        if (userRole === 'Admin') {
           return { name: 'dashboards-admin-dashboard' }
-        }else{
-          // return { name: 'access-control' }
+        } else if (userRole === 'Client') {
           return { name: 'dashboards-user-dashboard' }
-
-          // return { name: 'login', query: to.query }
-
         }
 
         // const userRole = (userData && userData.userAbilities) ? userData.userAbilities : null
@@ -41,10 +35,12 @@ const router = createRouter({
         //   // return { name: 'dashboards-analytics' }
         // if (userRole === 'Client')
         //   return { name: 'access-control' }
-        
-        return { name: 'login', query: to.query }
+
+        return { path: '/' }
       },
     },
+    { path: '/login', name: 'Login', component: () => import('@/pages/login.vue') },
+    { path: '/register', name: 'Register', component: () => import('@/pages/register.vue') },
     {
       path: '/pages/user-profile',
       redirect: () => ({ name: 'pages-user-profile-tab', params: { tab: 'profile' } }),

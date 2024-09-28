@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "[javascript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[typescript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
@@ -92,5 +92,6 @@
     ]
   },
   "vetur.trace.server": "messages",
-  "vetur.validation.templateProps": true
+  "vetur.validation.templateProps": true,
+  "liveServer.settings.port": 5501
 }

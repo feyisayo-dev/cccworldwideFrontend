@@ -78,27 +78,9 @@ const statisticsVertical = {
     <!-- 👉 Website analytics -->
     <VCol
       cols="12"
-      md="6"
+      md="12"
     >
       <AnalyticsWebsiteAnalytics />
-    </VCol>
-
-    <!-- 👉 Sales Overview -->
-    <VCol
-      cols="12"
-      md="3"
-      sm="6"
-    >
-      <AnalyticsSalesOverview />
-    </VCol>
-
-    <!-- 👉 Statistics Vertical -->
-    <VCol
-      cols="12"
-      md="3"
-      sm="6"
-    >
-      <CardStatisticsVertical v-bind="statisticsVertical" />
     </VCol>
 
     <!-- 👉 Earning Reports Weekly Overview -->

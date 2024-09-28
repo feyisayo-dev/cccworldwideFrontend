@@ -298,7 +298,7 @@ const getChurchState = () => {
 
     try {
       const data = form.value.selectedchurchCountry.states
-
+      console.log(form.value.selectedchurchCountry.states)
       if (Array.isArray(data) && data.length > 0) {
         form.value.churchStateList = data.map(churchState => ({
           country_id: churchState.country_id,

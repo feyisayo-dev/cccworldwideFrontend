@@ -2,7 +2,18 @@
 import VueApexCharts from 'vue3-apexcharts'
 import { useTheme } from 'vuetify'
 import { hexToRgb } from '@layouts/utils'
+import { useAllAdminActions } from '@/apiservices/adminActions'
+import api from '@/apiservices/api'
+import { ref, onMounted } from 'vue'
 
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
+
+const earningsReports = ref([])
+const totalEarningsThisWeek = ref(0)
+const totalEarningsLastWeek = ref(0)
+const earningsPercentageChange = ref(0)
 const vuetifyTheme = useTheme()
 
 const series = [{
@@ -17,10 +28,185 @@ const series = [{
   ],
 }]
 
+import dayjs from 'dayjs'
+
+const updateEarningsReports = paymentTotals => {
+  earningsReports.value = [
+    {
+      color: 'primary',
+      icon: 'tabler-currency-dollar',
+      title: 'Building Levy',
+      amount: `₦${paymentTotals.buildingLevyPayments.toFixed(2)}`, // Total for building levy payments
+      progress: calculateProgress(paymentTotals.buildingLevyPayments), // Function to calculate progress
+    },
+    {
+      color: 'info',
+      icon: 'tabler-chart-pie-2',
+      title: 'Committee',
+      amount: `₦${paymentTotals.committeePayments.toFixed(2)}`, // Total for committee payments
+      progress: calculateProgress(paymentTotals.committeePayments),
+    },
+    {
+      color: 'success',
+      icon: 'tabler-brand-paypal',
+      title: 'Offering',
+      amount: `₦${paymentTotals.offeringPayments.toFixed(2)}`, // Total for offering payments
+      progress: calculateProgress(paymentTotals.offeringPayments),
+    },
+    {
+      color: 'success',
+      icon: 'tabler-brand-paypal',
+      title: 'Tithe',
+      amount: `₦${paymentTotals.tithePayments.toFixed(2)}`, // Total for tithe payments
+      progress: calculateProgress(paymentTotals.tithePayments),
+    },
+    {
+      color: 'warning',
+      icon: 'tabler-currency-dollar',
+      title: 'Baptism',
+      amount: `₦${paymentTotals.baptismPayments.toFixed(2)}`, // Total for baptism payments
+      progress: calculateProgress(paymentTotals.baptismPayments),
+    },
+  ]
+}
+
+const calculateProgress = amount => {
+  const maxProgress = 1000 // Example maximum threshold for progress
+  
+  return Math.min((amount / maxProgress) * 100, 100) // Ensure progress is capped at 100
+}
+
+const fetchAllPayments = async () => {
+  try {
+    const response = await api.get(`/getChurchPayment/${userData.parishcode}`)
+    const payments = response.data
+
+    const paymentTotals = {
+      buildingLevyPayments: 0,
+      committeePayments: 0,
+      offeringPayments: 0,
+      baptismPayments: 0,
+      tithePayments: 0,
+    }
+
+    payments.forEach(payment => {
+      switch (payment.payment_type.toLowerCase()) {  // Ensure consistent comparison with lowercase
+      case 'buildinglevy':
+        paymentTotals.buildingLevyPayments += Number(payment.amount) // Convert to number
+        break
+      case 'committee':
+        paymentTotals.committeePayments += Number(payment.amount) // Convert to number
+        break
+      case 'offering':
+        paymentTotals.offeringPayments += Number(payment.amount) // Convert to number
+        break
+      case 'baptism':
+        paymentTotals.baptismPayments += Number(payment.amount) // Convert to number
+        break
+      case 'tithe':
+        paymentTotals.tithePayments += Number(payment.amount) // Convert to number
+        break
+      default:
+        break
+      }
+    })
+
+    // Update the earnings reports with the calculated totals
+    updateEarningsReports(paymentTotals)
+
+  } catch (error) {
+    console.error('Error fetching payments:', error)
+  }
+}
+
+const calculateEarningsForWeek = (payments, weekStart, weekEnd) => {
+  return payments.reduce((total, payment) => {
+    const paymentDate = new Date(payment.datePaid)
+    if (paymentDate >= weekStart && paymentDate <= weekEnd) {
+      total += Number(payment.amount)
+    }
+    
+    return total
+  }, 0)
+}
+
+const fetchAndCalculateEarnings = async () => {
+  try {
+    const response = await api.get(`/getMemberPayment/${userData.UserId}`)
+    const payments = response.data
+
+    // Get the current date
+    const today = new Date()
+
+    // Calculate the start and end of the current week
+    const currentWeekStart = new Date(today.setDate(today.getDate() - today.getDay()))
+    const currentWeekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6))
+
+    // Calculate the start and end of the last week
+    const lastWeekStart = new Date(today.setDate(today.getDate() - today.getDay() - 7))
+    const lastWeekEnd = new Date(today.setDate(today.getDate() - today.getDay() - 1))
+
+    // Calculate total earnings for this and last week
+    totalEarningsThisWeek.value = calculateEarningsForWeek(payments, currentWeekStart, currentWeekEnd)
+    totalEarningsLastWeek.value = calculateEarningsForWeek(payments, lastWeekStart, lastWeekEnd)
+
+    // Calculate the percentage change
+    const difference = totalEarningsThisWeek.value - totalEarningsLastWeek.value
+
+    earningsPercentageChange.value = totalEarningsLastWeek.value
+      ? ((difference / totalEarningsLastWeek.value) * 100).toFixed(2)
+      : 100 // If last week had 0 earnings, default to 100% increase
+
+    // Update the chart with payment data for the last 7 days
+    const last7DaysPayments = groupPaymentsByDay(payments)
+
+    updateChart(last7DaysPayments) // Update chart with dynamic data
+
+  } catch (error) {
+    console.error('Error fetching payments:', error)
+  }
+}
+
+
+const groupPaymentsByDay = payments => {
+  const last7DaysPayments = Array(7).fill(0) // Initialize an array to store payments for each day
+
+  const today = dayjs()
+
+  payments.forEach(payment => {
+    const paymentDate = dayjs(payment.datePaid)
+    const dayDifference = today.diff(paymentDate, 'day') // Calculate how many days ago the payment was made
+    if (dayDifference >= 0 && dayDifference < 7) {
+      last7DaysPayments[6 - dayDifference] += Number(payment.amount) // Add payment to the corresponding day
+    }
+  })
+
+  return last7DaysPayments
+}
+
+
+// Call fetchAndCalculateEarnings when the component is mounted
+onMounted(() => {
+  fetchAndCalculateEarnings()
+  fetchAllPayments()
+})
+
+const updateChart = seriesData => {
+  series.value = [{
+    data: seriesData,
+  }]
+}
+
+
+
 const chartOptions = computed(() => {
   const currentTheme = vuetifyTheme.current.value.colors
   const variableTheme = vuetifyTheme.current.value.variables
-  
+
+  const last7DaysLabels = Array.from({ length: 7 }, (_, i) =>
+    dayjs().subtract(i, 'day').format('MMM D'),
+  ).reverse()
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -49,24 +235,13 @@ const chartOptions = computed(() => {
     colors: [
       `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
       `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
-      `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
-      `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
-      `rgba(${ hexToRgb(currentTheme.primary) }, 1)`,
-      `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
-      `rgba(${ hexToRgb(currentTheme.primary) },${ variableTheme['pressed-opacity'] })`,
+
+      // Add colors as needed based on your theme...
     ],
     dataLabels: { enabled: false },
     legend: { show: false },
     xaxis: {
-      categories: [
-        'Mo',
-        'Tu',
-        'We',
-        'Th',
-        'Fr',
-        'Sa',
-        'Su',
-      ],
+      categories: last7DaysLabels, // Last 7 days labels for x-axis
       axisBorder: { show: false },
       axisTicks: { show: false },
       labels: {
@@ -78,7 +253,7 @@ const chartOptions = computed(() => {
       },
     },
     yaxis: { labels: { show: false } },
-    tooltip: { enabled: false },
+    tooltip: { enabled: true },
     responsive: [{
       breakpoint: 1025,
       options: { chart: { height: 199 } },
@@ -86,29 +261,6 @@ const chartOptions = computed(() => {
   }
 })
 
-const earningsReports = [
-  {
-    color: 'primary',
-    icon: 'tabler-currency-dollar',
-    title: 'Earnings',
-    amount: '$545.69',
-    progress: '55',
-  },
-  {
-    color: 'info',
-    icon: 'tabler-chart-pie-2',
-    title: 'Profit',
-    amount: '$256.34',
-    progress: '25',
-  },
-  {
-    color: 'error',
-    icon: 'tabler-brand-paypal',
-    title: 'Expense',
-    amount: '$74.19',
-    progress: '65',
-  },
-]
 
 const moreList = [
   {
@@ -144,13 +296,13 @@ const moreList = [
         >
           <div class="d-flex align-center gap-2 mb-2 pb-1 flex-wrap">
             <h4 class="text-4xl font-weight-medium">
-              $468
+              ₦{{ totalEarningsThisWeek.toFixed(2) }} <!-- Display this week's total earnings -->
             </h4>
             <VChip
               label
-              color="success"
+              :color="earningsPercentageChange >= 0 ? 'success' : 'error'"
             >
-              +4.2%
+              {{ earningsPercentageChange >= 0 ? '+' : '' }}{{ earningsPercentageChange }}%
             </VChip>
           </div>
 

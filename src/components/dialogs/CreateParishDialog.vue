@@ -1,7 +1,7 @@
 <script setup>
 import { useAllAdminActions } from '@/apiservices/adminActions'
 import laptopGirl from '@images/illustrations/laptop-girl.png'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref  } from 'vue'
 
 
 
@@ -9,15 +9,20 @@ const props = defineProps({
   isDialogVisible: {
     type: Boolean,
     required: true,
+    default: false,
   },
 })
 
 const emit = defineEmits([
   'update:isDialogVisible',
   'updatedData',
+  'changes',
 ])
 
 
+const openDialog = () => {
+  isDialogVisible.value = true
+}
 
 const currentStep = ref(0)
 const apiResponseStatus = ref('')
@@ -74,124 +79,6 @@ const createApp = [
   // },
 ]
 
-const categories = [
-  {
-    icon: 'tabler-briefcase',
-    color: 'info',
-    title: 'National Parish',
-    subtitle: 'First Level Parish',
-    slug: 'National',
-  },
-  {
-    icon: 'tabler-shopping-cart',
-    color: 'success',
-    title: 'State Parish',
-    subtitle: 'Grow Your Business With App',
-    slug: 'State',
-  },
-  {
-    icon: 'tabler-device-laptop',
-    color: 'error',
-    title: 'Area Parish',
-    subtitle: 'Start learning today',
-    slug: 'Area',
-  },
-  {
-    icon: 'tabler-device-laptop',
-    color: 'error',
-    title: 'Province',
-    subtitle: 'Start learning today',
-    slug: 'Province',
-  },
-  {
-    icon: 'tabler-device-laptop',
-    color: 'error',
-    title: 'Circuit',
-    subtitle: 'Start learning today',
-    slug: 'Circuit',
-  },
-  {
-    icon: 'tabler-device-laptop',
-    color: 'error',
-    title: 'District',
-    subtitle: 'Start learning today',
-    slug: 'District',
-  },
-  {
-    icon: 'tabler-device-laptop',
-    color: 'error',
-    title: 'Parish',
-    subtitle: 'Start learning today',
-    slug: 'Parish',
-  },
-]
-
-const frameworks = [
-  {
-    icon: 'tabler-brand-react-native',
-    color: 'info',
-    title: 'React Native',
-    subtitle: 'Create truly native apps',
-    slug: 'react-framework',
-  },
-  {
-    icon: 'tabler-brand-angular',
-    color: 'error',
-    title: 'Angular',
-    subtitle: 'Most suited for your application',
-    slug: 'angular-framework',
-  },
-  {
-    icon: 'tabler-brand-html5',
-    color: 'warning',
-    title: 'HTML',
-    subtitle: 'Progressive Framework',
-    slug: 'html-framework',
-  },
-  {
-    icon: 'tabler-brand-python',
-    color: 'primary',
-    title: 'Python',
-    subtitle: 'js web frameworks',
-    slug: 'js-framework',
-  },
-]
-
-const databases = [
-  {
-    icon: 'tabler-brand-firebase',
-    color: 'error',
-    title: 'Firebase',
-    subtitle: 'Cloud Firestore',
-    slug: 'firebase-database',
-  },
-  {
-    icon: 'tabler-brand-amazon',
-    color: 'warning',
-    title: 'AWS',
-    subtitle: 'Amazon Fast NoSQL Database',
-    slug: 'aws-database',
-  },
-  {
-    icon: 'tabler-database',
-    color: 'info',
-    title: 'MySQL',
-    subtitle: 'Basic MySQL database',
-    slug: 'mysql-database',
-  },
-]
-
-const createAppData = ref({
-  category: 'crm-application',
-  framework: 'vue-framework',
-  database: 'firebase-database',
-  cardNumber: null,
-  cardName: '',
-  cardExpiry: '',
-  cardCvv: '',
-  isSave: false,
-})
-
 const dialogVisibleUpdate = val => {
   emit('update:isDialogVisible', val)
   currentStep.value = 0
@@ -201,61 +88,6 @@ watch(props, () => {
   if (!props.isDialogVisible)
     currentStep.value = 0
 })
-
-// const onSubmit = message => {
-
-//   if (message) {
-
-
-
-
-
-
-    
-//     // addNewParish (form.value.parishName, form.value.parishEmail, form.value.parishPhone1, form.value.parishPhone2, form.value.parishAddress, form.value.parishCategory, form.value.selectedCountry, form.value.selectedState, form.value.city, form.value.seletedParish )
-    
-//     const postData = {
-//       email: form.value.parishEmail,
-//       phone1: form.value.parishPhone1,
-//       phone2: form.value.parishPhone2,
-//       country: form.value.selectedCountry,
-//       category: form.value.parishCategory,
-//       state: form.value.selectedState,
-//       city: form.value.city,
-//       address: form.value.parishAddress,
-//       name: form.value.parishName,
-//       reportTo: form.value.seletedParish,
-//     }
-
-
-
-
-    
-//     // .then(responses => {
-
-//     //   alert('get here')
-
-//     //   // console.log("Get Add parish response  here now", JSON.stringify(response.data))
-//     //   const apiStatus=responses.data
-
-//     //   console.log("Get Add parish response here now", JSON.stringify(apiStatus.status))
-
-//     //   apiResponseStatus.value=apiStatus.status
-//     //   apiResponseMessage.value=apiStatus.message
-
-       
-//     // }).catch(e => {
-//     //   // const { errors: formErrors } = e.response.data
-
-//     //   // errors.value = formErrors
-//     //   console.error(e.responses.data)
-//     // })
-
-    
-    
-
-//   }
-// }
 
 const onSubmit = message => {
   if (message) {
@@ -276,16 +108,14 @@ const onSubmit = message => {
       // Make the API call and handle the response
       allAdminActions.addNewParish(postData)
         .then(response => {
-          // console.log("Response from server:", response.data)
-
-          // Handle successful response here, e.g., updating UI, showing a success message, etc.
           const apiStatus=response.data
 
-          // console.log("Get Add parish response here now", JSON.stringify(apiStatus.status))
 
           apiResponseStatus.value=apiStatus.status
           apiResponseMessage.value=apiStatus.message
-          
+          if (apiResponseStatus.value === 200) {
+            emit('changes')
+          }
         })
         .catch(error => {
           console.error("Error submitting data:", error)
@@ -596,7 +426,7 @@ const prefixedParishName = computed({
                   </VAutocomplete>
                 </VCol>
                 <VCol cols="12">
-                  <AppSelect
+                  <VAutocomplete
                     v-model="form.selectedState"
                     label="State"
                     :items="form.stateList"
@@ -659,115 +489,6 @@ const prefixedParishName = computed({
                     double-line
                   />
                 </VCol>
-              </VWindowItem>
-
-              <!-- 👉 Database Engine -->
-              <VWindowItem>
-                <AppTextField label="Database Name" />
-
-                <h6 class="text-h6 my-4">
-                  Select Database Engine
-                </h6>
-                <VRadioGroup v-model="createAppData.database">
-                  <VList class="card-list">
-                    <VListItem
-                      v-for="database in databases"
-                      :key="database.title"
-                      @click="createAppData.database = database.slug"
-                    >
-                      <template #prepend>
-                        <VAvatar
-                          size="48"
-                          rounded
-                          variant="tonal"
-                          :color="database.color"
-                        >
-                          <VIcon :icon="database.icon" />
-                        </VAvatar>
-                      </template>
-                      <VListItemTitle class="mb-1">
-                        {{ database.title }}
-                      </VListItemTitle>
-                      <VListItemSubtitle>
-                        {{ database.subtitle }}
-                      </VListItemSubtitle>
-                      <template #append>
-                        <VRadio :value="database.slug" />
-                      </template>
-                    </VListItem>
-                  </VList>
-                </VRadioGroup>
-              </VWindowItem>
-
-              <!-- 👉 Billing form -->
-              <VWindowItem>
-                <h6 class="text-h6 mb-4">
-                  Payment Details
-                </h6>
-
-                <VForm>
-                  <VRow>
-                    <VCol cols="12">
-                      <AppTextField
-                        v-model="createAppData.cardNumber"
-                        label="Card Number"
-                        type="number"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="12"
-                      md="6"
-                    >
-                      <AppTextField
-                        v-model="createAppData.cardName"
-                        label="Name on Card"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="6"
-                      md="3"
-                    >
-                      <AppTextField
-                        v-model="createAppData.cardExpiry"
-                        label="Expiry"
-                      />
-                    </VCol>
-
-                    <VCol
-                      cols="6"
-                      md="3"
-                    >
-                      <AppTextField
-                        v-model="createAppData.cardCvv"
-                        label="CVV"
-                      />
-                    </VCol>
-
-                    <VCol cols="12">
-                      <VSwitch
-                        v-model="createAppData.isSave"
-                        label="Save Card for future billing?"
-                      />
-                    </VCol>
-                  </VRow>
-                </VForm>
-              </VWindowItem>
-
-              <VWindowItem class="text-center">
-                <h6 class="text-h6 mb-2">
-                  Submit 🥳
-                </h6>
-                <p class="text-sm mb-6">
-                  Submit to kickstart your project.
-                </p>
-
-                <VImg
-                  :src="laptopGirl"
-                  width="176"
-                  class="mx-auto"
-                />
               </VWindowItem>
             </VWindow>
 

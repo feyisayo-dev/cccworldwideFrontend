@@ -16,10 +16,9 @@ import { createPinia } from 'pinia'
 import { createVPhoneInput } from 'v-phone-input'
 import 'v-phone-input/dist/v-phone-input.css'
 import VueConfirmPlugin from 'v3confirm'
-import { createApp } from 'vue'
+import { createApp, ref } from 'vue'
 import CountryFlag from 'vue-country-flag-next'
 import vueCountryRegionSelect from 'vue3-country-region-select'
-
 
 const vPhoneInput = createVPhoneInput({
   countryIconMode: 'svg',
@@ -41,8 +40,10 @@ app.use(VueConfirmPlugin, {
   noText: 'No',
 })
 
+
 // Use plugins
 app.use(vuetify)
+
 app.use(vPhoneInput)
 app.use(createPinia())
 app.use(router)
@@ -54,3 +55,4 @@ app.use(abilitiesPlugin, ability, {
 
 // Mount vue app
 app.mount('#app')
+
