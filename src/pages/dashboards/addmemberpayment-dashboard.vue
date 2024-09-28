@@ -189,7 +189,7 @@ const onDeleteCommiteeMembers = () => {
                 prepend-icon="tabler-plus"
                 @click="isCreateMemberPaymentVisible = !isCreateMemberPaymentVisible"
               >
-                Add Committee Members Payment
+                Make Payment
               </VBtn>
             </div>
           </VCardText>
