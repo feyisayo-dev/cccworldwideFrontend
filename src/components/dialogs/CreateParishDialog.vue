@@ -473,7 +473,7 @@ const prefixedParishName = computed({
                   -->
                   <VAutocomplete
                     v-model="form.seletedParish"
-                    label=" Select Parish "
+                    label=" Select Parish your church is reporting to "
                     :items="form.parishList"
                     item-value="parishcode"
                     :item-title="(item) => `${item.name}-${item.parishaddress}`"
