@@ -117,34 +117,6 @@ const statisticsVertical = {
       <EcommerceTransactions />
     </VCol>
 
-    <!-- 👉 Total Earning -->
-    <VCol
-      cols="12"
-      sm="6"
-      lg="4"
-    >
-      <AnalyticsTotalEarning />
-    </VCol>
-
-    <!-- 👉 Monthly Campaign State -->
-    <VCol
-      cols="12"
-      sm="6"
-      lg="4"
-    >
-      <AnalyticsMonthlyCampaignState />
-    </VCol>
-
-
-    <!-- 👉 Source Visits -->
-    <VCol
-      cols="12"
-      sm="6"
-      lg="4"
-    >
-      <AnalyticsSourceVisits />
-    </VCol>
-
     <!-- 👉 Project Table -->
     <VCol
       cols="12"

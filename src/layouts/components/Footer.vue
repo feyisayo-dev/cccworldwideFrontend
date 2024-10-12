@@ -5,6 +5,7 @@ import {
   default as registerMultistepIllustrationLight,
 } from "@images/illustrations/ccclogo.png";
 import registerMultistepBgDark from "@images/pages/register-multistep-bg-dark.png";
+import fsdlogo from "@images/pages/fsdlogo.png";
 import registerMultistepBgLight from "@images/pages/register-multistep-bg-light.png";
 
 const registerMultistepBg = useGenerateImageVariant(
@@ -27,7 +28,7 @@ const registerMultistepIllustration = useGenerateImageVariant(
     <span class="d-flex align-center">
       &copy;
       {{ new Date().getFullYear() }}
-      powered by Fsdgroup
+       CCC Afonifoji Ibukun-Olu International
       <div style="width: 40px">
         <VImg :src="registerMultistepIllustration"  class="illustration-image" />
         <VImg
@@ -44,12 +45,12 @@ const registerMultistepIllustration = useGenerateImageVariant(
         powered by Fsdgroup
         <div style="width: 40px">
           <VImg
-            :src="registerMultistepIllustration"
-            class="illustration-image"
+            :src="fsdlogo"
+            class="fsdlogo"
           />
           <VImg
-            :src="registerMultistepBg"
-            class="bg-image position-absolute w-90"
+            :src="fsdlogo"
+            class="fsdlogo"
           />
         </div>
       </span>

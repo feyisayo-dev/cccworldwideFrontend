@@ -4414,6 +4414,9 @@ html:not(.lt-ie10) .not-animated {
 	text-align: center;
 }
 
+.sub{
+	font-size: 1.8125rem;
+}
 .preloader-body p {
 	position: relative;
 	right: -8px;

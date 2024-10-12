@@ -83,7 +83,7 @@ const headerValues = computed(() => {
           <h6 class="text-h6">
             THEME CUSTOMIZER
           </h6>
-          <span class="text-body-1">Customize & Preview in Real Time</span>
+          <span class="text-body-1">Customize Your Dashboard</span>
         </div>
         <IconBtn @click="isNavDrawerOpen = false">
           <VIcon

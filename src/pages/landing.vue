@@ -1,17 +1,15 @@
 <script setup>
+import { useAllAdminActions } from "@/apiservices/adminActions";
 import { useHead } from "@vueuse/head";
-import { ref, onMounted, watchEffect } from "vue";
+import { onMounted, ref } from "vue";
 const isCreateParishVisible = ref(false);
 const apiResponseStatus = ref("");
 const apiResponseMessage = ref("");
-import { paginationMeta } from "@/@fake-db/utils";
-import { useAllAdminActions } from "@/apiservices/adminActions";
-import { VDataTableServer } from "vuetify/labs/VDataTable";
 
 const isConfirmDialogVisible = ref(false);
 const AllAdminActions = useAllAdminActions();
 useHead({
-  title: "CCC Worldwide ~ Landing",
+  title: "CCC Agiliti 1 ~ Landing",
   meta: [
     { charset: "utf-8" },
     {
@@ -132,7 +130,7 @@ onMounted(() => {
                         ></span>
                       </div>
                       <div class="unit-body">
-                        <a href="tel:#">+2349063392515</a>
+                        <a href="tel:#">(+44) 7721480196</a>
                       </div>
                     </div>
                   </li>
@@ -145,9 +143,8 @@ onMounted(() => {
                       </div>
                       <div class="unit-body">
                         <a href="#"
-                          >Celestial Church Of Christ Holy Land FR3P+Q56,
-                          111104, Imeko, Nigeria</a
-                        >
+                          >CCC Afonifoji Ibukun-Olu Agiliti 1, International
+                        </a>
                       </div>
                     </div>
                   </li>
@@ -218,14 +215,14 @@ onMounted(() => {
                               >Register as a member</a
                             >
                           </li>
-                          <li class="rd-dropdown-item">
+                          <!-- <li class="rd-dropdown-item">
                             <VBtn
                               prepend-icon="tabler-plus"
                               @click="isCreateParishVisible = true"
                             >
                               Register as a parish
                             </VBtn>
-                          </li>
+                          </li> -->
                         </ul>
                       </li>
                       <li class="rd-nav-item">
@@ -250,8 +247,8 @@ onMounted(() => {
               >
                 Loving God, loving others and serving the world
               </h1>
-              <p class="wow fadeInUp text-sm" data-wow-delay=".2s">
-                Welcome to CCC Worldwide.
+              <p class="wow fadeInUp sub" data-wow-delay=".2s">
+                Welcome to CCC Agiliti 1, International.
               </p>
             </div>
           </div>
@@ -263,7 +260,7 @@ onMounted(() => {
           <div class="row justify-content-center">
             <div class="col-xl-8 col-lg-10">
               <div class="pre-title wow fadeInLeft" data-wow-delay=".1s">
-                Welcome to Celestial Church Of Church
+                Welcome to Agiliti 1 International
               </div>
               <h2 class="wow fadeInRight" data-wow-delay=".2s">
                 Sharing the God’s love with everyone
@@ -355,17 +352,12 @@ onMounted(() => {
           <div class="row row-narrow-50 align-items-center row-30">
             <div class="col-lg-7 wow fadeInLeft" data-wow-delay=".2s">
               <div class="inset-xl-right-60">
-                <img
-                  src="/images/cathedral1.jpg"
-                  alt=""
-                  width="660"
-                  height="495"
-                />
+                <img src="/images/church.jpg" alt="" width="660" height="495" />
               </div>
             </div>
             <div class="col-lg-5 wow fadeInRight" data-wow-delay=".3s">
-              <div class="pre-title">Headquarters</div>
-              <h2>CCC Holy Land Imeko, Nigeria</h2>
+              <div class="pre-title">History of our church</div>
+              <h2>41 years and counting</h2>
               <p>
                 The Church has its Supreme Headquarters in Porto Novo, Republic
                 of Benin, its National (Diocesan) Headquarters at 12/15 Church
@@ -492,7 +484,9 @@ onMounted(() => {
                 translated to “Pastor.” This occurred after he spent five years
                 as an “Evangelist” following the establishment of the Church.
               </p>
-              <div class="quote-italic">“Halleluyah...”</div>
+              <div class="quote-italic">
+                Omo Adekoya, O so gbo di le, O so gbe di igboro
+              </div>
               <img
                 src="/images/signature-132x43.png"
                 alt=""
@@ -517,15 +511,15 @@ onMounted(() => {
               </div>
             </div>
             <div class="col-lg-5 wow fadeInLeft" data-wow-delay="3.3s">
-              <div class="pre-title">The Founder Sherperd</div>
-              <h2>Samuel Adekoya<br />Founding Sherperd</h2>
+              <div class="pre-title">The Current Sherperd</div>
+              <h2>Daniel Adekoya<br />Current Sherperd</h2>
               <p>
                 Apart from being a prophet, the Founder was given permission by
                 divine order to use the angelic title "EPASTORAL," which was
                 translated to “Pastor.” This occurred after he spent five years
                 as an “Evangelist” following the establishment of the Church.
               </p>
-              <div class="quote-italic">“Halleluyah...”</div>
+              <div class="quote-italic">Eri Kankanbu || Sheperd by grace”</div>
               <img
                 src="/images/signature-132x43.png"
                 alt=""
@@ -570,7 +564,7 @@ onMounted(() => {
                                 “Raising the Dead.<span
                                   class="text-italic accent-block"
                                   >One of the most famous miracles attributed to
-                                  Oshoffa was when he reportedly raised a young
+                                  Adekoya was when he reportedly raised a young
                                   boy from the dead during a service.</span
                                 >
                                 This event drew significant attention and
@@ -592,16 +586,16 @@ onMounted(() => {
                           >
                             <div class="col-lg-9 inset-left-110">
                               <div class="h3">
-                                “FHealing the Sick<span
+                                “Healing the Sick<span
                                   class="text-italic accent-block"
-                                  >Oshoffa was known for his ability to heal
+                                  >Adekoya was known for his ability to heal
                                   people with various illnesses, including those
                                   who were declared incurable by medical
                                   professionals.
                                 </span>
                                 Many came to him for healing, and numerous
-                                testimonies of miraculous recoveries were shared
-                                by followers.”
+                                testimonies of miraculous recoveries were
+                                shared.”
                               </div>
                             </div>
                           </div>
@@ -693,14 +687,16 @@ onMounted(() => {
                 <div class="footer-title">Contact us</div>
                 <ul class="contact-list">
                   <li>
-                    178 West 27th Street New York, NY 10012 Questions? Please
-                    write us at:<a class="link-secondary" href="mailto:#"
-                      >info@demolink.org</a
-                    >
+                    18/20 Celestial Avenue, Agiliti, Mile 12.
+                    <br />
+                    Questions? Please write us at:<a
+                      class="link-secondary"
+                      href="mailto:info@cccagili1.org"
+                      >info@cccagili1.org</a>
                   </li>
                   <li>
                     <span>Call us:</span
-                    ><a class="phone" href="tel:#">+1 705 55 50 000</a>
+                    ><a class="phone" href="tel:#">(+44) 7721480196</a>
                   </li>
                 </ul>
                 <ul class="social-list">
@@ -743,8 +739,8 @@ onMounted(() => {
               <div class="col-12 wow fadeInUp" data-wow-delay=".4s">
                 <p class="rights">
                   <span>&copy;&nbsp; </span><span class="copyright-year"></span
-                  ><span>&nbsp;</span><span>CCC</span><span>.&nbsp;</span
-                  ><span>All Rights Reserved.</span>
+                  ><span>&nbsp;</span><span>CCC Afonifoji Ibukun-Olu</span
+                  ><span>.&nbsp;</span><span>All Rights Reserved.</span>
                 </p>
               </div>
             </div>
@@ -771,14 +767,15 @@ onMounted(() => {
 
 <style lang="scss">
 .ie-panel {
-  display: none;
-  background: #212121;
-  padding: 10px 0;
-  box-shadow: 3px 3px 5px 0 rgba(0, 0, 0, 0.3);
-  clear: both;
-  text-align: center;
   position: relative;
   z-index: 1;
+  display: none;
+  background: #212121;
+  box-shadow: 3px 3px 5px 0 rgba(0, 0, 0, 30%);
+  clear: both;
+  padding-block: 10px;
+  padding-inline: 0;
+  text-align: center;
 }
 
 html.ie-10 .ie-panel,

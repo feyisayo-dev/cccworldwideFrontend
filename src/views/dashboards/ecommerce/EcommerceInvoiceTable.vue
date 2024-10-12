@@ -1,15 +1,21 @@
 <script setup>
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
-import { paginationMeta } from '@/@fake-db/utils'
-import { useInvoiceStore } from '@/views/apps/invoice/useInvoiceStore'
+import { VDataTableServer } from "vuetify/labs/VDataTable";
+import { paginationMeta } from "@/@fake-db/utils";
+import { useInvoiceStore } from "@/views/apps/invoice/useInvoiceStore";
+import api from "@/apiservices/api";
+import dayjs from "dayjs";
+import { ref, computed, onMounted } from "vue";
 
-const invoiceListStore = useInvoiceStore()
-const searchQuery = ref('')
-const dateRange = ref('')
-const selectedStatus = ref()
-const totalInvoices = ref(0)
-const invoices = ref([])
-const selectedRows = ref([])
+const totalPaymentsCountGlobal = ref(0);
+const invoiceListStore = useInvoiceStore();
+const searchQuery = ref("");
+const dateRange = ref("");
+const selectedStatus = ref();
+const totalInvoices = ref(0);
+const invoices = ref([]);
+const Payments = ref([]);
+const selectedRows = ref([]);
+const userData = JSON.parse(localStorage.getItem("userData") || "null");
 
 const options = ref({
   page: 1,
@@ -17,142 +23,155 @@ const options = ref({
   sortBy: [],
   groupBy: [],
   search: undefined,
-})
+});
 
-const isLoading = ref(false)
-const currentPage = ref(1)
+const isLoading = ref(false);
+const currentPage = ref(1);
 
-currentPage.value = options.value.page
+currentPage.value = options.value.page;
 
 // 👉 headers
 const headers = [
   {
-    title: '#ID',
-    key: 'id',
+    title: "#ID",
+    key: "id", // Corresponds to the payment ID
   },
   {
-    title: 'Trending',
-    key: 'trending',
+    title: "Trending",
+    key: "trending", // Corresponds to the trend/status
     sortable: false,
   },
   {
-    title: 'Total',
-    key: 'total',
+    title: "Payment Type",
+    key: "type", // Corresponds to 'paidfor' in the payment data
   },
   {
-    title: 'Issued Date',
-    key: 'date',
+    title: "Payment Amount",
+    key: "amount", // Corresponds to the payment amount
   },
   {
-    title: 'Actions',
-    key: 'actions',
-    sortable: false,
-    width: '2rem',
+    title: "Date Issued",
+    key: "date", // Corresponds to the issued date
   },
-]
+];
 
-// 👉 Fetch Invoices
-const fetchInvoices = (query, currentStatus, firstDate, lastDate, option) => {
-  isLoading.value = true
-  invoiceListStore.fetchInvoices({
-    q: query,
-    status: currentStatus,
-    startDate: firstDate,
-    endDate: lastDate,
-    options: option,
-  }).then(response => {
-    invoices.value = response.data.invoices
-    totalInvoices.value = response.data.totalInvoices
-    options.value.page = response.data.page
-  }).catch(error => {
-    console.log(error)
-  })
-  isLoading.value = false
-}
+const fetchAllPayments = async () => {
+  try {
+    const response = await api.get(`/getMemberPayment/${userData.UserId}`);
+    const payments = response.data;
 
-const resolveInvoiceStatusVariantAndIcon = status => {
-  if (status === 'Partial Payment')
-    return {
-      variant: 'success',
-      icon: 'tabler-circle-half-2',
-    }
-  if (status === 'Paid')
-    return {
-      variant: 'warning',
-      icon: 'tabler-chart-pie',
-    }
-  if (status === 'Downloaded')
-    return {
-      variant: 'info',
-      icon: 'tabler-arrow-down-circle',
-    }
-  if (status === 'Draft')
-    return {
-      variant: 'primary',
-      icon: 'tabler-device-floppy',
-    }
-  if (status === 'Sent')
-    return {
-      variant: 'secondary',
-      icon: 'tabler-circle-check',
-    }
-  if (status === 'Past Due')
-    return {
-      variant: 'error',
-      icon: 'tabler-alert-circle',
-    }
-  
-  return {
-    variant: 'secondary',
-    icon: 'tabler-x',
+    const totalPaymentsCount = payments.length;
+
+    const paymentData = payments.map((payment) => {
+      const date = dayjs(payment.payment_date);
+
+      return {
+        id: payment.receipt, // ID corresponds to 'receipt'
+        status: "Paid", // Static or dynamic trending status
+        type: payment.payment_type, // Type of payment (e.g., Building Levy, Offering, etc.)
+        amount: Number(payment.amount), // Payment amount
+        date: date.isValid() ? date.format("MM/DD/YYYY") : "Invalid Date", // Use Day.js to format the date
+      };
+    });
+
+    // Log the total count of payments
+    console.log("Total Payments Count:", totalPaymentsCount);
+    totalPaymentsCountGlobal.value = totalPaymentsCount;
+    Payments.value = paymentData; // Ensure this updates properly
+
+    console.log("Payments Data:", Payments.value);
+  } catch (error) {
+    console.error("Error fetching payments:", error);
   }
-}
+};
+
+onMounted(() => {
+  console.log("This is the payments");
+  fetchAllPayments();
+});
+
+const filteredPayments = computed(() => {
+  if (!searchQuery.value) {
+    return Payments.value; // Return all payments if there's no search query
+  }
+
+  const lowerCaseQuery = searchQuery.value.toLowerCase();
+
+  return Payments.value.filter((payment) => {
+    return (
+      payment.id.toString().includes(lowerCaseQuery) || // ID match
+      payment.type.toLowerCase().includes(lowerCaseQuery) || // Type match
+      payment.amount.toString().includes(lowerCaseQuery) || // Amount match
+      payment.date.includes(lowerCaseQuery) // Date match
+    );
+  });
+});
+
+const resolveInvoiceStatusVariantAndIcon = (status) => {
+  if (status === "Partial Payment")
+    return {
+      variant: "success",
+      icon: "tabler-circle-half-2",
+    };
+  if (status === "Paid")
+    return {
+      variant: "success",
+      icon: "tabler-chart-pie",
+    };
+  if (status === "Downloaded")
+    return {
+      variant: "info",
+      icon: "tabler-arrow-down-circle",
+    };
+  if (status === "Draft")
+    return {
+      variant: "primary",
+      icon: "tabler-device-floppy",
+    };
+  if (status === "Sent")
+    return {
+      variant: "secondary",
+      icon: "tabler-circle-check",
+    };
+  if (status === "Past Due")
+    return {
+      variant: "error",
+      icon: "tabler-alert-circle",
+    };
+
+  return {
+    variant: "secondary",
+    icon: "tabler-x",
+  };
+};
 
 const computedMoreList = computed(() => {
-  return paramId => [
+  return (paramId) => [
     {
-      title: 'Download',
-      value: 'download',
-      prependIcon: 'tabler-download',
+      title: "Download",
+      value: "download",
+      prependIcon: "tabler-download",
     },
     {
-      title: 'Edit',
-      value: 'edit',
-      prependIcon: 'tabler-pencil',
+      title: "Edit",
+      value: "edit",
+      prependIcon: "tabler-pencil",
       to: {
-        name: 'apps-invoice-edit-id',
+        name: "apps-invoice-edit-id",
         params: { id: paramId },
       },
     },
     {
-      title: 'Duplicate',
-      value: 'duplicate',
-      prependIcon: 'tabler-layers-intersect',
+      title: "Duplicate",
+      value: "duplicate",
+      prependIcon: "tabler-layers-intersect",
     },
-  ]
-})
-
-const deleteInvoice = id => {
-  invoiceListStore.deleteInvoice(id).then(() => {
-    fetchInvoices(searchQuery.value, selectedStatus.value, dateRange.value?.split('to')[0], dateRange.value?.split('to')[1], options.value)
-  }).catch(error => {
-    console.log(error)
-  })
-}
-
-// 👉 watch for data table options like itemsPerPage,page,searchQuery,sortBy etc...
-watchEffect(() => {
-  const [start, end] = dateRange.value ? dateRange.value.split('to') : ''
-
-  fetchInvoices(searchQuery.value, selectedStatus.value, start, end, options.value)
-})
+  ];
+});
 </script>
 
 <template>
-  <VCard
-    v-if="invoices"
-    id="invoice-list"
-  >
+  <VCard v-if="Payments" id="invoice-list">
     <VCardText class="d-flex align-center flex-wrap gap-4 py-4">
       <div class="me-3 d-flex gap-3">
         <AppSelect
@@ -165,15 +184,15 @@ watchEffect(() => {
             { value: 100, title: '100' },
             { value: -1, title: 'All' },
           ]"
-          style="width: 6.25rem;"
+          style="width: 6.25rem"
           @update:model-value="options.itemsPerPage = parseInt($event, 10)"
         />
         <!-- 👉 Create invoice -->
         <VBtn
           prepend-icon="tabler-plus"
-          :to="{ name: 'apps-invoice-add' }"
+          :to="{ name: 'dashboards-addmemberpayment-dashboard' }"
         >
-          Create invoice
+          Create Payments
         </VBtn>
       </div>
 
@@ -184,20 +203,8 @@ watchEffect(() => {
         <div class="invoice-list-filter">
           <AppTextField
             v-model="searchQuery"
-            placeholder="Search Invoice"
+            placeholder="Search Payemnts"
             density="compact"
-          />
-        </div>
-
-        <!-- 👉 Select status -->
-        <div class="invoice-list-filter">
-          <AppSelect
-            v-model="selectedStatus"
-            placeholder="Select Status"
-            clearable
-            clear-icon="tabler-x"
-            single-line
-            :items="['Downloaded', 'Draft', 'Sent', 'Paid', 'Partial Payment', 'Past Due']"
           />
         </div>
       </div>
@@ -209,25 +216,23 @@ watchEffect(() => {
     <VDataTableServer
       v-model="selectedRows"
       v-model:items-per-page="options.itemsPerPage"
-      v-model:page="options.page"
       :loading="isLoading"
-      :items-length="totalInvoices"
+      :items-length="filteredPayments.length"
       :headers="headers"
-      :items="invoices"
+      :items="filteredPayments"
       class="text-no-wrap"
       @update:options="options = $event"
     >
       <!-- Trending Header -->
       <template #column.trending>
-        <VIcon
-          size="22"
-          icon="tabler-trending-up"
-        />
+        <VIcon size="22" icon="tabler-trending-up" />
       </template>
 
       <!-- id -->
       <template #item.id="{ item }">
-        <RouterLink :to="{ name: 'apps-invoice-preview-id', params: { id: item.value } }">
+        <RouterLink
+          :to="{ name: 'apps-invoice-preview-id', params: { id: item.value } }"
+        >
           #{{ item.raw.id }}
         </RouterLink>
       </template>
@@ -239,35 +244,31 @@ watchEffect(() => {
             <VAvatar
               :size="30"
               v-bind="props"
-              :color="resolveInvoiceStatusVariantAndIcon(item.raw.invoiceStatus).variant"
+              :color="
+                resolveInvoiceStatusVariantAndIcon(item.raw.status).variant
+              "
               variant="tonal"
             >
               <VIcon
                 :size="20"
-                :icon="resolveInvoiceStatusVariantAndIcon(item.raw.invoiceStatus).icon"
+                :icon="resolveInvoiceStatusVariantAndIcon(item.raw.status).icon"
               />
             </VAvatar>
           </template>
           <p class="mb-0">
-            {{ item.raw.invoiceStatus }}
+            {{ item.raw.status }}
           </p>
-          <p class="mb-0">
-            Balance: {{ item.raw.balance }}
-          </p>
-          <p class="mb-0">
-            Due date: {{ item.raw.dueDate }}
-          </p>
+          <p class="mb-0">Balance: {{ item.raw.balance }}</p>
+          <p class="mb-0">Due date: {{ item.raw.dueDate }}</p>
         </VTooltip>
       </template>
 
       <!-- Total -->
-      <template #item.total="{ item }">
-        ${{ item.raw.total }}
-      </template>
+      <template #item.total="{ item }"> ${{ item.raw.total }} </template>
 
       <!-- Date -->
       <template #item.date="{ item }">
-        {{ item.raw.issuedDate }}
+        {{ item.raw.date }}
       </template>
 
       <!-- Actions -->
@@ -276,7 +277,9 @@ watchEffect(() => {
           <VIcon icon="tabler-trash" />
         </IconBtn>
 
-        <IconBtn :to="{ name: 'apps-invoice-preview-id', params: { id: item.raw.id } }">
+        <IconBtn
+          :to="{ name: 'apps-invoice-preview-id', params: { id: item.raw.id } }"
+        >
           <VIcon icon="tabler-eye" />
         </IconBtn>
 
@@ -292,7 +295,9 @@ watchEffect(() => {
       <template #bottom>
         <VDivider />
 
-        <div class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-3 pa-5 pt-3">
+        <div
+          class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-3 pa-5 pt-3"
+        >
           <p class="text-sm text-disabled mb-0">
             {{ paginationMeta(options, totalInvoices) }}
           </p>

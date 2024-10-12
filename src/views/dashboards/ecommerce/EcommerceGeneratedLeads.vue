@@ -131,7 +131,7 @@ const chartOptions = computed(() => {
       <div class="d-flex flex-column">
         <div class="mb-auto">
           <h5 class="text-h5 text-no-wrap">
-            Generated Leads
+            Request a prayer session
           </h5>
           <span class="text-sm">Monthly Report</span>
         </div>
