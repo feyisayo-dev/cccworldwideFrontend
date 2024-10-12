@@ -7,11 +7,21 @@ export default [
         title: 'User Dashboard',
         to: 'dashboards-user-dashboard',
         action: 'read',        // Define specific action
-        subject: 'Children',  
+        subject: 'Children',
+      },
+      {
+        title: 'User Setting',
+        to: {
+          name: 'pages-account-settings-tab',
+          params: { tab: 'account' },
+        },
+        icon: { icon: 'tabler-settings' },
+        action: 'read',        // Define specific action
+        subject: 'Children',
       },
       {
         title: 'Add Children',
-        to: 'dashboards-analytics',
+        to: 'dashboards-addChildren-dashboard',
         action: 'read',
         subject: 'User',
       },

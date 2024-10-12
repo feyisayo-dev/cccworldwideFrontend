@@ -184,38 +184,6 @@ const editUserDialog = name => {
           <!-- 👉 Filters -->
           <VCardText>
             <VRow>
-              <!-- 👉 Select Role -->
-              <!--
-                <VCol
-                cols="12"
-                sm="4"
-                >
-                <AppSelect
-                v-model="selectedRole"
-                label="Select Role"
-                :items="roles"
-                clearable
-                clear-icon="tabler-x"
-                />
-                </VCol>
-              -->
-              <!-- 👉 Select Plan -->
-              <!-- 
-                <VCol
-                cols="12"
-                sm="4"
-                >
-                <AppSelect
-                v-model="selectedPlan"
-                label="Select Plan"
-                :items="plans"
-                clearable
-                clear-icon="tabler-x"
-                />
-                </VCol>
-              -->
-              <!-- 👉 Select Status -->
-              <!--
                 <VCol
                 cols="12"
                 sm="4"

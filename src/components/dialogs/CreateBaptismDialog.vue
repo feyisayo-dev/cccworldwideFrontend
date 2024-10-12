@@ -264,7 +264,7 @@ const isConfirmDialogVisible = ref(false)
   <ConfirmDialog
     v-model:isDialogVisible="isConfirmDialogVisible"
     :api-response="apiResponseStatus"
-    confirmation-question="You are about to confirm this title Did you want to continue ?"
+    confirmation-question="You are about to confirm this Baptism Did you want to continue ?"
     cancel-msg="Registration Cancelled!!"
     cancel-title="Cancelled"
     :confirm-msg="apiResponseMessage"

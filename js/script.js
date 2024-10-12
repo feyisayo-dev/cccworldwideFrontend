@@ -83,8 +83,9 @@
 
 	// Initialize scripts that require a loaded window
 	$window.on('load', function () {
-		// Page loader & Page transition
+		console.log("Window loaded");
 		if (plugins.preloader.length && !isNoviBuilder) {
+			console.log("Preloader found, initializing...");
 			pageTransition({
 				target:            document.querySelector('.page'),
 				delay:             0,

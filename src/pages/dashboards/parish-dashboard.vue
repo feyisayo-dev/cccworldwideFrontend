@@ -191,15 +191,7 @@ const resolveUserRoleVariant = category => {
   }
 }
 
-const resolveUserStatusVariant = stat => {
-  const statLowerCase = stat.toLowerCase()
-  if (statLowerCase === 'pending')
-    return 'warning'
-  if (statLowerCase === 'active')
-    return 'success'
-  if (statLowerCase === 'inactive')
-    return 'secondary'
-  
+const resolveUserStatusVariant = () => {  
   return 'primary'
 }
 

@@ -152,6 +152,7 @@ const status = [
 ]
 
 const resolveUserRoleVariant = category => {
+  console.log("This is the category", category)
   const roleLowerCase = category.toLowerCase()
   if (roleLowerCase === 'national')
     return {
@@ -191,15 +192,7 @@ const resolveUserRoleVariant = category => {
   }
 }
 
-const resolveUserStatusVariant = stat => {
-  const statLowerCase = stat.toLowerCase()
-  if (statLowerCase === 'pending')
-    return 'warning'
-  if (statLowerCase === 'active')
-    return 'success'
-  if (statLowerCase === 'inactive')
-    return 'secondary'
-  
+const resolveUserStatusVariant = () => {  
   return 'primary'
 }
 
@@ -454,7 +447,6 @@ const editPermission = name => {
                 <VAvatar
                   size="34"
                   :variant="!item.raw.avatar ? 'tonal' : undefined"
-                  :color="!item.raw.avatar ? resolveUserRoleVariant(item.raw.city).color : undefined"
                   class="me-3"
                 >
                   <VImg

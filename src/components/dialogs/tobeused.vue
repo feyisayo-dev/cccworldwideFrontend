@@ -1,8 +1,6 @@
 <script setup>
-import { useUserListStore } from '@/apiservices/membersList'
-import laptopGirl from '@images/illustrations/laptop-girl.png'
-import { onMounted, ref } from 'vue'
 import { useAllAdminActions } from '@/apiservices/adminActions'
+import { onMounted, ref } from 'vue'
 
 
 const props = defineProps({
@@ -136,9 +134,9 @@ const onCancel = () => {
 const fetchCountries = async () => {
   allAdminActions.fetchCountries({
   }).then(response => {
-    const data=response.data
+    const data = response.data
 
-    if(data.countries&&data.countries.length>0) {  
+    if (data.countries && data.countries.length > 0) {
       form.value.countryList = data.countries.map(country => ({
         id: country.id,
         name: country.name,
@@ -184,20 +182,20 @@ const getResidentialState = () => {
 const getTitleByGender = async getByGendervalue => {
   try {
     const response = await api.get(`/getTitleByGender/${getByGendervalue}`)
-    const data = response.data.titles 
-    if(data&&data.length>0) {
+    const data = response.data.titles
+    if (data && data.length > 0) {
       form.value.titleList = data.map(genderTitles => ({
         level: genderTitles.level,
         title: genderTitles.title,
-       
+
       }))
-    }  
+    }
   } catch (error) {
     console.error('Error fetching data:', error)
   }
 }
 
-const  getGenderTitle = () => {
+const getGenderTitle = () => {
   if (form.value.Gender) {
     const gender = form.value.Gender
 
@@ -208,8 +206,8 @@ const  getGenderTitle = () => {
 const fetchMinistryFromApi = async () => {
   allAdminActions.fetchMinistryFromApi({
   }).then(response => {
-    const data=response.data
-    
+    const data = response.data
+
     // form.value.ministry = data.ministry
 
     if (data.ministry && data.ministry.length > 0) {
@@ -245,7 +243,7 @@ const resetForm = () => {
 const resetAvatar = () => {
   form.value.avatar = userData.avatar || avatar1
 }
-    
+
 const changeAvatar = file => {
   const { files } = file.target
   if (files && files.length) {
@@ -269,47 +267,22 @@ const changeAvatar = file => {
         <VCard title="Profile Details">
           <VCardText class="d-flex">
             <!-- 👉 Avatar -->
-            <VAvatar
-              rounded
-              size="100"
-              class="me-6"
-              :image="form.avatar"
-            />
+            <VAvatar rounded size="100" class="me-6" :image="form.avatar" />
 
             <!-- 👉 Upload Photo -->
             <form class="d-flex flex-column justify-center gap-4">
               <div class="d-flex flex-wrap gap-2">
-                <VBtn
-                  color="primary"
-                  @click="refInputEl?.click()"
-                >
-                  <VIcon
-                    icon="tabler-cloud-upload"
-                    class="d-sm-none"
-                  />
+                <VBtn color="primary" @click="refInputEl?.click()">
+                  <VIcon icon="tabler-cloud-upload" class="d-sm-none" />
                   <span class="d-none d-sm-block">Upload new photo</span>
                 </VBtn>
 
-                <input
-                  ref="refInputEl"
-                  type="file"
-                  name="file"
-                  accept=".jpeg,.png,.jpg,GIF"
-                  hidden
-                  @input="changeAvatar"
-                >
+                <input ref="refInputEl" type="file" name="file" accept=".jpeg,.png,.jpg,GIF" hidden
+                  @input="changeAvatar">
 
-                <VBtn
-                  type="reset"
-                  color="secondary"
-                  variant="tonal"
-                  @click="resetAvatar"
-                >
+                <VBtn type="reset" color="secondary" variant="tonal" @click="resetAvatar">
                   <span class="d-none d-sm-block">Reset</span>
-                  <VIcon
-                    icon="tabler-refresh"
-                    class="d-sm-none"
-                  />
+                  <VIcon icon="tabler-refresh" class="d-sm-none" />
                 </VBtn>
               </div>
 
@@ -326,214 +299,95 @@ const changeAvatar = file => {
             <VForm class="mt-6">
               <VRow>
                 <!-- 👉 First Name -->
-                <VCol
-                  md="4"
-                  cols="12"
-                >
-                  <AppTextField
-                    v-model="form.fname"
-                    label="First Name"
-                  />
+                <VCol md="4" cols="12">
+                  <AppTextField v-model="form.fname" label="First Name" />
                 </VCol>
 
                 <!-- 👉 Middle Name -->
-                <VCol
-                  md="4"
-                  cols="12"
-                >
-                  <AppTextField
-                    v-model="form.mname"
-                    label="Middle Name"
-                  />
+                <VCol md="4" cols="12">
+                  <AppTextField v-model="form.mname" label="Middle Name" />
                 </VCol>
 
                 <!-- 👉 Last Name -->
-                <VCol
-                  md="4"
-                  cols="12"
-                >
-                  <AppTextField
-                    v-model="form.sname"
-                    label="Last Name"
-                  />
+                <VCol md="4" cols="12">
+                  <AppTextField v-model="form.sname" label="Last Name" />
                 </VCol>
 
                 <!-- 👉 Email -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.email"
-                    label="E-mail"
-                    type="email"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.email" label="E-mail" type="email" />
                 </VCol>
 
                 <!-- 👉 Phone -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.mobile"
-                    label="Phone Number"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.mobile" label="Phone Number" />
                 </VCol>
 
                 <!-- 👉 Alt Phone -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.Altmobile"
-                    label="Alternate Phone Number"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.Altmobile" label="Alternate Phone Number" />
                 </VCol>
 
                 <!-- 👉 dob -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.dob"
-                    type="date"
-                    label="Date of birth"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.dob" type="date" label="Date of birth" />
                 </VCol>
 
                 <!-- 👉 Address -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.Residence"
-                    label="Address"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.Residence" label="Address" />
                 </VCol>
 
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.dot"
-                    type="date"
-                    label="Date of first anointment"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.dot" type="date" label="Date of first anointment" />
                 </VCol>
 
                 <!-- 👉 Country -->
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <VAutocomplete
-                    v-model="form.preSelectedCountry"
-                    label="Country"
-                    :items="form.countryList"
-                    item-title="name"
-                    item-value="name"
-                    density="compact"
-                    variant="outlined"
-                    @change="getResidentialState"
-                  />
+                <VCol cols="12" md="6">
+                  <VAutocomplete v-model="form.preSelectedCountry" label="Country" :items="form.countryList"
+                    item-title="name" item-value="name" density="compact" variant="outlined"
+                    @change="getResidentialState" />
                 </VCol>
 
 
                 <!-- 👉 State -->
-                <VCol
-                  cols="12"
-                  md="6"
-                >
-                  <VAutocomplete
-                    v-model="form.State"
-                    label="State"
-                    :items="form.stateList"
-                    item-title="name"
-                  />
+                <VCol cols="12" md="6">
+                  <VAutocomplete v-model="form.State" label="State" :items="form.stateList" item-title="name" />
                 </VCol>
 
                 <!-- 👉 City -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppTextField
-                    v-model="form.City"
-                    label="City"
-                  />
+                <VCol cols="12" md="4">
+                  <AppTextField v-model="form.City" label="City" />
                 </VCol>
 
                 <!-- 👉 title -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppSelect
-                    v-model="form.Title"
-                    label="Present Title"
-                    :items="form.titleList"
-                  />
+                <VCol cols="12" md="4">
+                  <AppSelect v-model="form.Title" label="Present Title" :items="form.titleList" />
                 </VCol>
 
                 <!-- 👉 Status -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppSelect
-                    v-model="form.MStatus"
-                    label="Member Status"
-                    placeholder=" Select status "
-                    :items="['Member/Laity', 'Vineyard Worker']"
-                  />
+                <VCol cols="12" md="4">
+                  <AppSelect v-model="form.MStatus" label="Member Status" placeholder=" Select status "
+                    :items="['Member/Laity', 'Vineyard Worker']" />
                 </VCol>
 
-                <VCol
-                  v-if="form.MStatus == 'Vineyard Worker'"
-                  cols="12"
-                  md="4"
-                >
-                  <AppSelect
-                    v-model="form.Status"
-                    label="Vineyard Status"
-                    placeholder=" Select Vineyard status "
-                    :items="['Shepherd','Asst. Shepherd','Wolider','Wolima','Church Worker','Pastor']"
-                  />
+                <VCol v-if="form.MStatus == 'Vineyard Worker'" cols="12" md="4">
+                  <AppSelect v-model="form.Status" label="Vineyard Status" placeholder=" Select Vineyard status "
+                    :items="['Shepherd', 'Asst. Shepherd', 'Wolider', 'Wolima', 'Church Worker', 'Pastor']" />
                 </VCol>
 
                 <!-- 👉 Ministry -->
-                <VCol
-                  cols="12"
-                  md="4"
-                >
-                  <AppSelect
-                    id="ministrySelect"
-                    v-model="form.ministry"
-                    label="Ministry"
-                    :items="form.ministryList"
-                  />
+                <VCol cols="12" md="4">
+                  <AppSelect id="ministrySelect" v-model="form.ministry" label="Ministry" :items="form.ministryList" />
                 </VCol>
 
                 <!-- 👉 Form Actions -->
-                <VCol
-                  cols="12"
-                  class="d-flex flex-wrap gap-4"
-                >
+                <VCol cols="12" class="d-flex flex-wrap gap-4">
                   <VBtn @click="isConfirmDialogVisible = true">
                     Save changes
                   </VBtn>
 
-                  <VBtn
-                    color="secondary"
-                    variant="tonal"
-                    type="reset"
-                    @click.prevent="resetForm"
-                  >
+                  <VBtn color="secondary" variant="tonal" type="reset" @click.prevent="resetForm">
                     Reset
                   </VBtn>
                 </VCol>
@@ -545,16 +399,9 @@ const changeAvatar = file => {
     </VRow>
 
     <!-- Confirm Dialog -->
-    <ConfirmDialog
-      v-model:isDialogVisible="isConfirmDialogVisible"
-      :api-response="apiResponseStatus"
+    <ConfirmDialog v-model:isDialogVisible="isConfirmDialogVisible" :api-response="apiResponseStatus"
       confirmation-question="You are about to confirm this edit Did you want to continue ?"
-      cancel-msg="Edit Cancelled!!"
-      cancel-title="Cancelled"
-      :confirm-msg="apiResponseMessage"
-      confirm-title="Updated Successfully!"
-      @confirm="onSubmit"
-      @cancel="onCancel"
-    />
+      cancel-msg="Edit Cancelled!!" cancel-title="Cancelled" :confirm-msg="apiResponseMessage"
+      confirm-title="Updated Successfully!" @confirm="onSubmit" @cancel="onCancel" />
   </div>
 </template>

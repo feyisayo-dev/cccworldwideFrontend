@@ -19,7 +19,7 @@ import VueConfirmPlugin from 'v3confirm'
 import { createApp, ref } from 'vue'
 import CountryFlag from 'vue-country-flag-next'
 import vueCountryRegionSelect from 'vue3-country-region-select'
-
+import { createHead } from '@vueuse/head'
 const vPhoneInput = createVPhoneInput({
   countryIconMode: 'svg',
   
@@ -31,7 +31,9 @@ loadFonts()
 
 // Create vue app
 const app = createApp(App)
+const head = createHead()
 
+app.use(head)
 app.use(vueCountryRegionSelect)
 app.component('CountryFlag', CountryFlag)
 app.use(VueConfirmPlugin, {

@@ -1,11 +1,15 @@
 <script setup>
-import { VDataTable } from 'vuetify/labs/VDataTable'
-import { paginationMeta } from '@/@fake-db/utils'
-import { useProjectStore } from '@/views/dashboards/analytics/useProjectStore'
-import { avatarText } from '@core/utils/formatters'
+import { VDataTable } from "vuetify/labs/VDataTable";
+import { paginationMeta } from "@/@fake-db/utils";
+import { useProjectStore } from "@/views/dashboards/analytics/useProjectStore";
+import { avatarText } from "@core/utils/formatters";
 
-const projectStore = useProjectStore()
-const searchQuery = ref('')
+const projectStore = useProjectStore();
+const searchQuery = ref("");
+const isCreateDepartmentVisible = ref(false);
+const apiResponseStatus = ref('')
+const apiResponseMessage = ref('')
+const userData = JSON.parse(localStorage.getItem('userData') || 'null')
 
 const options = ref({
   page: 1,
@@ -13,56 +17,117 @@ const options = ref({
   sortBy: [],
   groupBy: [],
   search: undefined,
-})
+});
 
-const projects = ref([])
+const departments = ref([]);
 
 // 👉 headers
 const headers = [
   {
-    title: 'Name',
-    key: 'name',
+    title: "Name",
+    key: "name",
   },
   {
-    title: 'Leader',
-    key: 'leader',
+    title: "Leader",
+    key: "leader",
   },
   {
-    title: 'Team',
-    key: 'team',
+    title: "Team",
+    key: "team",
   },
   {
-    title: 'Status',
-    key: 'status',
+    title: "Status",
+    key: "status",
   },
   {
-    title: 'Actions',
-    key: 'actions',
+    title: "Actions",
+    key: "actions",
     sortable: false,
   },
-]
+];
 
-// 👉 Fetch Projects
-onMounted(() => {
-  projectStore.fetchProjects().then(response => {
-    projects.value = response.data
-  }).catch(error => {
-    console.log(error)
-  })
-})
+const fetchAllDepartments = async (message) => {
+  if (message) {
+    try {
+      const response = await api.get(`/getDepartment/${userData.parishcode}`);
+      
+      if (response.data.departments) {
+        // Initialize an array to hold the departments with member data
+        const departmentsWithMembers = await Promise.all(
+          response.data.departments.map(async (department) => {
+            // Split the team string into an array of member IDs
+            const teamMembers = department.team.split(',');
+
+            // Fetch details for each team member
+            const members = await Promise.all(
+              teamMembers.map(async (memberId) => {
+                const memberResponse = await api.get(`/member/${memberId}`);
+                return {
+                  id: memberId,
+                  logo: memberResponse.data.thumbnails, // Assuming the response includes a 'logo' field
+                };
+              })
+            );
+
+            return {
+              id: department.id,
+              name: department.name,
+              leader: department.leader,
+              team: members, // Store the members with their logos
+              status: department.status,
+            };
+          })
+        );
+
+        departments.value = departmentsWithMembers; // Set the fetched departments
+      }
+
+      console.log("Departments formatted for VDataTable:", departments.value);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+};
+
+
+watchEffect(fetchAllDepartments)
+
+
+// onMounted(() => {
+//   projectStore
+//     .fetchProjects()
+//     .then((response) => {
+//       departments.value = response.data;
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+// });
+
+const changes = () => {
+  // fetchAllDepartments()
+  isCreateDepartmentVisible.value = false
+}
 </script>
 
 <template>
-  <VCard v-if="projects">
-    <VCardItem class="project-header d-flex flex-wrap justify-space-between py-4 gap-4">
-      <VCardTitle>Projects</VCardTitle>
-
+  <VCard v-if="departments">
+    <VCardItem
+      class="project-header d-flex flex-wrap justify-space-between py-4 gap-4"
+    >
+      <VCardTitle>Dapartments</VCardTitle>
+      <div class="d-flex justify-center mb-4">
+        <VBtn
+          v-if="userData.role === 'Admin'"
+          prepend-icon="tabler-plus"
+          @click="isCreateDepartmentVisible = !isCreateDepartmentVisible"
+        >
+          Add Department
+        </VBtn>
+      </div>
       <template #append>
-        <div style="inline-size: 272px;">
-          <AppTextField
-            v-model="searchQuery"
-            placeholder="Search"
-          />
+        <div style="inline-size: 272px">
+          <AppTextField v-model="searchQuery" placeholder="Search" />
         </div>
       </template>
     </VCardItem>
@@ -76,7 +141,7 @@ onMounted(() => {
       show-select
       :search="searchQuery"
       :headers="headers"
-      :items="projects"
+      :items="departments"
       class="text-no-wrap"
       @update:options="options = $event"
     >
@@ -88,14 +153,10 @@ onMounted(() => {
             :color="!item.raw.logo.length ? 'primary' : undefined"
             size="38"
           >
-            <VImg
-              v-if="item.raw.logo.length"
-              :src="item.raw.logo"
-            />
-            <span
-              v-else
-              class="font-weight-medium"
-            >{{ avatarText(item.raw.name) }}</span>
+            <VImg v-if="item.raw.logo.length" :src="item.raw.logo" />
+            <span v-else class="font-weight-medium">{{
+              avatarText(item.raw.name)
+            }}</span>
           </VAvatar>
 
           <div>
@@ -121,10 +182,7 @@ onMounted(() => {
 
       <!-- 👉 Status -->
       <template #item.status="{ item }">
-        <div
-          class="d-flex align-center gap-3"
-          style="min-inline-size: 150px;"
-        >
+        <div class="d-flex align-center gap-3" style="min-inline-size: 150px">
           <div class="flex-grow-1">
             <VProgressLinear
               :model-value="item.raw.status"
@@ -142,22 +200,29 @@ onMounted(() => {
       <template #item.actions>
         <MoreBtn
           color="default"
-          :menu-list="[{ title: 'Details', value: 'Details' }, { title: 'Archive', value: 'Archive' }]"
+          :menu-list="[
+            { title: 'Details', value: 'Details' },
+            { title: 'Archive', value: 'Archive' },
+          ]"
         />
       </template>
 
       <template #bottom>
         <VDivider />
 
-        <div class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-3 pa-5 pt-3">
+        <div
+          class="d-flex align-center justify-center justify-sm-space-between flex-wrap gap-3 pa-5 pt-3"
+        >
           <p class="text-sm text-disabled mb-0">
-            {{ paginationMeta(options, projects.length) }}
+            {{ paginationMeta(options, departments.length) }}
           </p>
 
           <VPagination
             v-model="options.page"
-            :total-visible="Math.ceil(projects.length / options.itemsPerPage)"
-            :length="Math.ceil(projects.length / options.itemsPerPage)"
+            :total-visible="
+              Math.ceil(departments.length / options.itemsPerPage)
+            "
+            :length="Math.ceil(departments.length / options.itemsPerPage)"
           >
             <template #next="slotProps">
               <VBtn
@@ -186,6 +251,12 @@ onMounted(() => {
     </VDataTable>
     <!-- !SECTION -->
   </VCard>
+  <VCol cols="12" sm="6" md="4">
+    <CreateDepartmentDialog
+      v-model:is-dialog-visible="isCreateDepartmentVisible"
+      @changes="changes"
+    />
+  </VCol>
 </template>
 
 <style lang="scss">

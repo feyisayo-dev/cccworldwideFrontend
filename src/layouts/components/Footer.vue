@@ -27,7 +27,7 @@ const registerMultistepIllustration = useGenerateImageVariant(
     <span class="d-flex align-center">
       &copy;
       {{ new Date().getFullYear() }}
-      powered by
+      powered by Fsdgroup
       <div style="width: 40px">
         <VImg :src="registerMultistepIllustration"  class="illustration-image" />
         <VImg
@@ -41,7 +41,7 @@ const registerMultistepIllustration = useGenerateImageVariant(
       <span class="d-flex align-center">
         &copy;
         {{ new Date().getFullYear() }}
-        powered by
+        powered by Fsdgroup
         <div style="width: 40px">
           <VImg
             :src="registerMultistepIllustration"

@@ -9,6 +9,9 @@ import AnalyticsSourceVisits from '@/views/dashboards/analytics/AnalyticsSourceV
 import AnalyticsSupportTracker from '@/views/dashboards/analytics/AnalyticsSupportTracker.vue'
 import AnalyticsTotalEarning from '@/views/dashboards/analytics/AnalyticsTotalEarning.vue'
 import AnalyticsWebsiteAnalytics from '@/views/dashboards/analytics/AnalyticsWebsiteAnalytics.vue'
+import EcommerceTransactions from '@/views/dashboards/ecommerce/EcommerceTransactions.vue'
+import EcommercePopularProducts from '@/views/dashboards/ecommerce/EcommercePopularProducts.vue'
+import Departments from '@/views/dashboards/ecommerce/Departments.vue'
 
 const vuetifyTheme = useTheme()
 const currentTheme = vuetifyTheme.current.value.colors
@@ -102,10 +105,16 @@ const statisticsVertical = {
     <!-- 👉 Sales by Countries -->
     <VCol
       cols="12"
-      sm="6"
-      lg="4"
+      md="6"
     >
-      <AnalyticsSalesByCountries />
+      <EcommercePopularProducts />
+    </VCol>
+
+    <VCol
+      cols="12"
+      md="6"
+    >
+      <EcommerceTransactions />
     </VCol>
 
     <!-- 👉 Total Earning -->
@@ -126,6 +135,7 @@ const statisticsVertical = {
       <AnalyticsMonthlyCampaignState />
     </VCol>
 
+
     <!-- 👉 Source Visits -->
     <VCol
       cols="12"
@@ -138,9 +148,8 @@ const statisticsVertical = {
     <!-- 👉 Project Table -->
     <VCol
       cols="12"
-      lg="8"
     >
-      <AnalyticsProjectTable />
+    <Departments />
     </VCol>
   </VRow>
 </template>

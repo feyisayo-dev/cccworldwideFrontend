@@ -116,28 +116,43 @@ const colorsRadio = [
 
 // 👉 FetchAll country from adminAction
 const fetchCountries = async () => {
+  const cachedCountries = localStorage.getItem('countries');
 
-  allAdminActions.fetchCountries({
-  }).then(response => {
-    const data=response.data
-    if(data.countries&&data.countries.length>0) {  
-      form.value.countryList = data.countries.map(country => ({
-        id: country.id,
-        name: country.name,
-        flag_img: country.flag_img,
-        states: country.states,
-      }))
+  if (cachedCountries) {
+    // If the data exists, load it from localStorage
+    console.log('Loaded countries from localStorage', JSON.parse(cachedCountries));
+    
+    form.value.countryList = JSON.parse(cachedCountries).map((country) => ({
+      id: country.id,
+      name: country.name,
+      flag_img: country.flag_img,
+      states: country.states,
+    }));
+  } else {
+    // If not available, fetch from API and store in localStorage
+    allAdminActions
+      .fetchCountries()
+      .then((response) => {
+        const data = response.data;
+        console.log('This is my data', data);
 
-     
-    }
-  }).catch(error => {
-    console.error(error)
-  })
+        if (data.countries && data.countries.length > 0) {
+          // Store fetched countries in localStorage
+          localStorage.setItem('countries', JSON.stringify(data.countries));
 
-  // form.value.preSelectedCountry =  form.value.countryList.find(country => country.name === props.parishData.country)
-
-  console.log('preselected  country here', props.parishData.country)
-}
+          form.value.countryList = data.countries.map((country) => ({
+            id: country.id,
+            name: country.name,
+            flag_img: country.flag_img,
+            states: country.states,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching countries:', error);
+      });
+  }
+};
 
 
 

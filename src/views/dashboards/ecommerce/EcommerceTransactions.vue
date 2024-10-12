@@ -1,122 +1,131 @@
 <script setup>
-const transitions = [
-  {
-    avatarIcon: 'tabler-wallet',
-    avatarColor: 'primary',
-    title: 'Wallet',
-    subtitle: 'Starbucks',
-    stats: '-$75',
-    profit: false,
-  },
-  {
-    avatarIcon: 'tabler-browser-check',
-    avatarColor: 'success',
-    title: 'Bank Transfer',
-    subtitle: 'Add Money',
-    stats: '+$480',
-    profit: true,
-  },
-  {
-    avatarIcon: 'tabler-brand-paypal',
-    avatarColor: 'error',
-    title: 'Paypal',
-    subtitle: 'Client Payment',
-    stats: '+$268',
-    profit: true,
-  },
-  {
-    avatarIcon: 'tabler-credit-card',
-    avatarColor: 'secondary',
-    title: 'Master Card',
-    subtitle: 'Ordered iPhone 13',
-    stats: '-$699',
-    profit: false,
-  },
-  {
-    avatarIcon: 'tabler-currency-dollar',
-    avatarColor: 'info',
-    title: 'Bank Transactions',
-    subtitle: 'Refund',
-    stats: '+$98',
-    profit: true,
-  },
-  {
-    avatarIcon: 'tabler-brand-paypal',
-    avatarColor: 'error',
-    title: 'Paypal',
-    subtitle: 'Client Payment',
-    stats: '+$126',
-    profit: true,
-  },
-  {
-    avatarIcon: 'tabler-browser-check',
-    avatarColor: 'success',
-    title: 'Bank Transfer',
-    subtitle: 'Pay Office Rent',
-    stats: '-$1290',
-    profit: false,
-  },
-]
+const userData = JSON.parse(localStorage.getItem("userData") || "null");
+import dayjs from "dayjs";
+import { ref, onMounted } from "vue";
+import { useAllAdminActions } from "@/apiservices/adminActions";
+import api from "@/apiservices/api";
+const apiResponseStatus = ref("");
+const apiResponseMessage = ref("");
+const isCreateScheduleVisible = ref(false);
 
-const moreList = [
-  {
-    title: 'Refresh',
-    value: 'refresh',
-  },
-  {
-    title: 'Download',
-    value: 'Download',
-  },
-  {
-    title: 'View All',
-    value: 'View All',
-  },
-]
+// Default schedule fallback
+const defaultSchedules = [
+  { day: "Sunday", event: "Sunday Service", person: "Pastor John" },
+  { day: "Monday", event: "Bible Study", person: "Minister Sarah" },
+  { day: "Tuesday", event: "Prayer Meeting", person: "Elder James" },
+  { day: "Wednesday", event: "Mid-week Service", person: "Pastor Emily" },
+  { day: "Thursday", event: "Worship Practice", person: "Music Director Mark" },
+  { day: "Friday", event: "Youth Fellowship", person: "Youth Leader Grace" },
+  { day: "Saturday", event: "Community Outreach", person: "Deacon Samuel" },
+];
+
+// Dynamic church schedule fetched from the API
+const churchSchedules = ref([]);
+
+// Function to get the date of each day of the week
+const getWeekDates = () => {
+  const startOfWeek = dayjs().startOf("week");
+  return defaultSchedules.map((schedule, index) => {
+    const date = startOfWeek.add(index, "day").format("D MMMM"); // e.g., "1st October"
+    return { ...schedule, date };
+  });
+};
+
+const changes = () => {
+  fetchSchedules();
+  isCreateScheduleVisible.value = false;
+};
+// Fetch schedule from API
+const fetchSchedules = async () => {
+  try {
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    const parishCode = userData.parishcode || "default_parish_code";
+
+    const response = await api.get(`/getSchedule/${parishCode}`);
+    if (response.data.status === 200 && response.data.schedules.length > 0) {
+      // Map over the defaultSchedules, and for each day, check if there's a corresponding event from the DB
+      const fetchedSchedules = response.data.schedules;
+
+      churchSchedules.value = defaultSchedules.map((defaultSchedule, index) => {
+        const dbSchedule = fetchedSchedules.find(
+          (schedule) => dayjs(schedule.date).day() === index
+        );
+
+        // If a schedule exists for this day, overwrite the default
+        if (dbSchedule) {
+          return {
+            ...defaultSchedule,
+            event: dbSchedule.event,
+            person: dbSchedule.person,
+            date: dayjs(dbSchedule.date).format("D MMMM"), // Format the date to "D MMMM"
+          };
+        }
+
+        // Otherwise, use the default schedule
+        return {
+          ...defaultSchedule,
+          date: dayjs().startOf("week").add(index, "day").format("D MMMM"),
+        };
+      });
+    } else {
+      // No schedules found, fallback to default
+      churchSchedules.value = getWeekDates();
+    }
+  } catch (error) {
+    console.error("Error fetching schedules:", error);
+    churchSchedules.value = getWeekDates();
+  }
+};
+
+// Fetch schedules on component mount
+onMounted(fetchSchedules);
 </script>
 
 <template>
   <VCard
-    title="Transactions"
-    subtitle="Total 58 Transactions done in this Month"
+    title="Church Service Schedule"
+    subtitle="Services and Events for the Week"
   >
-    <template #append>
-      <div class="mt-n4 me-n2">
-        <MoreBtn :menu-list="moreList" />
-      </div>
-    </template>
-
+    <VDivider class="mb-4" />
+    <div class="d-flex justify-center mb-4">
+      <VBtn
+        v-if="userData.role == 'Admin'"
+        prepend-icon="tabler-plus"
+        @click="isCreateScheduleVisible = !isCreateScheduleVisible"
+      >
+        Add Schedule
+      </VBtn>
+    </div>
     <VCardText>
       <VList class="card-list">
-        <VListItem
-          v-for="transition in transitions"
-          :key="transition.title"
-        >
+        <VListItem v-for="schedule in churchSchedules" :key="schedule.day">
           <template #prepend>
-            <VAvatar
-              size="34"
-              :color="transition.avatarColor"
-              variant="tonal"
-              rounded
-            >
-              <VIcon :icon="transition.avatarIcon" />
+            <VAvatar size="34" color="primary" variant="tonal" rounded>
+              <VIcon icon="tabler-calendar" />
             </VAvatar>
           </template>
 
           <VListItemTitle class="font-weight-medium">
-            {{ transition.title }}
+            {{ schedule.event }}
           </VListItemTitle>
           <VListItemSubtitle class="text-disabled">
-            {{ transition.subtitle }}
+            {{ schedule.day }} - {{ schedule.date }}
           </VListItemSubtitle>
 
           <template #append>
             <div class="d-flex align-center">
-              <span :class="`${transition.profit ? 'text-success' : 'text-error'} me-2`">{{ transition.stats }}</span>
+              <span class="text-primary">{{ schedule.person }}</span>
             </div>
           </template>
         </VListItem>
       </VList>
     </VCardText>
+    <VCol cols="12" sm="6" md="4">
+      <CreateScheduleDialog
+        v-model:is-dialog-visible="isCreateScheduleVisible"
+        @changes="changes"
+      />
+    </VCol>
   </VCard>
 </template>
 

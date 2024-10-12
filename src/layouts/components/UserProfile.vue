@@ -34,8 +34,7 @@ const userProfileList = [
     icon: 'tabler-user',
     title: 'View Profile',
     to: {
-      name: 'apps-user-view-id',
-      params: { id: 21 },
+      name: 'dashboards-user-dashboard',
     },
   },
   {

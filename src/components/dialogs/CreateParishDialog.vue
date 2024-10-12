@@ -1,9 +1,7 @@
 <script setup>
-import { useAllAdminActions } from '@/apiservices/adminActions'
-import laptopGirl from '@images/illustrations/laptop-girl.png'
-import { onMounted, ref  } from 'vue'
-
-
+import { useAllAdminActions } from "@/apiservices/adminActions";
+import laptopGirl from "@images/illustrations/laptop-girl.png";
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
   isDialogVisible: {
@@ -11,53 +9,46 @@ const props = defineProps({
     required: true,
     default: false,
   },
-})
+});
 
-const emit = defineEmits([
-  'update:isDialogVisible',
-  'updatedData',
-  'changes',
-])
-
+const emit = defineEmits(["update:isDialogVisible", "updatedData", "changes"]);
 
 const openDialog = () => {
-  isDialogVisible.value = true
-}
+  isDialogVisible.value = true;
+};
 
-const currentStep = ref(0)
-const apiResponseStatus = ref('')
-const apiResponseMessage = ref('')
+const currentStep = ref(0);
+const apiResponseStatus = ref("");
+const apiResponseMessage = ref("");
 
 const form = ref({
   countryList: [],
   stateList: [],
   parishList: [],
-  selectedCountry: ' ',
-  selectedState: '',
-  seletedParish: '',
-  parishCategory: '',
-  parishName: '',
-  parishEmail: '',
-  parishPhone1: '',
-  parishPhone2: '',
-  parishAddress: '',
-  city: '',
-  prefixedParishName: '',
+  selectedCountry: " ",
+  selectedState: "",
+  seletedParish: "",
+  parishCategory: "",
+  parishName: "",
+  parishEmail: "",
+  parishPhone1: "",
+  parishPhone2: "",
+  parishAddress: "",
+  city: "",
+  prefixedParishName: "",
   addNewParish: [],
-
-
-})
+});
 
 const createApp = [
   {
-    icon: 'custom-home',
-    title: 'Details',
+    icon: "custom-home",
+    title: "Details",
 
     // subtitle: 'Enter  Parish Details',
   },
   {
-    icon: 'tabler-check',
-    title: 'Catergory',
+    icon: "tabler-check",
+    title: "Catergory",
 
     // subtitle: 'Select Catergory',
   },
@@ -77,19 +68,18 @@ const createApp = [
   //   title: 'Submit',
   //   subtitle: 'submit',
   // },
-]
+];
 
-const dialogVisibleUpdate = val => {
-  emit('update:isDialogVisible', val)
-  currentStep.value = 0
-}
+const dialogVisibleUpdate = (val) => {
+  emit("update:isDialogVisible", val);
+  currentStep.value = 0;
+};
 
 watch(props, () => {
-  if (!props.isDialogVisible)
-    currentStep.value = 0
-})
+  if (!props.isDialogVisible) currentStep.value = 0;
+});
 
-const onSubmit = message => {
+const onSubmit = (message) => {
   if (message) {
     const postData = {
       email: form.value.parishEmail,
@@ -102,117 +92,146 @@ const onSubmit = message => {
       address: form.value.parishAddress,
       name: form.value.parishName,
       reportTo: form.value.seletedParish,
-    }
+    };
 
     try {
       // Make the API call and handle the response
-      allAdminActions.addNewParish(postData)
-        .then(response => {
-          const apiStatus=response.data
+      allAdminActions
+        .addNewParish(postData)
+        .then((response) => {
+          const apiStatus = response.data;
 
-
-          apiResponseStatus.value=apiStatus.status
-          apiResponseMessage.value=apiStatus.message
+          apiResponseStatus.value = apiStatus.status;
+          apiResponseMessage.value = apiStatus.message;
           if (apiResponseStatus.value === 200) {
-            emit('changes')
+            emit("changes");
           }
         })
-        .catch(error => {
-          console.error("Error submitting data:", error)
+        .catch((error) => {
+          console.error("Error submitting data:", error);
 
           // Handle the error here, e.g., showing an error message
-        })
-
+        });
     } catch (error) {
-      console.log("Caught error in try-catch block:", error)
+      console.log("Caught error in try-catch block:", error);
     }
   }
-}
+};
 
-
-const selectedRadio = ref('primary')
+const selectedRadio = ref("primary");
 
 const parishLevel = [
-  'National',
-  'Region',
-  'State',
-  'Area',
-  'Province',
-  'Circuit',
-  'District',
-  'Parish',
-]
+  "National",
+  "Region",
+  "State",
+  "Area",
+  "Province",
+  "Circuit",
+  "District",
+  "Parish",
+];
 
-const allAdminActions = useAllAdminActions()
+const allAdminActions = useAllAdminActions();
 
-
-// 👉 FetchAll country from adminAction
+// 👉 Fetch countries and cache them in localStorage
 const fetchCountries = async () => {
-  allAdminActions.fetchCountries({
-  }).then(response => {
-    const data=response.data
-    if(data.countries&&data.countries.length>0) {  
-      form.value.countryList = data.countries.map(country => ({
-        id: country.id,
-        name: country.name,
-        flag_img: country.flag_img,
-        states: country.states,
-      }))
-    }
+  const cachedCountries = localStorage.getItem('countries');
 
-  }).catch(error => {
-    console.error(error)
-  })
-}
+  if (cachedCountries) {
+    // If the data exists, load it from localStorage
+    console.log('Loaded countries from localStorage', JSON.parse(cachedCountries));
+    
+    form.value.countryList = JSON.parse(cachedCountries).map((country) => ({
+      id: country.id,
+      name: country.name,
+      flag_img: country.flag_img,
+      states: country.states,
+    }));
+  } else {
+    // If not available, fetch from API and store in localStorage
+    allAdminActions
+      .fetchCountries()
+      .then((response) => {
+        const data = response.data;
+        console.log('This is my data', data);
 
-// 👉 FetchAll country  State by CountryId from adminAction
+        if (data.countries && data.countries.length > 0) {
+          // Store fetched countries in localStorage
+          localStorage.setItem('countries', JSON.stringify(data.countries));
+
+          form.value.countryList = data.countries.map((country) => ({
+            id: country.id,
+            name: country.name,
+            flag_img: country.flag_img,
+            states: country.states,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching countries:', error);
+      });
+  }
+};
+
+// 👉 Fetch states by country and cache them in localStorage
 const fetchStates = async () => {
-  form.value.stateList = []
-  
+  form.value.stateList = []; // Clear previous states
+
   if (form.value.selectedCountry) {
+    // Check if states for the selected country are cached in localStorage
+    const cachedStates = localStorage.getItem(`states_${form.value.selectedCountry}`);
 
-    // alert(form.value.selectedCountry)
-
-    // form.value.selectedState = 'Select parish state'
-
-    const response = await allAdminActions.fetchStateByCountry(form.value.selectedCountry)
-    if (response && Array.isArray( response) && response.length > 0) {
+    if (cachedStates) {
+      // Load states from localStorage if available
+      console.log('Loaded states from localStorage', JSON.parse(cachedStates));
+      form.value.stateList = JSON.parse(cachedStates).map((countryState) => ({
+        country_id: countryState.country_id,
+        name: countryState.name,
+      }));
+    } else {
       try {
-        const data= response
-      
-        if(Array.isArray(data) && data.length>0){
-          form.value.stateList = data.map(countryState => ({
-            country_id: countryState.country_id,
-            name: countryState.name,
-          }))
+        // Fetch states from API if not found in localStorage
+        const response = await allAdminActions.fetchStateByCountry(form.value.selectedCountry);
+
+        if (response && Array.isArray(response) && response.length > 0) {
+          const data = response;
+
+          if (Array.isArray(data) && data.length > 0) {
+            // Store fetched states in localStorage
+            localStorage.setItem(`states_${form.value.selectedCountry}`, JSON.stringify(data));
+
+            form.value.stateList = data.map((countryState) => ({
+              country_id: countryState.country_id,
+              name: countryState.name,
+            }));
+          }
         }
       } catch (error) {
-      
+        console.error('Error fetching states:', error);
       }
     }
   }
-}
+};
+
 
 // 👉 FetchAll parish from state
 const fetchParish = async () => {
+  if (form.value.selectedState) {
+    try {
+      form.value.parishList = [];
+      form.value.seletedParish = "Select parish";
+      console.log("State selected", form.value.selectedState);
 
+      const response = await allAdminActions.fetchStateParish(
+        form.value.selectedState
+      );
 
-  if ((form.value.selectedState)) {
-    try{
-      form.value.parishList=[]
-      form.value.seletedParish='Select parish'
-      console.log( 'State selected', form.value.selectedState)
+      console.log("State selected", response);
 
-      const response = await allAdminActions.fetchStateParish(form.value.selectedState)
-      
-      console.log( 'State selected', response)
-      
-      const data = response.data
+      const data = response.data;
 
-
-      if(data.Allparish&&data.Allparish.length>0) {
-
-        form.value.parishList = data.Allparish.map(parish => ({
+      if (data.Allparish && data.Allparish.length > 0) {
+        form.value.parishList = data.Allparish.map((parish) => ({
           // parishcode: parish.parishcode,
           parishname: parish.parishname,
           country: parish.country,
@@ -221,41 +240,32 @@ const fetchParish = async () => {
           parishaddress: parish.address,
           name: parish.parishname,
           parishcode: parish.parishcode,
-        }))
+        }));
       }
-      console.log( form.value.parishList)
-
-    }catch (error) {
-      console('Error fetching data:')
+      console.log(form.value.parishList);
+    } catch (error) {
+      console("Error fetching data:");
     }
-
-   
-
-
-
   }
-}
-
+};
 
 onMounted(() => {
-  fetchCountries()
-})
-
+  fetchCountries();
+});
 
 watchEffect(() => {
-  fetchStates()
-  fetchParish()
+  fetchStates();
+  fetchParish();
+});
 
-})
-
-const isConfirmDialogVisible = ref(false)
+const isConfirmDialogVisible = ref(false);
 
 // Define a computed property to concatenate the prefix with parishName
 const prefixedParishName = computed({
   get() {
-    return 'CCC-' + form.value.parishName
+    return "CCC-" + form.value.parishName;
   },
-})
+});
 </script>
 
 <template>
@@ -271,18 +281,13 @@ const prefixedParishName = computed({
     />
     <VCard class="create-app-dialog">
       <VCardText class="pa-5 pa-sm-10">
-        <h5 class="text-h5 text-center mb-2">
-          Create Parish
-        </h5>
+        <h5 class="text-h5 text-center mb-2">Create Parish</h5>
         <p class="text-sm text-center mb-8">
           Provide data with this form to create a new parish.
         </p>
 
         <VRow>
-          <VCol
-            cols="6"
-            sm="3"
-          >
+          <VCol cols="6" sm="3">
             <AppStepper
               v-model:current-step="currentStep"
               direction="vertical"
@@ -292,12 +297,7 @@ const prefixedParishName = computed({
             />
           </VCol>
 
-          <VCol
-            cols="18"
-            sm="7"
-            md="8"
-            lg="9"
-          >
+          <VCol cols="18" sm="7" md="8" lg="9">
             <VWindow
               v-model="currentStep"
               class="disable-tab-transition stepper-content"
@@ -384,14 +384,9 @@ const prefixedParishName = computed({
 
               <!-- 👉 Frameworks -->
               <VWindowItem>
-                <h6 class="text-h6 mb-4">
-                  Select Parish Category/Level
-                </h6>
+                <h6 class="text-h6 mb-4">Select Parish Category/Level</h6>
                 <VDivider />
-                <VRadioGroup
-                  v-model="form.parishCategory"
-                  inline
-                >
+                <VRadioGroup v-model="form.parishCategory" inline>
                   <div>
                     <VRadio
                       v-for="parish in parishLevel"
@@ -416,10 +411,7 @@ const prefixedParishName = computed({
                     <template #item="{ props: listItemProp, item }">
                       <VListItem v-bind="listItemProp">
                         <template #prepend>
-                          <VAvatar
-                            :image="item.raw.flag_img"
-                            size="30"
-                          />
+                          <VAvatar :image="item.raw.flag_img" size="30" />
                         </template>
                       </VListItem>
                     </template>
@@ -458,10 +450,11 @@ const prefixedParishName = computed({
                   </VCol>
                 -->
 
-               
                 <VCol
-      
-                  v-if="form.parishCategory !='national' && form.parishCategory !=''"
+                  v-if="
+                    form.parishCategory != 'national' &&
+                    form.parishCategory != ''
+                  "
                   cols="12"
                 >
                   <!--
@@ -483,7 +476,7 @@ const prefixedParishName = computed({
                     label=" Select Parish "
                     :items="form.parishList"
                     item-value="parishcode"
-                    :item-title="item => `${item.name}-${item.parishaddress}`"
+                    :item-title="(item) => `${item.name}-${item.parishaddress}`"
                     :hint="`${form.seletedParish}`"
                     persistent-hint
                     double-line
@@ -499,11 +492,7 @@ const prefixedParishName = computed({
                 :disabled="currentStep === 0"
                 @click="currentStep--"
               >
-                <VIcon
-                  icon="tabler-arrow-left"
-                  start
-                  class="flip-in-rtl"
-                />
+                <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
                 Previous
               </VBtn>
 
@@ -513,24 +502,13 @@ const prefixedParishName = computed({
                 @click="isConfirmDialogVisible = true"
               >
                 submit
-                <VIcon
-                  icon="tabler-check"
-                  end
-                  class="flip-in-rtl"
-                />
+                <VIcon icon="tabler-check" end class="flip-in-rtl" />
               </VBtn>
 
-              <VBtn
-                v-else
-                @click="currentStep++"
-              >
+              <VBtn v-else @click="currentStep++">
                 Next
 
-                <VIcon
-                  icon="tabler-arrow-right"
-                  end
-                  class="flip-in-rtl"
-                />
+                <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
               </VBtn>
             </div>
           </VCol>

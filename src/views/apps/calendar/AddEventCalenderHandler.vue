@@ -1,20 +1,17 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-import avatar6 from '@images/avatars/avatar-6.png'
-import EventDefualt from '@images/avatars/event_defualt.jpeg'
+import avatar1 from "@images/avatars/avatar-1.png";
+import avatar2 from "@images/avatars/avatar-2.png";
+import avatar3 from "@images/avatars/avatar-3.png";
+import avatar5 from "@images/avatars/avatar-5.png";
+import avatar6 from "@images/avatars/avatar-6.png";
+import EventDefualt from "@images/avatars/event_defualt.jpeg";
 
-import {
-  requiredValidator,
-  urlValidator,
-} from '@validators'
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import { VForm } from 'vuetify/components/VForm'
-import { useCalendarStore } from './useCalendarStore'
-import { onMounted, ref, computed } from 'vue'
-import api from '@/apiservices/api'
+import { requiredValidator, urlValidator } from "@validators";
+import { PerfectScrollbar } from "vue3-perfect-scrollbar";
+import { VForm } from "vuetify/components/VForm";
+import { useCalendarStore } from "./useCalendarStore";
+import { onMounted, ref, computed } from "vue";
+import api from "@/apiservices/api";
 
 const props = defineProps({
   isDrawerOpen: {
@@ -25,277 +22,294 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-})
+});
 
 const emit = defineEmits([
-  'update:isDrawerOpen',
-  'addEvent',
-  'updateEvent',
-  'removeEvent',
-  'changes',
-])
+  "update:isDrawerOpen",
+  "addEvent",
+  "updateEvent",
+  "removeEvent",
+  "changes",
+]);
 
-const apiResponseStatus = ref('')
-const apiResponseMessage = ref('')
-const userData = JSON.parse(localStorage.getItem('userData') || 'null')
-const refInputEl = ref()
-const startTimeCombined = ref('')
-const endTimeCombined = ref('')
+const apiResponseStatus = ref("");
+const apiResponseMessage = ref("");
+const userData = JSON.parse(localStorage.getItem("userData") || "null");
+const refInputEl = ref();
+const startTimeCombined = ref("");
+const endTimeCombined = ref("");
 
 watchEffect(() => {
   if (props.eventData) {
-    if(props.eventData.id){
-      console.log("<====There is prop===>", props.eventData)
+    if (props.eventData.id) {
+      console.log("<====There is prop===>", props.eventData);
 
-      const startDate = props.eventData.start.toISOString().slice(0, 10) 
-      const startTime = props.eventData.start.toTimeString().slice(0, 5) 
+      const startDate = props.eventData.start.toISOString().slice(0, 10);
+      const startTime = props.eventData.start.toTimeString().slice(0, 5);
 
-      startTimeCombined.value = `${startDate}T${startTime}`
+      startTimeCombined.value = `${startDate}T${startTime}`;
 
-      const endDate = props.eventData.end ? props.eventData.end.toISOString().slice(0, 10) : '' // Handle null case
-      const endTime = props.eventData.end ? props.eventData.end.toTimeString().slice(0, 5) : '' // Handle null case
+      const endDate = props.eventData.end
+        ? props.eventData.end.toISOString().slice(0, 10)
+        : ""; // Handle null case
+      const endTime = props.eventData.end
+        ? props.eventData.end.toTimeString().slice(0, 5)
+        : ""; // Handle null case
 
-      endTimeCombined.value = `${endDate}T${endTime}`
+      endTimeCombined.value = `${endDate}T${endTime}`;
     }
-  }else{
-    console.log("<====There is no prop===>")
+  } else {
+    console.log("<====There is no prop===>");
   }
-})
-
+});
 
 const form = ref({
-  eventId: '',
-  title: '',
+  eventId: "",
+  title: "",
   allDay: false,
-  description: '',
-  startDate: '',
-  endDate: '',
-  startTime: '',
-  endTime: '',
-  StartDateEdit: '',
-  EndDateEdit: '',
-  time: '',
-  moderator: '',
-  minister: '',
-  guest: '',
-  SGuest: '',
-  Sermoner: '',
-  location: '',
-  type: '',
-  parishCode: userData.parishcode || '',
-  parishName: userData.parishname || '',
+  description: "",
+  startDate: "",
+  endDate: "",
+  startTime: "",
+  endTime: "",
+  StartDateEdit: "",
+  EndDateEdit: "",
+  time: "",
+  moderator: "",
+  minister: "",
+  guest: "",
+  SGuest: "",
+  Sermoner: "",
+  location: "",
+  type: "",
+  parishCode: userData.parishcode || "",
+  parishName: userData.parishname || "",
   eventImg: EventDefualt,
-  eventImgFile: '',
-})
+  eventImgFile: "",
+});
 
 watchEffect(() => {
   if (props.eventData && Object.keys(props.eventData).length > 0) {
-    form.value.eventId = props.eventData.id || ''
-    form.value.title = props.eventData.title || ''
-    form.value.description = props.eventData.description || ''
+    form.value.eventId = props.eventData.id || "";
+    form.value.title = props.eventData.title || "";
+    form.value.description = props.eventData.description || "";
     // eslint-disable-next-line vue/no-ref-as-operand
-    form.value.startDate = startTimeCombined || ''
+    form.value.startDate = startTimeCombined || "";
     // eslint-disable-next-line vue/no-ref-as-operand
-    form.value.endDate = endTimeCombined || ''
-    form.value.time = props.eventData.time || ''
-    form.value.moderator = props.eventData.moderator || ''
-    form.value.guest = props.eventData.guest || ''
-    form.value.SGuest = props.eventData.guest || ''
-    form.value.Sermoner = props.eventData.Sermoner || ''
-    form.value.location = props.eventData.location || ''
-    form.value.type = props.eventData.type || ''
+    form.value.endDate = endTimeCombined || "";
+    form.value.time = props.eventData.time || "";
+    form.value.moderator = props.eventData.moderator || "";
+    form.value.guest = props.eventData.guest || "";
+    form.value.SGuest = props.eventData.guest || "";
+    form.value.Sermoner = props.eventData.Sermoner || "";
+    form.value.location = props.eventData.location || "";
+    form.value.type = props.eventData.type || "";
   } else {
-    form.value.eventId = ''
-    form.value.title = ''
-    form.value.description = ''
-    form.value.startDate = ''
-    form.value.endDate = ''
-    form.value.time = ''
-    form.value.moderator = ''
-    form.value.guest = ''
-    form.value.SGuest = ''
-    form.value.Sermoner = ''
-    form.value.location = ''
-    form.value.type = ''
+    form.value.eventId = "";
+    form.value.title = "";
+    form.value.description = "";
+    form.value.startDate = "";
+    form.value.endDate = "";
+    form.value.time = "";
+    form.value.moderator = "";
+    form.value.guest = "";
+    form.value.SGuest = "";
+    form.value.Sermoner = "";
+    form.value.location = "";
+    form.value.type = "";
   }
-})
-
+});
 
 const resetEventImg = () => {
-  form.value.eventImg = EventDefualt
-}
+  form.value.eventImg = EventDefualt;
+};
 
-const changeEventImg = file => {
-  const { files } = file.target
+const changeEventImg = (file) => {
+  const { files } = file.target;
   if (files && files.length) {
-    form.value.eventImgFile = files[0]
+    form.value.eventImgFile = files[0];
 
-    const fileReader = new FileReader()
+    const fileReader = new FileReader();
 
-    fileReader.readAsDataURL(files[0])
+    fileReader.readAsDataURL(files[0]);
     fileReader.onload = () => {
-      if (typeof fileReader.result === 'string')
-        form.value.eventImg = fileReader.result
-    }
+      if (typeof fileReader.result === "string")
+        form.value.eventImg = fileReader.result;
+    };
   }
-}
+};
 
 const AddEvent = async () => {
   try {
-    console.log(form.value)
+    console.log(form.value);
 
-    const formData = new FormData()
+    const formData = new FormData();
 
-    formData.append('EventId', form.value.eventId)
-    formData.append('Title', form.value.title)
-    formData.append('Description', form.value.description)
-    formData.append('startdate', form.value.StartDateEdit)
-    formData.append('enddate', form.value.EndDateEdit)
-    formData.append('start_time', form.value.startTime)
-    formData.append('end_time', form.value.endTime)
-    formData.append('Time', form.value.time)
-    formData.append('Moderator', form.value.moderator)
-    formData.append('Minister', form.value.minister)
-    formData.append('guest', form.value.SGuest)
-    formData.append('location', form.value.location)
-    formData.append('Type', form.value.type)
-    formData.append('parishcode', form.value.parishCode)
-    formData.append('parishname', form.value.parishName)
+    formData.append("EventId", form.value.eventId);
+    formData.append("Title", form.value.title);
+    formData.append("Description", form.value.description);
+    formData.append("startdate", form.value.StartDateEdit);
+    formData.append("enddate", form.value.EndDateEdit);
+    formData.append("start_time", form.value.startTime);
+    formData.append("end_time", form.value.endTime);
+    formData.append("Time", form.value.time);
+    formData.append("Moderator", form.value.moderator);
+    formData.append("Minister", form.value.minister);
+    formData.append("guest", form.value.SGuest);
+    formData.append("location", form.value.location);
+    formData.append("Type", form.value.type);
+    formData.append("parishcode", form.value.parishCode);
+    formData.append("parishname", form.value.parishName);
 
     if (form.value.eventImg === EventDefualt) {
-      const blob = await fetch(EventDefualt).then(res => res.blob())
+      const blob = await fetch(EventDefualt).then((res) => res.blob());
 
-      formData.append('eventImg', blob, 'avatar-7.png')
+      formData.append("eventImg", blob, "avatar-7.png");
     } else {
-      formData.append('eventImg', form.value.eventImgFile)
+      formData.append("eventImg", form.value.eventImgFile);
     }
-    const response = ref({})
+    const response = ref({});
 
     if (form.value.eventId) {
-      response.value = await api.post(`/updateEvent/${form.value.eventId}/update`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      response.value = await api.post(
+        `/updateEvent/${form.value.eventId}/update`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
     } else {
       response.value = await api.post(`/AddEvent`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
-      })
+      });
     }
 
+    console.log(
+      "Event updated successfully",
+      JSON.stringify(response.value.data)
+    );
 
+    const apiResponseDetails = response.value.data;
 
-    console.log('Event updated successfully', JSON.stringify(response.value.data))
-
-    const apiResponseDetails = response.value.data
-
-    apiResponseStatus.value = apiResponseDetails.status
-    apiResponseMessage.value = apiResponseDetails.message
+    apiResponseStatus.value = apiResponseDetails.status;
+    apiResponseMessage.value = apiResponseDetails.message;
     if (apiResponseStatus.value === 200) {
-      emit('changes')  // Emit the 'changes' event
+      emit("changes"); // Emit the 'changes' event
     }
-
   } catch (error) {
     // Handle any errors
-    console.error('Error updating event:', error.response ? error.response.data : error.message)
+    console.error(
+      "Error updating event:",
+      error.response ? error.response.data : error.message
+    );
   }
-}
+};
 
-
-const onSubmit = message => {
+const onSubmit = (message) => {
   if (message) {
-    AddEvent()
+    AddEvent();
   }
-}
+};
 
-const isConfirmDialogVisible = ref(false)
-const store = useCalendarStore()
-const refForm = ref()
+const isConfirmDialogVisible = ref(false);
+const store = useCalendarStore();
+const refForm = ref();
 
 // 👉 Event
-const eventData = ref(JSON.parse(JSON.stringify(props.eventData)))
+const eventData = ref(JSON.parse(JSON.stringify(props.eventData)));
 
-console.log("<===This is the prop event data===>", props.eventData)
-
+console.log("<===This is the prop event data===>", props.eventData);
 
 watch([() => form.value.guest, () => form.value.Sermoner], () => {
-  form.value.minister = `${form.value.guest || ''}${form.value.guest && form.value.Sermoner ? ', ' : ''}${form.value.Sermoner || ''}`
-})
-
+  form.value.minister = `${form.value.guest || ""}${
+    form.value.guest && form.value.Sermoner ? ", " : ""
+  }${form.value.Sermoner || ""}`;
+});
 
 const onCancel = () => {
-  console.log('Cancel clicked')
-}
+  console.log("Cancel clicked");
+};
 
 const startDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: !form.value.allDay,
-    dateFormat: `Y-m-d${ form.value.allDay ? '' : ' H:i' }`,
-  }
+    dateFormat: `Y-m-d${form.value.allDay ? "" : " H:i"}`,
+  };
 
-  if (form.value.endDate)
-    config.maxDate = form.value.endDate
-  
-  return config
-})
+  if (form.value.endDate) config.maxDate = form.value.endDate;
+
+  return config;
+});
 
 const endDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: !form.value.allDay,
-    dateFormat: `Y-m-d${ form.value.allDay ? '' : ' H:i' }`,
-  }
+    dateFormat: `Y-m-d${form.value.allDay ? "" : " H:i"}`,
+  };
 
-  if (form.value.startDate)
-    config.minDate = form.value.startDate
-  
-  return config
-})
+  if (form.value.startDate) config.minDate = form.value.startDate;
+
+  return config;
+});
 
 watch([() => form.value.startDate, () => form.value.endDate], () => {
   if (form.value.startDate && form.value.endDate) {
-    const start = new Date(form.value.startDate)
-    const end = new Date(form.value.endDate)
+    const start = new Date(form.value.startDate);
+    const end = new Date(form.value.endDate);
 
-    const formattedStartDate = start.toISOString().split('T')[0] // Y-m-d format
-    const formattedEndDate = end.toISOString().split('T')[0] // Y-m-d format
+    const formattedStartDate = start.toISOString().split("T")[0]; // Y-m-d format
+    const formattedEndDate = end.toISOString().split("T")[0]; // Y-m-d format
 
-    const formattedStartTime = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-    const formattedEndTime = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+    const formattedStartTime = start.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const formattedEndTime = end.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
-    form.value.StartDateEdit = formattedStartDate
-    form.value.EndDateEdit = formattedEndDate
-    form.value.startTime = formattedStartTime
-    form.value.endTime = formattedEndTime
+    form.value.StartDateEdit = formattedStartDate;
+    form.value.EndDateEdit = formattedEndDate;
+    form.value.startTime = formattedStartTime;
+    form.value.endTime = formattedEndTime;
 
+    const diffMs = end - start;
+    const diffMonths =
+      end.getMonth() -
+      start.getMonth() +
+      12 * (end.getFullYear() - start.getFullYear());
 
-    const diffMs = end - start
-    const diffMonths = end.getMonth() - start.getMonth() + (12 * (end.getFullYear() - start.getFullYear()))
-    
-    let adjustedStart = new Date(start)
-    adjustedStart.setMonth(start.getMonth() + diffMonths)
-    let diffDays = Math.floor((end - adjustedStart) / (1000 * 60 * 60 * 24))
-    adjustedStart.setDate(adjustedStart.getDate() + diffDays)
+    let adjustedStart = new Date(start);
+    adjustedStart.setMonth(start.getMonth() + diffMonths);
+    let diffDays = Math.floor((end - adjustedStart) / (1000 * 60 * 60 * 24));
+    adjustedStart.setDate(adjustedStart.getDate() + diffDays);
 
-    const diffHrs = Math.floor((end - adjustedStart) / 3600000)
-    const diffMins = Math.floor(((end - adjustedStart) % 3600000) / 60000)
+    const diffHrs = Math.floor((end - adjustedStart) / 3600000);
+    const diffMins = Math.floor(((end - adjustedStart) % 3600000) / 60000);
 
-    const timeParts = []
-    if (diffMonths > 0) timeParts.push(`${diffMonths} month(s)`)
-    if (diffDays > 0) timeParts.push(`${diffDays} day(s)`)
-    if (diffHrs > 0) timeParts.push(`${diffHrs} hour(s)`)
-    if (diffMins > 0 || timeParts.length === 0) timeParts.push(`${diffMins} minute(s)`)
+    const timeParts = [];
+    if (diffMonths > 0) timeParts.push(`${diffMonths} month(s)`);
+    if (diffDays > 0) timeParts.push(`${diffDays} day(s)`);
+    if (diffHrs > 0) timeParts.push(`${diffHrs} hour(s)`);
+    if (diffMins > 0 || timeParts.length === 0)
+      timeParts.push(`${diffMins} minute(s)`);
 
-    form.value.time = timeParts.join(', ')
+    form.value.time = timeParts.join(", ");
   } else {
-    form.value.time = ''
+    form.value.time = "";
   }
-})
+});
 
-const dialogModelValueUpdate = val => {
-  emit('update:isDrawerOpen', val)
-}
+const dialogModelValueUpdate = (val) => {
+  emit("update:isDrawerOpen", val);
+};
 </script>
 
 <template>
@@ -314,10 +328,7 @@ const dialogModelValueUpdate = val => {
     >
       <template #beforeClose>
         <IconBtn v-show="form.eventId">
-          <VIcon
-            size="18"
-            icon="tabler-trash"
-          />
+          <VIcon size="18" icon="tabler-trash" />
         </IconBtn>
       </template>
     </AppDrawerHeaderSection>
@@ -328,24 +339,13 @@ const dialogModelValueUpdate = val => {
           <!-- SECTION Form -->
           <VCardText class="d-flex">
             <!-- 👉 Avatar -->
-            <VAvatar
-              rounded
-              size="100"
-              class="me-6"
-              :image="form.eventImg"
-            />
+            <VAvatar rounded size="100" class="me-6" :image="form.eventImg" />
 
             <!-- 👉 Upload Photo -->
             <form class="d-flex flex-column justify-center gap-4">
               <div class="d-flex flex-wrap gap-2">
-                <VBtn
-                  color="primary"
-                  @click="refInputEl?.click()"
-                >
-                  <VIcon
-                    icon="tabler-cloud-upload"
-                    class="d-sm-none"
-                  />
+                <VBtn color="primary" @click="refInputEl?.click()">
+                  <VIcon icon="tabler-cloud-upload" class="d-sm-none" />
                   <span class="d-none d-sm-block">Upload Event Image</span>
                 </VBtn>
 
@@ -356,7 +356,7 @@ const dialogModelValueUpdate = val => {
                   accept=".jpeg,.png,.jpg,GIF"
                   hidden
                   @input="changeEventImg"
-                >
+                />
 
                 <VBtn
                   type="reset"
@@ -365,10 +365,7 @@ const dialogModelValueUpdate = val => {
                   @click="resetEventImg"
                 >
                   <span class="d-none d-sm-block">Reset</span>
-                  <VIcon
-                    icon="tabler-refresh"
-                    class="d-sm-none"
-                  />
+                  <VIcon icon="tabler-refresh" class="d-sm-none" />
                 </VBtn>
               </div>
 
@@ -397,7 +394,7 @@ const dialogModelValueUpdate = val => {
                 :rules="[requiredValidator]"
               />
             </VCol>
-            
+
             <VCol cols="12">
               <AppDateTimePicker
                 v-model="form.startDate"
@@ -428,10 +425,7 @@ const dialogModelValueUpdate = val => {
 
             <!-- 👉 All day -->
             <VCol cols="12">
-              <VSwitch
-                v-model="form.allDay"
-                label="All day"
-              />
+              <VSwitch v-model="form.allDay" label="All day" />
             </VCol>
 
             <VCol cols="12">
@@ -443,38 +437,23 @@ const dialogModelValueUpdate = val => {
             </VCol>
             <!-- 👉 Guests -->
             <VCol cols="12">
-              <AppTextField
-                v-model="form.SGuest"
-                label="Guests Minister"
-              />
+              <AppTextField v-model="form.SGuest" label="Guests Minister" />
             </VCol>
             <VCol cols="12">
-              <AppTextField
-                v-model="form.Sermoner"
-                label="Sermoner"
-              />
+              <AppTextField v-model="form.Sermoner" label="Sermoner" />
             </VCol>
             <VCol cols="12">
-              <AppTextField
-                v-model="form.guest"
-                label="Guests"
-              />
+              <AppTextField v-model="form.guest" label="Guests" />
             </VCol>
 
             <!-- 👉 Location -->
             <VCol cols="12">
-              <AppTextField
-                v-model="form.location"
-                label="Event Location"
-              />
+              <AppTextField v-model="form.location" label="Event Location" />
             </VCol>
 
             <!-- 👉 Description -->
             <VCol cols="12">
-              <AppTextarea
-                v-model="form.description"
-                label="Description"
-              />
+              <AppTextarea v-model="form.description" label="Description" />
             </VCol>
 
             <!-- 👉 Form buttons -->
@@ -488,7 +467,7 @@ const dialogModelValueUpdate = val => {
               </VBtn>
             </VCol>
           </VRow>
-        <!-- !SECTION -->
+          <!-- !SECTION -->
         </VCardText>
       </VCard>
     </PerfectScrollbar>
