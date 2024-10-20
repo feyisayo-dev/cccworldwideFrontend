@@ -6,7 +6,7 @@ export const resolveVuetifyTheme = () => {
   
   return storedTheme === 'system'
     ? isDarkPreferred.value
-      ? 'dark'
-      : 'light'
+      ? 'light'
+      : 'dark'
     : storedTheme
 }

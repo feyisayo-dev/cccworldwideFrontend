@@ -79,12 +79,6 @@ const statisticsVertical = {
 <template>
   <VRow class="match-height">
     <!-- 👉 Website analytics -->
-    <VCol
-      cols="12"
-      md="12"
-    >
-      <AnalyticsWebsiteAnalytics />
-    </VCol>
 
     <!-- 👉 Earning Reports Weekly Overview -->
     <VCol

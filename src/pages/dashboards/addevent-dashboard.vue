@@ -1,81 +1,76 @@
 <script setup>
-import {
-  blankEvent,
-  useCalendar,
-} from '@/views/apps/calendar/useCalendar'
-import { useCalendarStore } from '@/views/apps/calendar/useCalendarStore'
-import { useResponsiveLeftSidebar } from '@core/composable/useResponsiveSidebar'
-import { paginationMeta } from '@/@fake-db/utils'
-import { useAllAdminActions } from '@/apiservices/adminActions'
-import api from '@/apiservices/api'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
-import { ref, computed, watchEffect } from 'vue'
-import FullCalendar from '@fullcalendar/vue3'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import listPlugin from '@fullcalendar/list'
-import tippy from 'tippy.js'
-import 'tippy.js/dist/tippy.css'
+import { blankEvent, useCalendar } from "@/views/apps/calendar/useCalendar";
+import { useCalendarStore } from "@/views/apps/calendar/useCalendarStore";
+import { useResponsiveLeftSidebar } from "@core/composable/useResponsiveSidebar";
+import { paginationMeta } from "@/@fake-db/utils";
+import { useAllAdminActions } from "@/apiservices/adminActions";
+import api from "@/apiservices/api";
+import { VDataTableServer } from "vuetify/labs/VDataTable";
+import { ref, computed, watchEffect } from "vue";
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+const userData = JSON.parse(localStorage.getItem("userData") || "null");
 
-const calendarRef = ref(null)
-const AllAdminActions = useAllAdminActions()
-const calendarApi = ref(null)
+const calendarRef = ref(null);
+const AllAdminActions = useAllAdminActions();
+const calendarApi = ref(null);
 
 // Components
-import CalendarEventHandler from '@/views/apps/calendar/AddEventCalenderHandler.vue'
+import CalendarEventHandler from "@/views/apps/calendar/AddEventCalenderHandler.vue";
 
-const store = useCalendarStore()
-const events = ref([])
+const store = useCalendarStore();
+const events = ref([]);
 
 // 👉 Event
-const eventData = ref({})
+const eventData = ref({});
 
-const isEventHandlerSidebarActive = ref(false)
+const isEventHandlerSidebarActive = ref(false);
 
 // watch(isEventHandlerSidebarActive, val => {
 //   if (!val)
 //     event.value = structuredClone(blankEvent)
 // })
 
-const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
-
+const { isLeftSidebarOpen } = useResponsiveLeftSidebar();
 
 // 👉 Check all
 const checkAll = computed({
   get: () => store.selectedCalendars.length === store.availableCalendars.length,
-  set: val => {
+  set: (val) => {
     if (val)
-      store.selectedCalendars = store.availableCalendars.map(i => i.label)
+      store.selectedCalendars = store.availableCalendars.map((i) => i.label);
     else if (store.selectedCalendars.length === store.availableCalendars.length)
-      store.selectedCalendars = []
+      store.selectedCalendars = [];
   },
-})
-
+});
 
 function getRandomColor() {
-  const letters = '0123456789ABCDEF'
-  let color = '#'
+  const letters = "0123456789ABCDEF";
+  let color = "#";
   for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)]
+    color += letters[Math.floor(Math.random() * 16)];
   }
-  
-  return color
-}
 
+  return color;
+}
 
 const FetchAllEvent = () => {
   AllAdminActions.fetchAllEvents()
-    .then(response => {
+    .then((response) => {
       if (response.data.events && response.data.events.length > 0) {
-        events.value = response.data.events.map(event => ({
-          id: event.EventId,           
+        events.value = response.data.events.map((event) => ({
+          id: event.EventId,
           title: event.Title,
           start: `${event.startdate}T${event.start_time}`,
           end: `${event.enddate}T${event.end_time}`,
           color: getRandomColor(),
-          textColor: 'white',
-          extendedProps: {             
+          textColor: "white",
+          extendedProps: {
             description: event.Description,
             time: event.Time,
             moderator: event.Moderator,
@@ -87,31 +82,31 @@ const FetchAllEvent = () => {
             parishName: event.parishname,
             eventImg: event.eventImgsPublicpath,
           },
-        }))
-        console.log("This is the Events", events.value)
+        }));
+        console.log("This is the Events", events.value);
       } else {
-        console.log("No events available.")
+        console.log("No events available.");
       }
     })
-    .catch(error => {
-      console.error("Error fetching events:", error)
-    })
-}
+    .catch((error) => {
+      console.error("Error fetching events:", error);
+    });
+};
 
 const changes = () => {
-  FetchAllEvent()
-  isEventHandlerSidebarActive.value = false
-}
+  FetchAllEvent();
+  isEventHandlerSidebarActive.value = false;
+};
 
-watchEffect(FetchAllEvent)
+watchEffect(FetchAllEvent);
 
 const calendarOptions = computed(() => {
   const options = {
     plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
-    initialView: 'dayGridMonth',
+    initialView: "dayGridMonth",
     headerToolbar: {
-      start: 'prev,next title',
-      end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
+      start: "prev,next title",
+      end: "dayGridMonth,timeGridWeek,timeGridDay,listMonth",
     },
     events: events.value, // Use the reactive events array
     forceEventDuration: true,
@@ -119,50 +114,62 @@ const calendarOptions = computed(() => {
     dragScroll: true,
     dayMaxEvents: 4,
     navLinks: true,
-    eventMouseEnter: info => {
-      const { event } = info
+    eventMouseEnter: (info) => {
+      const { event } = info;
 
       const content = `
         <div style="text-align: left;">
-          <img src="${event.extendedProps.eventImg}" alt="${event.title}" style="width: 100%; height: auto;" />
+          <img src="${event.extendedProps.eventImg}" alt="${
+        event.title
+      }" style="width: 100%; height: auto;" />
           <h3>${event.title}</h3>
-          <p>${event.title}, to be held on ${event.start.toLocaleDateString()} to ${event.end ? event.end.toLocaleDateString() : 'N/A'}, in ${event.extendedProps.location}, brought to you by ${event.extendedProps.parishName}.</p>
-          <p>People to be there: ${event.extendedProps.guest}, ${event.extendedProps.minister}, moderated by ${event.extendedProps.moderator}.</p>
-          <p><strong>Description:</strong> ${event.extendedProps.description}</p>
+          <p>${
+            event.title
+          }, to be held on ${event.start.toLocaleDateString()} to ${
+        event.end ? event.end.toLocaleDateString() : "N/A"
+      }, in ${event.extendedProps.location}, brought to you by ${
+        event.extendedProps.parishName
+      }.</p>
+          <p>People to be there: ${event.extendedProps.guest}, ${
+        event.extendedProps.minister
+      }, moderated by ${event.extendedProps.moderator}.</p>
+          <p><strong>Description:</strong> ${
+            event.extendedProps.description
+          }</p>
         </div>
-      `
+      `;
 
       tippy(info.el, {
         content,
         allowHTML: true,
-        placement: 'top',
-        theme: 'light',
+        placement: "top",
+        theme: "light",
         maxWidth: 300,
-      })
+      });
     },
-    eventMouseLeave: info => {
-      const tooltip = info.el._tippy
+    eventMouseLeave: (info) => {
+      const tooltip = info.el._tippy;
       if (tooltip) {
-        tooltip.destroy()
+        tooltip.destroy();
       }
     },
-    eventClick: info => {
-      const { event } = info
+    eventClick: (info) => {
+      const { event } = info;
 
-      let guest = ''
-      let Sermoner = ''
+      let guest = "";
+      let Sermoner = "";
       if (event.extendedProps.minister) {
-        if (event.extendedProps.minister.includes(',')) {
-          const ministerParts = event.extendedProps.minister.split(',')
+        if (event.extendedProps.minister.includes(",")) {
+          const ministerParts = event.extendedProps.minister.split(",");
 
-          guest = ministerParts[0]?.trim() || ''
-          Sermoner = ministerParts[1]?.trim() || ''
+          guest = ministerParts[0]?.trim() || "";
+          Sermoner = ministerParts[1]?.trim() || "";
         } else {
-          guest = event.extendedProps.minister.trim()
-          Sermoner = null
+          guest = event.extendedProps.minister.trim();
+          Sermoner = null;
         }
-      }else{
-        console.log("No minister here")
+      } else {
+        console.log("No minister here");
       }
 
       eventData.value = {
@@ -173,34 +180,35 @@ const calendarOptions = computed(() => {
         id: event.id,
         guest: guest,
         Sermoner: Sermoner,
-      }
+      };
 
-      isEventHandlerSidebarActive.value = true
+      isEventHandlerSidebarActive.value = true;
 
-      console.log("Updated eventData:", eventData.value)
+      console.log("Updated eventData:", eventData.value);
     },
-  }
+  };
 
-  console.log("Calendar Options:", options) 
-  
-  return options
-})
+  console.log("Calendar Options:", options);
 
-const handleDateChange = value => {
-  const selectedDate = value
+  return options;
+});
 
-  console.log("This is the value", selectedDate)
-  calendarRef.value.getApi().gotoDate(selectedDate)
-}
+const handleDateChange = (value) => {
+  const selectedDate = value;
+
+  console.log("This is the value", selectedDate);
+  calendarRef.value.getApi().gotoDate(selectedDate);
+};
 </script>
 
 <template>
   <div>
     <VCard>
       <!-- `z-index: 0` Allows overlapping vertical nav on calendar -->
-      <VLayout style="z-index: 0;">
+      <VLayout style="z-index: 0">
         <!-- 👉 Navigation drawer -->
         <VNavigationDrawer
+          v-if="userData.role === 'Admin'"
           v-model="isLeftSidebarOpen"
           width="292"
           absolute
@@ -209,7 +217,7 @@ const handleDateChange = value => {
           class="calendar-add-event-drawer"
           :temporary="$vuetify.display.mdAndDown"
         >
-          <div style="margin: 1.4rem;">
+          <div style="margin: 1.4rem">
             <VBtn
               block
               prepend-icon="tabler-plus"
@@ -232,15 +240,10 @@ const handleDateChange = value => {
 
           <VDivider />
           <div class="pa-7">
-            <p class="text-sm text-uppercase text-disabled mb-3">
-              FILTER
-            </p>
+            <p class="text-sm text-uppercase text-disabled mb-3">FILTER</p>
 
             <div class="d-flex flex-column calendars-checkbox">
-              <VCheckbox
-                v-model="checkAll"
-                label="View all"
-              />
+              <VCheckbox v-model="checkAll" label="View all" />
               <VCheckbox
                 v-for="calendar in store.availableCalendars"
                 :key="calendar.label"
@@ -255,10 +258,7 @@ const handleDateChange = value => {
 
         <VMain>
           <VCard flat>
-            <FullCalendar
-              ref="calendarRef"
-              :options="calendarOptions"
-            />
+            <FullCalendar ref="calendarRef" :options="calendarOptions" />
           </VCard>
         </VMain>
       </VLayout>
@@ -291,8 +291,8 @@ const handleDateChange = value => {
 .calendar-date-picker {
   display: none;
 
-  +.flatpickr-input {
-    +.flatpickr-calendar.inline {
+  + .flatpickr-input {
+    + .flatpickr-calendar.inline {
       border: none;
       box-shadow: none;
 

@@ -43,28 +43,33 @@ const fetchSchedules = async () => {
 
     const response = await api.get(`/getSchedule/${parishCode}`);
     if (response.data.status === 200 && response.data.schedules.length > 0) {
-      // Map over the defaultSchedules, and for each day, check if there's a corresponding event from the DB
       const fetchedSchedules = response.data.schedules;
+
+      const startOfWeek = dayjs().startOf("week");
+      const endOfWeek = dayjs().endOf("week");
 
       churchSchedules.value = defaultSchedules.map((defaultSchedule, index) => {
         const dbSchedule = fetchedSchedules.find(
-          (schedule) => dayjs(schedule.date).day() === index
+          (schedule) => 
+            dayjs(schedule.date).isSameOrAfter(startOfWeek) &&
+            dayjs(schedule.date).isSameOrBefore(endOfWeek) &&
+            dayjs(schedule.date).day() === index
         );
 
-        // If a schedule exists for this day, overwrite the default
+        // Overwrite default schedule if found in the DB
         if (dbSchedule) {
           return {
             ...defaultSchedule,
             event: dbSchedule.event,
             person: dbSchedule.person,
-            date: dayjs(dbSchedule.date).format("D MMMM"), // Format the date to "D MMMM"
+            date: dayjs(dbSchedule.date).format("D MMMM"),
           };
         }
 
         // Otherwise, use the default schedule
         return {
           ...defaultSchedule,
-          date: dayjs().startOf("week").add(index, "day").format("D MMMM"),
+          date: startOfWeek.add(index, "day").format("D MMMM"),
         };
       });
     } else {

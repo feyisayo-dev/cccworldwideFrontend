@@ -20,6 +20,13 @@ export default [
         subject: 'Children',
       },
       {
+        title: 'Events',
+        to: 'dashboards-addevent-dashboard',
+        icon: { icon: 'tabler-calendar' },
+        action: 'read',        // Define specific action
+        subject: 'Children',
+      },
+      {
         title: 'Add Children',
         to: 'dashboards-addChildren-dashboard',
         action: 'read',

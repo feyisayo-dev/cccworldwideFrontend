@@ -638,10 +638,10 @@ onMounted(() => {
         class="section section-vide section-lg video-wrap vide"
         data-vide-bg="video/video-1"
       >
-        <div class="container text-center context-dark">
+        <!-- <div class="container text-center context-dark">
           <div class="h1">Attend the next church event</div>
           <p class="text-sm">See you at the sunday sermon</p>
-        </div>
+        </div> -->
       </section>
       <footer class="section footer-classic">
         <div class="footer-body">

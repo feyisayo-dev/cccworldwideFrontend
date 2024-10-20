@@ -13,7 +13,6 @@ export default [
         children: [
           { title: 'View Members', to: 'dashboards-viewuser-dashboard' },
           { title: 'Add Parish', to: 'dashboards-parish-dashboard' },
-          { title: 'Add Event', to: 'dashboards-addevent-dashboard' },
        
 
           // { title: 'Add Parish', to: { name: 'dashboards-parish-dashboard', params: { id: 21 } } },

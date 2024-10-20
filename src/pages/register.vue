@@ -1,87 +1,99 @@
 <!-- eslint-disable vue/no-lone-template -->
 <script setup>
-import { useAllAdminActions } from '@/apiservices/adminActions'
-import api from '@/apiservices/api'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import { default as registerMultistepIllustrationDark, default as registerMultistepIllustrationLight } from '@images/illustrations/ccclogo.png'
-import registerMultistepBgDark from '@images/pages/register-multistep-bg-dark.png'
-import registerMultistepBgLight from '@images/pages/register-multistep-bg-light.png'
-import { onMounted, ref } from 'vue'
+import { useAllAdminActions } from "@/apiservices/adminActions";
+import api from "@/apiservices/api";
+import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
+import {
+  default as registerMultistepIllustrationDark,
+  default as registerMultistepIllustrationLight,
+} from "@images/illustrations/ccclogo.png";
+import registerMultistepBgDark from "@images/pages/register-multistep-bg-dark.png";
+import registerMultistepBgLight from "@images/pages/register-multistep-bg-light.png";
+import { onMounted, ref } from "vue";
 
-const registerMultistepBg = useGenerateImageVariant(registerMultistepBgLight, registerMultistepBgDark)
-const currentStep = ref(0)
-const isPasswordVisible = ref(false)
-const isConfirmPasswordVisible = ref(false)
-const registerMultistepIllustration = useGenerateImageVariant(registerMultistepIllustrationLight, registerMultistepIllustrationDark)
-const allAdminActions = useAllAdminActions()
-const apiResponseStatus = ref('')
-const apiResponseMessage = ref('')
+const registerMultistepBg = useGenerateImageVariant(
+  registerMultistepBgLight,
+  registerMultistepBgDark
+);
+const currentStep = ref(0);
+const isPasswordVisible = ref(false);
+const isConfirmPasswordVisible = ref(false);
+const registerMultistepIllustration = useGenerateImageVariant(
+  registerMultistepIllustrationLight,
+  registerMultistepIllustrationDark
+);
+const allAdminActions = useAllAdminActions();
+const apiResponseStatus = ref("");
+const apiResponseMessage = ref("");
 
-const items = [{
-  title: 'Account',
-  subtitle: 'Account Details',
-  icon: 'tabler-smart-home',
-},
-{
-  title: 'Personal Details',
-  subtitle: 'Personal Information',
-  icon: 'tabler-users',
-},
-{
-  title: 'Anointing Details',
-  subtitle: 'Joinning/Anoiting Details',
-  icon: 'tabler-credit-card',
-},
-{
-  title: 'Contact Details',
-  subtitle: 'Contact Details',
-  icon: 'tabler-map-pin',
-},
-{
-  title: 'Church Details',
-  subtitle: 'Church Information',
-  icon: 'custom-home',
-
-},
-{
-  title: 'Review and Summary',
-  subtitle: 'Review & Summary',
-  icon: 'tabler-file-text',
-}]
+const items = [
+  {
+    title: "Account",
+    subtitle: "Account Details",
+    icon: "tabler-smart-home",
+  },
+  {
+    title: "Personal Details",
+    subtitle: "Personal Information",
+    icon: "tabler-users",
+  },
+  {
+    title: "Anointing Details",
+    subtitle: "Joinning/Anoiting Details",
+    icon: "tabler-credit-card",
+  },
+  {
+    title: "Contact Details",
+    subtitle: "Contact Details",
+    icon: "tabler-map-pin",
+  },
+  {
+    title: "Church Details",
+    subtitle: "Church Information",
+    icon: "custom-home",
+  },
+  {
+    title: "Review and Summary",
+    subtitle: "Review & Summary",
+    icon: "tabler-file-text",
+  },
+];
 
 const form = ref({
-  email: '',
-  password: '',
-  confirmPassword: '',
-  sname: ' ',
-  fname: '',
-  mname: '',
-  Gender: 'Select you gender',
-  dob: '',
-  MStatus: 'Select status',
-  VineyardStatus: 'Select Vineyard status',
-  title: 'Select present title',
-  dot: '',
-  selectedMinistry: 'Select Ministry',
-  phoneNo: '',
-  altPhoneno: '',
-  address: '',
-  selectedCountry: '',
-  residentialCountry: '',
-  selectedState: '',
-  selectedchurchCountry: ' ',
-  selectedChurchState: 'Select state',
-  state: '',
-  city: '',
-  Country: '',
-  selectedParish: 'Select parish',
-  getTitleByGendervalue: '',
-  selectedParishState: 'Select state',
-  getParisByState: '',
-  userParish: '',
-  userParishCode: '',
-  confirm_title: 'Registered!',
-  getCountryById: '',
+  email: "",
+  password: "",
+  confirmPassword: "",
+  sname: " ",
+  fname: "",
+  mname: "",
+  Gender: "Select you gender",
+  dob: "",
+  MStatus: "Select status",
+  VineyardStatus: "Select Vineyard status",
+  title: "Select present title",
+  dot: "",
+  selectedMinistry: "Select Ministry",
+  phoneNo: "",
+  altPhoneno: "",
+  address: "",
+  selectedCountry: "",
+  residentialCountry: "",
+  churchCountryName: "",
+  selectedState: "",
+  selectedchurchCountry: " ",
+  selectedChurchState: "Select state",
+  state: "",
+  city: "",
+  Country: "",
+  selectedParish: "Select parish",
+  getTitleByGendervalue: "",
+  selectedParishState: "Select state",
+  getParisByState: "",
+  userParish: "",
+  userParishCode: "",
+  confirm_title: "Registered!",
+  getCountryById: "",
+  getChurchCountryById: "",
 
   // Add other form fields as needed list here confirm-title
   ministryList: [],
@@ -90,19 +102,20 @@ const form = ref({
   churchStateList: [],
   titleList: [],
   parishList: [],
-  genderList: Object.freeze(['Male', 'Female']),
-})
+  genderList: Object.freeze(["Male", "Female"]),
+});
 
-
-
-//Fetch all country 
+//Fetch all country
 const fetchCountries = async () => {
-  const cachedCountries = localStorage.getItem('countries');
+  const cachedCountries = localStorage.getItem("countries");
 
   if (cachedCountries) {
     // If the data exists, load it from localStorage
-    console.log('Loaded countries from localStorage', JSON.parse(cachedCountries));
-    
+    console.log(
+      "Loaded countries from localStorage",
+      JSON.parse(cachedCountries)
+    );
+
     form.value.countryList = JSON.parse(cachedCountries).map((country) => ({
       id: country.id,
       name: country.name,
@@ -115,11 +128,11 @@ const fetchCountries = async () => {
       .fetchCountries()
       .then((response) => {
         const data = response.data;
-        console.log('This is my data', data);
+        console.log("This is my data", data);
 
         if (data.countries && data.countries.length > 0) {
           // Store fetched countries in localStorage
-          localStorage.setItem('countries', JSON.stringify(data.countries));
+          localStorage.setItem("countries", JSON.stringify(data.countries));
 
           form.value.countryList = data.countries.map((country) => ({
             id: country.id,
@@ -130,38 +143,41 @@ const fetchCountries = async () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching countries:', error);
+        console.error("Error fetching countries:", error);
       });
   }
 };
 
 //Fetch Ministry
 const fetchMinistryFromApi = async () => {
-  allAdminActions.fetchMinistryFromApi({
-  }).then(response => {
-    const data=response.data
-    
-    form.value.ministry = data.ministry
+  allAdminActions
+    .fetchMinistryFromApi({})
+    .then((response) => {
+      const data = response.data;
 
-    if (data.ministry && data.ministry.length > 0) {
-      form.value.ministryList = data.ministry.map(ministry => ministry.ministry)
-    }
+      form.value.ministry = data.ministry;
 
-  }).catch(error => {
-    console.error(error)
-  })
-}
-
+      if (data.ministry && data.ministry.length > 0) {
+        form.value.ministryList = data.ministry.map(
+          (ministry) => ministry.ministry
+        );
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
 const register = async () => {
   try {
     // Determine the value for Status based on MStatus
-    const status = form.value.MStatus === 'Vineyard Worker'
-      ? form.value.VineyardStatus
-      : null
+    const status =
+      form.value.MStatus === "Vineyard Worker"
+        ? form.value.VineyardStatus
+        : null;
 
     // Make the API request
-    const response = await api.post('/Addmember', {
+    const response = await api.post("/Addmember", {
       email: form.value.email,
       password: form.value.password,
       sname: form.value.sname,
@@ -182,55 +198,55 @@ const register = async () => {
       City: form.value.city,
       parishcode: form.value.userParishCode,
       parishname: form.value.userParish,
-    })
+    });
 
     // Handle the response
-    console.log('Got usersData here register', JSON.stringify(response.data))
+    console.log("Got usersData here register", JSON.stringify(response.data));
 
-    const apiResponseDetails = response.data
+    const apiResponseDetails = response.data;
 
     // Perform necessary actions with the response data
-    apiResponseStatus.value = apiResponseDetails.status
-    apiResponseMessage.value = apiResponseDetails.message
+    apiResponseStatus.value = apiResponseDetails.status;
+    apiResponseMessage.value = apiResponseDetails.message;
 
     // Check status and reload if successful
     if (apiResponseStatus.value === 200) {
-      window.location.href = '/login'
+      window.location.href = "/login";
     }
-
   } catch (error) {
     // Handle any errors
-    console.error('Error:', error.response ? error.response.data : error.message)
+    console.error(
+      "Error:",
+      error.response ? error.response.data : error.message
+    );
   } finally {
     // Close the confirmation dialog and perform any cleanup
-    isConfirmDialogVisible.value = false
+    isConfirmDialogVisible.value = false;
   }
-}
-
+};
 
 const onCountryChange = () => {
-  form.value.selectedParishState = ''
-  form.value.selectedParish = ''
-  form.value.churchStateList = []
-  form.value.parishList = []
+  form.value.selectedParishState = "";
+  form.value.selectedParish = "";
+  form.value.churchStateList = [];
+  form.value.parishList = [];
 
-  getChurchState()
-}
+  getChurchState();
+};
 
 // 👉 FetchAll parish from state
-const fetchParishes = async state => {
+const fetchParishes = async (state) => {
   if (state) {
     try {
-      form.value.parishList = []
-      form.value.selectedParish = ''  // Clear the selected parish
-      console.log("<=====This is the state of the church======>", state)
+      form.value.parishList = [];
+      form.value.selectedParish = ""; // Clear the selected parish
+      console.log("<=====This is the state of the church======>", state);
 
-      const response = await allAdminActions.fetchStateParish(state)
+      const response = await allAdminActions.fetchStateParish(state);
 
-
-      const data = response.data
+      const data = response.data;
       if (data.Allparish && data.Allparish.length > 0) {
-        form.value.parishList = data.Allparish.map(parish => ({
+        form.value.parishList = data.Allparish.map((parish) => ({
           parishname: `${parish.parishname} ${parish.address}`,
           country: parish.country,
           states: parish.states,
@@ -238,209 +254,216 @@ const fetchParishes = async state => {
           parishaddress: parish.address,
           name: parish.parishname,
           parishcode: parish.parishcode,
-        }))
+        }));
       }
-      console.log("<=====This is the response======>", form.value.parishList)
-
+      console.log("<=====This is the response======>", form.value.parishList);
     } catch (error) {
-      console.log('Error fetching data:', error)
+      console.log("Error fetching data:", error);
     }
   }
-}
+};
 
-
-
-const getTitleByGender = async getByGendervalue => {
-  
+const getTitleByGender = async (getByGendervalue) => {
   try {
     // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint
-    const response = await api.get(`/getTitleByGender/${getByGendervalue}`)
-    const data = response.data.titles 
+    const response = await api.get(`/getTitleByGender/${getByGendervalue}`);
+    const data = response.data.titles;
 
-  
-
-    if(data&&data.length>0) {
-    
-
-      form.value.titleList = data.map(genderTitles => ({
+    if (data && data.length > 0) {
+      form.value.titleList = data.map((genderTitles) => ({
         level: genderTitles.level,
         title: genderTitles.title,
-       
-      }))
+      }));
     }
-    
-  
-  
   } catch (error) {
-    console.error('Error fetching data:', error)
+    console.error("Error fetching data:", error);
   }
-}
-
+};
 
 onMounted(() => {
-  fetchMinistryFromApi()
-  fetchCountries()
-})
+  fetchMinistryFromApi();
+  fetchCountries();
+});
 
-const  getResidentialState = () => {
+const getResidentialState = () => {
   // form.value.stateList = []
   // form.value.selectedState = ''
-  console.log("<=========This is the country id picked for residential==========>", form.value.selectedCountry)
+  console.log(
+    "<=========This is the country id picked for residential==========>",
+    form.value.selectedCountry
+  );
 
   if (form.value.selectedCountry) {
-    form.value.getCountryById = form.value.countryList.find(country => country.id === form.value.selectedCountry)
-    console.log("<=========This is the country picked for residential==========>", form.value.getCountryById)
-    form.value.residentialCountry = form.value.getCountryById.name
-
-  }
- 
-  if (form.value.getCountryById && Array.isArray( form.value.getCountryById.states) &&  form.value.getCountryById.states.length > 0) {
-    
-    try {
-      const data= form.value.getCountryById.states
-      
-      if(Array.isArray(data) && data.length>0){
-        form.value.stateList = data.map(countryState => ({
-          country_id: countryState.country_id,
-          name: countryState.name,
-        }))
-      }
-    } catch (error) {
-      
-    }
+  form.value.getCountryById = form.value.countryList.find(
+    (country) => country.id === form.value.selectedCountry
+  );
+  
+  if (form.value.getCountryById) {
+    console.log(
+      "<=========This is the country picked for residential==========>",
+      form.value.getCountryById
+    );
+    form.value.residentialCountry = form.value.getCountryById.name;
+  } else {
+    console.error("No country found for the selected country ID.");
   }
 }
+
+  if (
+    form.value.getCountryById &&
+    Array.isArray(form.value.getCountryById.states) &&
+    form.value.getCountryById.states.length > 0
+  ) {
+    try {
+      const data = form.value.getCountryById.states;
+
+      if (Array.isArray(data) && data.length > 0) {
+        form.value.stateList = data.map((countryState) => ({
+          country_id: countryState.country_id,
+          name: countryState.name,
+        }));
+      }
+    } catch (error) {}
+  }
+};
 
 const getChurchState = () => {
   if (form.value.selectedchurchCountry) {
-    console.log("<=========This is the country picked for parish==========>", form.value.selectedchurchCountry)
+    console.log(
+      "<=========This is the country ID picked for parish==========>",
+      form.value.selectedchurchCountry
+    );
 
-    form.value.churchStateList = []
-    form.value.selectedParishState = ''
+    // Find the selected church country in the country list, like in getResidentialState
+    form.value.getChurchCountryById = form.value.countryList.find(
+      (country) => country.id === form.value.selectedchurchCountry
+    );
+    
+    console.log(
+      "<=========This is the country picked for parish==========>",
+      form.value.getChurchCountryById
+    );
+    form.value.churchCountryName = form.value.getChurchCountryById.name
+    form.value.churchStateList = [];
+    form.value.selectedParishState = "";
 
-    try {
-      const data = form.value.selectedchurchCountry.states
-      console.log(form.value.selectedchurchCountry.states)
-      if (Array.isArray(data) && data.length > 0) {
-        form.value.churchStateList = data.map(churchState => ({
-          country_id: churchState.country_id,
-          name: churchState.name,
-        }))
+    if (
+      form.value.getChurchCountryById &&
+      Array.isArray(form.value.getChurchCountryById.states) &&
+      form.value.getChurchCountryById.states.length > 0
+    ) {
+      try {
+        const data = form.value.getChurchCountryById.states;
+        console.log(data);
+
+        if (Array.isArray(data) && data.length > 0) {
+          form.value.churchStateList = data.map((churchState) => ({
+            country_id: churchState.country_id,
+            name: churchState.name,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching states:", error);
       }
-
-    } catch (error) {
-      console.error('Error fetching states:', error)
     }
   }
-}
+};
 
-
-const  getGenderTitle = () => {
+const getGenderTitle = () => {
   if (form.value.Gender) {
+    const gender = form.value.Gender;
 
-    const gender = form.value.Gender
-
-    getTitleByGender(gender)
-
-  
+    getTitleByGender(gender);
   }
-}
+};
 
 const getStateParish = () => {
   if (form.value.selectedParishState) {
-    console.log("<=========This is the state picked for parish==========>", form.value.selectedParishState)
-    fetchParishes(form.value.selectedParishState)
+    console.log(
+      "<=========This is the state picked for parish==========>",
+      form.value.selectedParishState
+    );
+    fetchParishes(form.value.selectedParishState);
   } else {
-    console.log("No state is selected")
+    console.log("No state is selected");
   }
-}
+};
 
-
-//submit to call the register function 
-const onSubmit = message => {
-
+//submit to call the register function
+const onSubmit = (message) => {
   // eslint-disable-next-line sonarjs/no-all-duplicated-branches
   if (message) {
-    register()
+    register();
   }
-}
-
+};
 
 // const closeDialog= () => {
 //   this.isConfirmDialogVisible = false
 //   alert('Cancelled')
 // }
 
-watch(() => form.value.selectedParish, newValue => {
+watch(
+  () => form.value.selectedParish,
+  (newValue) => {
+    if (newValue) {
+      // Find the parish object corresponding to the selected parish code
+      const selectedParishObject = form.value.parishList.find(
+        (parish) => parish.parishcode === newValue
+      );
 
-  if (newValue) {
-    // Find the parish object corresponding to the selected parish code
-    const selectedParishObject = form.value.parishList.find(parish => parish.parishcode === newValue)
-
-    if (selectedParishObject) {
-      console.log("Selected Parish Name:", selectedParishObject.parishname)
-      form.value.userParish = selectedParishObject.parishname
-      form.value.userParishCode = newValue
-
-
-    } else {
-      console.log("Parish not found")
+      if (selectedParishObject) {
+        console.log("Selected Parish Name:", selectedParishObject.parishname);
+        form.value.userParish = selectedParishObject.parishname;
+        form.value.userParishCode = newValue;
+      } else {
+        console.log("Parish not found");
+      }
     }
   }
-})
+);
 
 watchEffect(() => {
   // getResidentialState()
   // getChurchState()
-  getGenderTitle()
+  getGenderTitle();
 
   // getStateParish()
-})
+});
 
-const isConfirmDialogVisible = ref(false)
+const isConfirmDialogVisible = ref(false);
 
-const refetchData = hideOverlay => {
-  setTimeout(hideOverlay, 3000)
-}
+const refetchData = (hideOverlay) => {
+  setTimeout(hideOverlay, 3000);
+};
 
-const isPasswordValid = computed(() => form.value.password.length >= 6)
-const doPasswordsMatch = computed(() => form.value.password === form.value.confirmPassword)
+const isPasswordValid = computed(() => form.value.password.length >= 6);
+const doPasswordsMatch = computed(
+  () => form.value.password === form.value.confirmPassword
+);
 
 const isNextButtonDisabled = computed(() => {
-  return currentStep.value === 0 && (!isPasswordValid.value || !doPasswordsMatch.value)
-})
+  return (
+    currentStep.value === 0 &&
+    (!isPasswordValid.value || !doPasswordsMatch.value)
+  );
+});
 
 const isStep1Valid = computed(() => {
   return (
-    form.value.sname &&
-    form.value.fname &&
-    form.value.Gender &&
-    form.value.dob
-  )
-})
+    form.value.sname && form.value.fname && form.value.Gender && form.value.dob
+  );
+});
+
 </script>
 
-
-
-<template> 
-  <VRow
-    no-gutters
-    class="auth-wrapper"
-  >
-    <VCol
-      md="1"
-      class="d-none d-md-flex"
-    >
+<template>
+  <VRow no-gutters class="auth-wrapper">
+    <VCol md="1" class="d-none d-md-flex">
       <!-- here your illustration -->
       <div class="d-flex justify-center align-center w-100 position-relative">
-        <VImg
-          :src="registerMultistepIllustration"
-          class="illustration-image"
-        />
-        <VImg
-          :src="registerMultistepBg"
-          class="bg-image position-absolute w-100"
-        />
+        <router-link to="/landing">
+          <p class="mb-0">Go home &rarr;</p>
+        </router-link>
       </div>
     </VCol>
 
@@ -448,12 +471,9 @@ const isStep1Valid = computed(() => {
       cols="30"
       md="12"
       class="auth-card-v2 d-flex align-center justify-center pa-10"
-      style="background-color: rgb(var(--v-theme-surface));"
+      style="background-color: rgb(var(--v-theme-surface))"
     >
-      <VCard
-        flat
-        class="mt-16 mt-sm-0"
-      >
+      <VCard flat class="mt-16 mt-sm-0">
         <AppStepper
           v-model:current-step="currentStep"
           :items="items"
@@ -464,25 +484,15 @@ const isStep1Valid = computed(() => {
         <VDivider />
         <VCardText>
           <!-- 👉 stepper content -->
-          <AppCardActions
-            action-refresh
-            @refresh="refetchData"
-          />
+          <!-- <AppCardActions action-refresh @refresh="refetchData" /> -->
           <VForm>
-            <VWindow
-              v-model="currentStep"
-              class="disable-tab-transition"
-            >
+            <VWindow v-model="currentStep" class="disable-tab-transition">
               <!-- This is account details step view -->
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
-                    <h5 class="text-h4 mb-1">
-                      Account Information
-                    </h5>
-                    <p class="text-sm">
-                      Enter Your Account Details
-                    </p>
+                    <h5 class="text-h4 mb-1">Account Information</h5>
+                    <p class="text-sm">Enter Your Account Details</p>
                   </VCol>
 
                   <VCol cols="12">
@@ -491,37 +501,41 @@ const isStep1Valid = computed(() => {
                       label="Enter Email Address"
                       variant="outlined"
                     />
-                  </VCol> 
+                  </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VTextField
                       v-model="form.password"
                       label="Enter Password"
                       variant="outlined"
                       :type="isPasswordVisible ? 'text' : 'password'"
-                      :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                      :append-inner-icon="
+                        isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
+                      "
                       hint="Password must be at least 6 characters long"
                       persistent-hint
-                      @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                      @click:append-inner="
+                        isPasswordVisible = !isPasswordVisible
+                      "
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VTextField
                       v-model="form.confirmPassword"
                       label="Confirm Password"
                       variant="outlined"
                       :type="isConfirmPasswordVisible ? 'text' : 'password'"
-                      :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                      :append-inner-icon="
+                        isConfirmPasswordVisible
+                          ? 'tabler-eye-off'
+                          : 'tabler-eye'
+                      "
                       hint="Make sure your passwords match"
                       persistent-hint
-                      @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
+                      @click:append-inner="
+                        isConfirmPasswordVisible = !isConfirmPasswordVisible
+                      "
                     />
                   </VCol>
                 </VRow>
@@ -531,12 +545,8 @@ const isStep1Valid = computed(() => {
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
-                    <h5 class="text-h5 mb-1">
-                      Personal Information
-                    </h5>
-                    <p class="text-sm">
-                      Enter Your Personal Information
-                    </p>
+                    <h5 class="text-h5 mb-1">Personal Information</h5>
+                    <p class="text-sm">Enter Your Personal Information</p>
                   </VCol>
 
                   <VCol cols="12">
@@ -544,26 +554,20 @@ const isStep1Valid = computed(() => {
                       v-model="form.sname"
                       label="Enter Surname"
                       variant="outlined"
-                      :rules="[v => !!v || 'Surname is required']"
+                      :rules="[(v) => !!v || 'Surname is required']"
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VTextField
                       v-model="form.fname"
                       label="Enter First Name"
                       variant="outlined"
-                      :rules="[v => !!v || 'First Name is required']"
+                      :rules="[(v) => !!v || 'First Name is required']"
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VTextField
                       v-model="form.mname"
                       label="Enter Middle Name"
@@ -571,28 +575,22 @@ const isStep1Valid = computed(() => {
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VSelect
                       v-model="form.Gender"
                       :items="form.genderList"
                       label="Select your gender"
                       outlined
-                      :rules="[v => !!v || 'Gender is required']"
+                      :rules="[(v) => !!v || 'Gender is required']"
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppTextField
                       v-model="form.dob"
                       type="date"
                       label="DOB"
-                      :rules="[v => !!v || 'Date of Birth is required']"
+                      :rules="[(v) => !!v || 'Date of Birth is required']"
                       hint="Your year of birth is not shown to anyone"
                       persistent-hint
                     />
@@ -604,18 +602,11 @@ const isStep1Valid = computed(() => {
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
-                    <h5 class="text-h5 mb-1">
-                      Joinning/Anoiting Information
-                    </h5>
-                    <p class="text-sm">
-                      Enter Your Joinning/Anoiting
-                    </p>
+                    <h5 class="text-h5 mb-1">Joinning/Anoiting Information</h5>
+                    <p class="text-sm">Enter Your Joinning/Anoiting</p>
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppSelect
                       v-model="form.MStatus"
                       label="Member Status"
@@ -633,14 +624,18 @@ const isStep1Valid = computed(() => {
                       v-model="form.VineyardStatus"
                       label="Vineyard Status"
                       placeholder=" Select Vineyard status "
-                      :items="['Shepherd','Asst. Shepherd','Wolider','Wolima','Church Worker','Pastor']"
+                      :items="[
+                        'Shepherd',
+                        'Asst. Shepherd',
+                        'Wolider',
+                        'Wolima',
+                        'Church Worker',
+                        'Pastor',
+                      ]"
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppSelect
                       v-model="form.title"
                       label="Present Title"
@@ -648,20 +643,14 @@ const isStep1Valid = computed(() => {
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppTextField
                       v-model="form.dot"
                       type="date"
                       label="Date of present Anoitment"
                     />
                   </VCol>
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppSelect
                       id="ministrySelect"
                       v-model="form.selectedMinistry"
@@ -675,18 +664,11 @@ const isStep1Valid = computed(() => {
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
-                    <h5 class="text-h5 mb-1">
-                      Contact Information
-                    </h5>
-                    <p class="text-sm">
-                      Enter Your contact details
-                    </p>
+                    <h5 class="text-h5 mb-1">Contact Information</h5>
+                    <p class="text-sm">Enter Your contact details</p>
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VPhoneInput
                       v-model="form.phoneNo"
                       label="WhatsApp Phone number"
@@ -697,10 +679,7 @@ const isStep1Valid = computed(() => {
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VPhoneInput
                       v-model="form.altPhoneno"
                       label="Alternative Phone number"
@@ -719,10 +698,7 @@ const isStep1Valid = computed(() => {
                     />
                   </VCol>
 
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VAutocomplete
                       v-model="form.selectedCountry"
                       label="Country of residence"
@@ -736,19 +712,13 @@ const isStep1Valid = computed(() => {
                       <template #item="{ props: listItemProp, item }">
                         <VListItem v-bind="listItemProp">
                           <template #prepend>
-                            <VAvatar
-                              :image="item.raw.flag_img"
-                              size="30"
-                            />
+                            <VAvatar :image="item.raw.flag_img" size="30" />
                           </template>
                         </VListItem>
                       </template>
                     </VAutocomplete>
                   </VCol>
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <VAutocomplete
                       v-model="form.selectedState"
                       label="State of residence"
@@ -756,10 +726,7 @@ const isStep1Valid = computed(() => {
                       item-title="name"
                     />
                   </VCol>
-                  <VCol
-                    cols="12"
-                    md="6"
-                  >
+                  <VCol cols="12" md="6">
                     <AppTextField
                       v-model="form.city"
                       label="City"
@@ -770,15 +737,11 @@ const isStep1Valid = computed(() => {
               </VWindowItem>
               <!-- This is church details step view -->
               <VWindowItem>
-                <h5 class="text-h5 mt-10">
-                  Church Information
-                </h5>
-                <p class="text-sm">
-                  Enter your current church information
-                </p>
+                <h5 class="text-h5 mt-10">Church Information</h5>
+                <p class="text-sm">Enter your current church information</p>
                 <VRow>
                   <VCol cols="12">
-                    <AppCombobox
+                    <VAutocomplete
                       v-model="form.selectedchurchCountry"
                       label="Country"
                       :items="form.countryList"
@@ -791,20 +754,14 @@ const isStep1Valid = computed(() => {
                       <template #item="{ props: listItemProp, item }">
                         <VListItem v-bind="listItemProp">
                           <template #prepend>
-                            <VAvatar
-                              :image="item.raw.flag_img"
-                              size="30"
-                            />
+                            <VAvatar :image="item.raw.flag_img" size="30" />
                           </template>
                         </VListItem>
                       </template>
-                    </AppCombobox>
+                    </VAutocomplete>
                   </VCol>
 
-                  <VCol
-                    cols="6"
-                    md="6"
-                  >
+                  <VCol cols="6" md="6">
                     <VAutocomplete
                       v-model="form.selectedParishState"
                       label="State"
@@ -815,16 +772,13 @@ const isStep1Valid = computed(() => {
                     />
                   </VCol>
 
-                  <VCol
-                    cols="6"
-                    md="6"
-                  >
+                  <VCol cols="6" md="6">
                     <VAutocomplete
                       v-model="form.selectedParish"
                       label="Parish"
                       :items="form.parishList"
                       item-value="parishcode"
-                      :item-title="item => item.parishname || 'Select Parish'"
+                      :item-title="(item) => item.parishname || 'Select Parish'"
                       :hint="`${form.selectedParish}`"
                       persistent-hint
                       double-line
@@ -836,14 +790,12 @@ const isStep1Valid = computed(() => {
               <!-- This is review & summary step view -->
               <VWindowItem>
                 <div class="text-base">
-                  <Vdivider>
+                  <!-- <VDivider> -->
                     <h6 class="text-base font-weight-medium mb-2">
-                      Account Details
+                      Review & Summary
                     </h6>
 
-                    <p class="mb-1">
-                      Email address {{ form.email }}
-                    </p>
+                    <p class="mb-1">Email address {{ form.email }}</p>
 
                     <VDivider class="my-4" />
 
@@ -851,21 +803,13 @@ const isStep1Valid = computed(() => {
                       Personal Details
                     </h6>
 
-                    <p class="mb-1  text-base">
+                    <p class="mb-1 text-base">
                       Surname Name <span>{{ form.sname }}</span>
                     </p>
-                    <p class="mb-1  text-base">
-                      First Name {{ form.fname }}
-                    </p>
-                    <p class="mb-1  text-base">
-                      Middle Name {{ form.mname }}
-                    </p>
-                    <p class="mb-1">
-                      Gender {{ form.Gender }}
-                    </p>
-                    <p class="mb-1">
-                      DOB {{ form.dob }}
-                    </p>
+                    <p class="mb-1 text-base">First Name {{ form.fname }}</p>
+                    <p class="mb-1 text-base">Middle Name {{ form.mname }}</p>
+                    <p class="mb-1">Gender {{ form.Gender }}</p>
+                    <p class="mb-1">DOB {{ form.dob }}</p>
 
                     <VDivider class="my-4" />
 
@@ -873,24 +817,13 @@ const isStep1Valid = computed(() => {
                       Joinning/Anoiting Details
                     </h6>
 
-                    <p class="mb-1">
-                      Member Status {{ form.MStatus }}
+                    <p class="mb-1">Member Status {{ form.MStatus }}</p>
+                    <p v-if="form.MStatus == 'Vineyard Worker'" class="mb-1">
+                      Vineyard Status {{ form.VineyardStatus }}
                     </p>
-                    <p 
-                      v-if="form.MStatus == 'Vineyard Worker'"
-                      class="mb-1"
-                    >
-                      Vineyard Status   {{ form.VineyardStatus }}
-                    </p>
-                    <p class="mb-1">
-                      Present Title  {{ form.title }}
-                    </p>
-                    <p class="mb-1">
-                      Date of present Anoitment {{ form.dot }}
-                    </p>
-                    <p class="mb-1">
-                      Ministry {{ form.selectedMinistry }}
-                    </p>
+                    <p class="mb-1">Present Title {{ form.title }}</p>
+                    <p class="mb-1">Date of present Anoitment {{ form.dot }}</p>
+                    <p class="mb-1">Ministry {{ form.selectedMinistry }}</p>
 
                     <VDivider class="my-4" />
 
@@ -898,37 +831,27 @@ const isStep1Valid = computed(() => {
                       Contact Details
                     </h6>
 
-                    <p class="mb-1">
-                      WhatsApp Phone number  {{ form.phoneNo }}
-                    </p>
+                    <p class="mb-1">WhatsApp Phone number {{ form.phoneNo }}</p>
                     <p class="mb-1">
                       Alternative Phone number {{ form.altPhoneno }}
                     </p>
-                    <p class="mb-1">
-                      Residential Address {{ form.address }}
-                    </p>
-                    <p class="mb-1">
-                      Country {{ form.residentialCountry }}
-                    </p>
-                  
-                    <p class="mb-1">
-                      State {{ form.selectedState }}
-                    </p>
+                    <p class="mb-1">Residential Address {{ form.address }}</p>
+                    <p class="mb-1">Country {{ form.residentialCountry }}</p>
+
+                    <p class="mb-1">State {{ form.selectedState }}</p>
                     <VDivider class="my-4" />
                     <h6 class="text-base font-weight-medium mb-2">
                       Church Details
                     </h6>
 
                     <p class="mb-1">
-                      Country {{ form.selectedchurchCountry.name }}
+                      Country {{ form.churchCountryName }}
                     </p>
-                    <p class="mb-1">
-                      State {{ form.selectedParishState }}
-                    </p>
+                    <p class="mb-1">State {{ form.selectedParishState }}</p>
                     <p class="mb-1">
                       Parish: {{ form.userParish }} - {{ form.userParishCode }}
                     </p>
-                  </vdivider>
+                  <!-- </VDivider> -->
                 </div>
               </VWindowItem>
             </VWindow>
@@ -939,12 +862,16 @@ const isStep1Valid = computed(() => {
                 variant="tonal"
                 @click="currentStep--"
               >
-                <VIcon
-                  icon="tabler-arrow-left"
-                  start
-                  class="flip-in-rtl"
-                />
+                <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
                 Previous
+              </VBtn>
+
+              <VBtn color="secondary" variant="tonal">
+                <router-link to="/login">
+                  <p class="mb-0">
+                    If you have an account, please login &rarr;
+                  </p>
+                </router-link>
               </VBtn>
 
               <VBtn
@@ -963,11 +890,7 @@ const isStep1Valid = computed(() => {
               >
                 Next
 
-                <VIcon
-                  icon="tabler-arrow-right"
-                  end
-                  class="flip-in-rtl"
-                />
+                <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
               </VBtn>
             </div>
             <!-- 👉 Confirm Dialog -->
@@ -986,33 +909,14 @@ const isStep1Valid = computed(() => {
         </VCardText>
       </VCard>
     </VCol>
-    <VCol
-      md="1"
-      class="d-none d-md-flex"
-    >
-      <!-- here your illustration -->
-      <div class="d-flex justify-center align-center w-100 position-relative">
-        <VImg
-          :src="registerMultistepIllustration"
-          class="illustration-image"
-        />
-        <VImg
-          :src="registerMultistepBg"
-          class="bg-image position-absolute w-100"
-        />
-      </div>
-      <div id="confirm" />
-    </VCol>
   </VRow>
 </template>
-
-
 
 <style lang="scss">
 #loading-bg {
   position: absolute;
   display: block;
-  background: var(--initial-loader-bg  #fff);
+  background: var(--initial-loader-bg #fff);
   block-size: 100%;
   inline-size: 100%;
 }
@@ -1089,5 +993,3 @@ const isStep1Valid = computed(() => {
 meta:
   layout: blank
 </route>
-
-

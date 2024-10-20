@@ -34,8 +34,8 @@ export const useThemeConfig = () => {
     watch([theme, isDarkPreferred], ([val, _]) => {
       vuetifyTheme.global.name.value = val === 'system'
         ? isDarkPreferred.value
-          ? 'dark'
-          : 'light'
+          ? 'light'
+          : 'dark'
         : val
     })
   }

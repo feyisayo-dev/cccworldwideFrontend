@@ -5,7 +5,7 @@ const shortcuts = [
     icon: 'tabler-calendar',
     title: 'Events',
     subtitle: 'scheduler',
-    to: { name: 'apps-addevent' },
+    to: { name: 'dashboards-addevent-dashboard' },
   },
   {
     icon: 'tabler-calendar',
