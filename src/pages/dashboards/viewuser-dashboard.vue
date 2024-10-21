@@ -1,20 +1,20 @@
 <script setup>
-import { paginationMeta } from '@/@fake-db/utils'
-import { useUserListStore } from '@/apiservices/membersList'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
+import { paginationMeta } from "@/@fake-db/utils";
+import { useUserListStore } from "@/apiservices/membersList";
+import { VDataTableServer } from "vuetify/labs/VDataTable";
 
-const userListStore = useUserListStore()
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedPlan = ref()
-const selectedStatus = ref()
-const totalPage = ref(1)
-const totalUsers = ref(0)
-const users = ref([])
-const usersTiles = ref([])
-let userData = ref([])
-const isEditDialogVisible = ref(false)
-const permissionName = ref('')
+const userListStore = useUserListStore();
+const searchQuery = ref("");
+const selectedRole = ref();
+const selectedPlan = ref();
+const selectedStatus = ref();
+const totalPage = ref(1);
+const totalUsers = ref(0);
+const users = ref([]);
+const usersTiles = ref([]);
+let userData = ref([]);
+const isEditDialogVisible = ref(false);
+const permissionName = ref("");
 
 const options = ref({
   page: 1,
@@ -22,181 +22,125 @@ const options = ref({
   sortBy: [],
   groupBy: [],
   search: undefined,
-})
-
-
+});
 
 // Headers
 const headers = [
   {
-    title: 'Member Name',
-    color: 'primary',
-    key: 'member',
+    title: "Member Name",
+    color: "primary",
+    key: "member",
   },
 
   {
-    title: 'Phone Number',
-    color: 'info',
-    key: 'mobile',
+    title: "Phone Number",
+    color: "info",
+    key: "mobile",
   },
 
   {
-    title: 'Gender',
-    value: 'Gender',
+    title: "Gender",
+    value: "Gender",
   },
 
   {
-    title: 'Email',
-    value: 'email',
-  },
-  
-  // {
-  //   title: 'email',
-  //   key: 'email',
-  // },
-
-  {
-    title: 'Role',
-    key: 'role',
+    title: "Email",
+    value: "email",
   },
 
- 
-
-  // {
-  //   title: 'Billing',
-  //   key: 'billing',
-  // },
-  // {
-  //   title: 'Status',
-  //   key: 'status',
-  // },
   {
-    title: 'Actions',
-    key: 'actions',
+    title: "Role",
+    key: "role",
+  },
+  {
+    title: "Actions",
+    key: "actions",
     sortable: false,
   },
-]
+];
 
 // 👉 Fetching users
 const fetchUsers = () => {
-  userListStore.fetchUsers({})
-    .then(response => {
-      users.value = response.data.members
-      console.log(users.value)
-      
+  userListStore
+    .fetchUsers({})
+    .then((response) => {
+      users.value = response.data.members;
+      console.log(users.value);
+
       // Process the users data to create the combined 'member' field
-      const processedUsers = response.data.members.map(user => {
-        const memberName = `${user.Title} ${user.fname} ${user.sname}` // Combine Title, fname, and sname
-        
-        return { ...user, member: memberName }
-      })
+      const processedUsers = response.data.members.map((user) => {
+        const memberName = `${user.Title} ${user.fname} ${user.sname}`; // Combine Title, fname, and sname
+
+        return { ...user, member: memberName };
+      });
 
       // Assign the processed data to usersTiles
-      usersTiles.value = processedUsers
-      console.log(usersTiles.value)
+      usersTiles.value = processedUsers;
+      console.log(usersTiles.value);
 
-      totalPage.value = response.data.totalPage
-      totalUsers.value = response.data.totalUsers
-      options.value.page = response.data.page
+      totalPage.value = response.data.totalPage;
+      totalUsers.value = response.data.totalUsers;
+      options.value.page = response.data.page;
     })
-    .catch(error => {
-      console.error(error)
-    })
-}
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
-
-watchEffect(fetchUsers)
+watchEffect(fetchUsers);
 
 // 👉 search filters
 const roles = [
   {
-    title: 'Admin',
-    value: 'admin',
+    title: "Admin",
+    value: "admin",
   },
   {
-    title: 'Client',
-    value: 'client',
+    title: "Client",
+    value: "client",
   },
-]
+];
 
-const isAddNewUserDrawerVisible = ref(false)
+const isAddNewUserDrawerVisible = ref(false);
 
-const addNewUser = userData => {
-  userListStore.addUser(userData)
-
-  // refetch User
-  fetchUsers()
-}
-
-const deleteUser = id => {
-  userListStore.deleteUser(id)
+const addNewUser = (userData) => {
+  userListStore.addUser(userData);
 
   // refetch User
-  fetchUsers()
-}
+  fetchUsers();
+};
 
-const editUserDialog = name => {
-  isEditDialogVisible.value = true
-  
-  userData.value =  users.raw
-  
-}
+const deleteUser = (id) => {
+  userListStore.deleteUser(id);
+
+  // refetch User
+  fetchUsers();
+};
+
+const editUserDialog = (name) => {
+  isEditDialogVisible.value = true;
+
+  userData.value = users.raw;
+};
 </script>
 
 <template>
   <section>
-    <VRow>
-      <!--
-        <VCol
-        v-for="meta in userListMeta"
-        :key="meta.title"
-        cols="12"
-        sm="6"
-        lg="3"
-        >
-    
-        <VCard>
-        <VCardText class="d-flex justify-space-between">
-        <div>
-        <span>{{ meta.title }}</span>
-        <div class="d-flex align-center gap-2 my-1">
-        <h6 class="text-h4">
-        {{ meta.stats }}
-        </h6>
-        <span :class="meta.percentage > 0 ? 'text-success' : 'text-error'">( {{ meta.percentage > 0 ? '+' : '' }} {{ meta.percentage }}%)</span>
-        </div>
-        <span>{{ meta.subtitle }}</span>
-        </div>
-
-        <VAvatar
-        rounded
-        variant="tonal"
-        :color="meta.color"
-        :icon="meta.icon"
-        />
-        </VCardText>
-        </VCard>
-     
-        </VCol>
-      -->
-      <VCol cols="12">
+    <VRow
+      ><VCol cols="12">
         <VCard title="Search Filter">
           <!-- 👉 Filters -->
           <VCardText>
             <VRow>
-                <VCol
-                cols="12"
-                sm="4"
-                >
+              <VCol cols="12" sm="4">
                 <AppSelect
-                v-model="selectedStatus"
-                label="Select Status"
-                :items="status"
-                clearable
-                clear-icon="tabler-x"
+                  v-model="selectedStatus"
+                  label="Select Status"
+                  :items="status"
+                  clearable
+                  clear-icon="tabler-x"
                 />
-                </VCol>
-              -->
+              </VCol>
             </VRow>
           </VCardText>
 
@@ -213,41 +157,25 @@ const editUserDialog = name => {
                   { value: 100, title: '100' },
                   { value: -1, title: 'All' },
                 ]"
-                style="width: 6.25rem;"
-                @update:model-value="options.itemsPerPage = parseInt($event, 10)"
+                style="width: 6.25rem"
+                @update:model-value="
+                  options.itemsPerPage = parseInt($event, 10)
+                "
               />
             </div>
             <VSpacer />
 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+            <div
+              class="app-user-search-filter d-flex align-center flex-wrap gap-4"
+            >
               <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
+              <div style="inline-size: 10rem">
                 <AppTextField
                   v-model="searchQuery"
                   placeholder="Search"
                   density="compact"
                 />
               </div>
-
-              <!-- 👉 Export button -->
-              <!-- 
-                <VBtn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="tabler-screen-share"
-                >
-                Export
-                </VBtn>
-              -->
-              <!-- 👉 Add user button -->
-              <!-- 
-                <VBtn
-                prepend-icon="tabler-plus"
-                @click="isAddNewUserDrawerVisible = true"
-                >
-                Add New User
-                </VBtn>
-              -->
             </div>
           </VCardText>
 
@@ -276,26 +204,20 @@ const editUserDialog = name => {
                 variant="text"
                 @click="editUserDialog(item)"
               >
-                <VIcon
-                  size="22"
-                  icon="tabler-edit"
-                />
+                <VIcon size="22" icon="tabler-edit" />
               </VBtn>
 
-              <VBtn
-                icon
-                variant="text"
-                size="small"
-                color="medium-emphasis"
-              >
-                <VIcon
-                  size="24"
-                  icon="tabler-dots-vertical"
-                />
+              <VBtn icon variant="text" size="small" color="medium-emphasis">
+                <VIcon size="24" icon="tabler-dots-vertical" />
 
                 <VMenu activator="parent">
                   <VList>
-                    <VListItem :to="{ name: 'apps-user-view-id', params: { id: item.raw.id } }">
+                    <VListItem
+                      :to="{
+                        name: 'apps-user-view-id',
+                        params: { id: item.raw.id },
+                      }"
+                    >
                       <template #prepend>
                         <VIcon icon="tabler-eye" />
                       </template>
@@ -324,7 +246,9 @@ const editUserDialog = name => {
             <!-- pagination -->
             <template #bottom>
               <VDivider />
-              <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
+              <div
+                class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3"
+              >
                 <p class="text-sm text-disabled mb-0">
                   {{ paginationMeta(options, totalUsers) }}
                 </p>
@@ -332,7 +256,11 @@ const editUserDialog = name => {
                 <VPagination
                   v-model="options.page"
                   :length="Math.ceil(totalUsers / options.itemsPerPage)"
-                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalUsers / options.itemsPerPage)"
+                  :total-visible="
+                    $vuetify.display.xs
+                      ? 1
+                      : Math.ceil(totalUsers / options.itemsPerPage)
+                  "
                 >
                   <template #prev="slotProps">
                     <VBtn
@@ -361,14 +289,14 @@ const editUserDialog = name => {
           </VDataTableServer>
           <!-- SECTION -->
         </VCard>
-      
+
         <!-- 👉 Add New User Permission -->
-        <EditUserDialog
+        <!-- <EditUserDialog
           v-model:isDialogVisible="isEditDialogVisible"
           :user-data="userData"
-        />
-      </vcol>
-    </vrow>
+        /> -->
+      </VCol>
+    </VRow>
   </section>
 </template>
 

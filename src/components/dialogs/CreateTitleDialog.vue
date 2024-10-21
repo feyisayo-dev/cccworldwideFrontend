@@ -53,37 +53,6 @@ const form = ref({
   genderList: Object.freeze(['Male', 'Female']),
 })
 
-
-// const fetchAllTitle = () => {
-//   AllAdminActions.fetchAlltitle({
-//     // q: searchQuery.value,
-//     // status: selectedStatus.value,
-//     // plan: selectedPlan.value,
-//     // role: selectedRole.value,
-//     // options: options.value,
-//   }).then(response => {
-//     // Title.value = response.data.allTitle
- 
-//     const processedTitles = response.data.titles.map(title => {
-//       const sum = (parseInt(title.p1) || 0) + (parseInt(title.p2) || 0) + (parseInt(title.p3) || 0) + (parseInt(title.p4) || 0) + (parseInt(title.p5) || 0) + (parseInt(title.p6) || 0) + (parseInt(title.p7) || 0) + (parseInt(title.p8) || 0) + (parseInt(title.p9) || 0)
-
-//       return { ...title, amount: sum }
-//     })
-
-//     titleName.value = processedTitles
-
-
-//     // totalPage.value = response.data.totalPage
-//     // totalTitle.value = response.data.totalTitle
-//     // options.value.page = response.data.page
-//     console.log("this is the title value", processedTitles)
-//   }).catch(error => {
-//     console.error(error)
-//   })
-// }
-
-// watchEffect(fetchAllTitle)
-
 const dialogVisibleUpdate = val => {
   emit('update:isDialogVisible', val)
   currentStep.value = 0

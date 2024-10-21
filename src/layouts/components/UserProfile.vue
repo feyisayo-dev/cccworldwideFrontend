@@ -2,6 +2,7 @@
 import { initialAbility } from '@/plugins/casl/ability'
 import { useAppAbility } from '@/plugins/casl/useAppAbility'
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import ImgDefault from "@images/avatars/ccclogo.png";
 
 const router = useRouter()
 const ability = useAppAbility()
@@ -104,8 +105,8 @@ const userProfileList = [
       :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
     >
       <VImg
-        v-if="userData && userData.avatar"
-        :src="userData.avatar"
+        v-if="userData"
+        :src="userData.avatar || ImgDefault"
       />
       <VIcon
         v-else
