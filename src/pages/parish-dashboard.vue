@@ -1,34 +1,34 @@
 <script setup>
-import { paginationMeta } from '@/@fake-db/utils'
-import { useAllAdminActions } from '@/apiservices/adminActions'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
+import { paginationMeta } from "@/@fake-db/utils";
+import { useAllAdminActions } from "@/apiservices/adminActions";
+import { VDataTableServer } from "vuetify/labs/VDataTable";
 
-const isConfirmDialogVisible = ref(false)
-const AllAdminActions = useAllAdminActions()
-const searchQuery = ref('')
-const selectedRole = ref()
-const selectedPlan = ref()
-const selectedStatus = ref()
-const totalPage = ref(1)
-const totalParish = ref(0)
-const parish = ref([])
-const isPermissionDialogVisible = ref(false)
-const isAddPermissionDialogVisible = ref(false)
-const permissionName = ref('')
-const isCreateParishVisible = ref(false)
-const isEditParishVisible = ref(false)
-let parishData = ref([])
-const deleteParishData = ref([])
-const apiResponseStatus = ref('')
-const apiResponseMessage = ref('')
+const isConfirmDialogVisible = ref(false);
+const AllAdminActions = useAllAdminActions();
+const searchQuery = ref("");
+const selectedRole = ref();
+const selectedPlan = ref();
+const selectedStatus = ref();
+const totalPage = ref(1);
+const totalParish = ref(0);
+const parish = ref([]);
+const isPermissionDialogVisible = ref(false);
+const isAddPermissionDialogVisible = ref(false);
+const permissionName = ref("");
+const isCreateParishVisible = ref(false);
+const isEditParishVisible = ref(false);
+let parishData = ref([]);
+const deleteParishData = ref([]);
+const apiResponseStatus = ref("");
+const apiResponseMessage = ref("");
 
-const openEditParishDialog = parish => {
+const openEditParishDialog = (parish) => {
   // Set the clicked parish data to a variable accessible by the EditParishDialog component
-  parishData.value =  parish.raw
+  parishData.value = parish.raw;
 
   // Open the edit dialog
-  isEditParishVisible.value = true
-}
+  isEditParishVisible.value = true;
+};
 
 
 
@@ -38,252 +38,203 @@ const options = ref({
   sortBy: [],
   groupBy: [],
   search: undefined,
-})
-
-
+});
 
 // Table Headers
 const headers = [
   {
-    title: 'Parish Name',
-    key: 'parishname',
+    title: "Parish Name",
+    key: "parishname",
   },
 
   {
-    title: 'Phone Number',
-    key: 'phone1',
+    title: "Phone Number",
+    key: "phone1",
   },
 
   {
-    title: 'Country',
-    value: 'country',
+    title: "Country",
+    value: "country",
   },
   {
-    title: 'State',
-    key: 'states',
+    title: "State",
+    key: "states",
+  },
+
+  {
+    title: "City",
+    key: "city",
+  },
+  {
+    title: "email",
+    value: "email",
   },
 
   {
-    title: 'City',
-    key: 'city',
-  },
-  {
-    title: 'email',
-    value: 'email',
-  },
-  
-  {
-    title: 'Category',
-    key: 'category',
+    title: "Category",
+    key: "category",
   },
 
- 
-
-
   {
-    title: 'Actions',
-    key: 'actions',
+    title: "Actions",
+    key: "actions",
     sortable: false,
   },
-]
+];
 
 // 👉 Fetching Parish
 const fetchAllParish = () => {
-  AllAdminActions.fetchAllParish({
-  }).then(response => {
-    parish.value = response.data.allParish
+  AllAdminActions.fetchAllParish({})
+    .then((response) => {
+      parish.value = response.data.allParish;
 
-    console.log(parish.value)
-    
-    totalPage.value = response.data.totalPage
-    totalParish.value = response.data.totalParish
-    options.value.page = response.data.page
-  }).catch(error => {
-    console.error(error)
-  })
-}
+      console.log(parish.value);
 
-watchEffect(fetchAllParish)
+      totalPage.value = response.data.totalPage;
+      totalParish.value = response.data.totalParish;
+      options.value.page = response.data.page;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
-// 👉 search filters
-const roles = [
-  {
-    title: 'Admin',
-    value: 'admin',
-  },
-  {
-    title: 'Client',
-    value: 'client',
-  },
-]
+watchEffect(fetchAllParish);
 
-const plans = [
-  {
-    title: 'Basic',
-    value: 'basic',
-  },
-  {
-    title: 'Company',
-    value: 'company',
-  },
-  {
-    title: 'Enterprise',
-    value: 'enterprise',
-  },
-  {
-    title: 'Team',
-    value: 'team',
-  },
-]
+const changes = () => {
+  fetchAllParish();
+  isEditParishVisible.value = false;
+  isConfirmDialogVisible = false;
+};
 
-const status = [
-  {
-    title: 'Pending',
-    value: 'pending',
-  },
-  {
-    title: 'Active',
-    value: 'active',
-  },
-  {
-    title: 'Inactive',
-    value: 'inactive',
-  },
-]
 
-const resolveUserRoleVariant = category => {
-  console.log("This is the category", category)
-  const roleLowerCase = category.toLowerCase()
-  if (roleLowerCase === 'national')
+const resolveUserRoleVariant = (category) => {
+  console.log("This is the category", category);
+  const roleLowerCase = category.toLowerCase();
+  if (roleLowerCase === "national")
     return {
-      color: 'warning',
-      icon: 'custom-home',
-    }
-  if (roleLowerCase === 'state')
+      color: "warning",
+      icon: "custom-home",
+    };
+  if (roleLowerCase === "state")
     return {
-      color: 'success',
-      icon: 'custom-home',
-    }
-  if (roleLowerCase === 'area')
+      color: "success",
+      icon: "custom-home",
+    };
+  if (roleLowerCase === "area")
     return {
-      color: 'primary',
-      icon: 'custom-home',
-    }
-  if (roleLowerCase === 'province')
+      color: "primary",
+      icon: "custom-home",
+    };
+  if (roleLowerCase === "province")
     return {
-      color: 'info',
-      icon: 'custom-home',
-    }
-  if (roleLowerCase === 'circuit')
+      color: "info",
+      icon: "custom-home",
+    };
+  if (roleLowerCase === "circuit")
     return {
-      color: 'secondary',
-      icon: 'custom-home',
-    }
+      color: "secondary",
+      icon: "custom-home",
+    };
 
-  if (roleLowerCase === 'district')
+  if (roleLowerCase === "district")
     return {
-      color: 'secondary',
-      icon: 'custom-home',
-    }
-  
+      color: "secondary",
+      icon: "custom-home",
+    };
+
   return {
-    color: 'primary',
-    icon: 'custom-home',
-  }
-}
+    color: "primary",
+    icon: "custom-home",
+  };
+};
 
-const resolveUserStatusVariant = () => {  
-  return 'primary'
-}
+const resolveUserStatusVariant = () => {
+  return "primary";
+};
 
-const isAddNewUserDrawerVisible = ref(false)
+const isAddNewUserDrawerVisible = ref(false);
 
 // 👉 List
 const userListMeta = [
   {
-    icon: 'tabler-user',
-    color: 'primary',
-    title: 'Session',
-    stats: '21,459',
+    icon: "tabler-user",
+    color: "primary",
+    title: "Session",
+    stats: "21,459",
     percentage: +29,
-    subtitle: 'Total Users',
+    subtitle: "Total Users",
   },
   {
-    icon: 'tabler-user-plus',
-    color: 'error',
-    title: 'Paid Users',
-    stats: '4,567',
+    icon: "tabler-user-plus",
+    color: "error",
+    title: "Paid Users",
+    stats: "4,567",
     percentage: +18,
-    subtitle: 'Last week analytics',
+    subtitle: "Last week analytics",
   },
   {
-    icon: 'tabler-user-check',
-    color: 'success',
-    title: 'Active Users',
-    stats: '19,860',
+    icon: "tabler-user-check",
+    color: "success",
+    title: "Active Users",
+    stats: "19,860",
     percentage: -14,
-    subtitle: 'Last week analytics',
+    subtitle: "Last week analytics",
   },
   {
-    icon: 'tabler-user-exclamation',
-    color: 'warning',
-    title: 'Pending Users',
-    stats: '237',
+    icon: "tabler-user-exclamation",
+    color: "warning",
+    title: "Pending Users",
+    stats: "237",
     percentage: +42,
-    subtitle: 'Last week analytics',
+    subtitle: "Last week analytics",
   },
-]
+];
 
-const deleteParish = data => {
-  isConfirmDialogVisible.value= true
+const deleteParish = (data) => {
+  isConfirmDialogVisible.value = true;
 
   // Extract parishcode and category
   deleteParishData.value = {
     parishcode: data.parishcode,
     category: data.category,
-  }
+  };
+};
 
-}
-
-
-const onDeleteParish = message => {
+const onDeleteParish = (message) => {
   // Check if the function receives the correct data
 
   if (message) {
     try {
       // Make the API call and handle the response
-      AllAdminActions.deleteParish( deleteParishData.value)
-        .then(response => {
+      AllAdminActions.deleteParish(deleteParishData.value)
+        .then((response) => {
           // console.log("Response from server:", response.data)
 
           // Handle successful response here, e.g., updating UI, showing a success message, etc.
-          const apiStatus=response.data
+          const apiStatus = response.data;
 
-          console.log("Parish Delete response==>", JSON.stringify(apiStatus))
+          console.log("Parish Delete response==>", JSON.stringify(apiStatus));
 
-          apiResponseStatus.value=apiStatus.status
-          apiResponseMessage.value=apiStatus.message
-          fetchAllParish()
+          apiResponseStatus.value = apiStatus.status;
+          apiResponseMessage.value = apiStatus.message;
+          fetchAllParish();
         })
-        .catch(error => {
-          console.error("Error submitting data:", error)
+        .catch((error) => {
+          console.error("Error submitting data:", error);
 
           // Handle the error here, e.g., showing an error message
-        })
-
+        });
     } catch (error) {
-      console.log("Caught error in try-catch block:", error)
+      console.log("Caught error in try-catch block:", error);
     }
+  }
+};
 
-
-
-  } 
-}
-
-const editPermission = name => {
-  isPermissionDialogVisible.value = true
-  permissionName.value = name
-}
+const editPermission = (name) => {
+  isPermissionDialogVisible.value = true;
+  permissionName.value = name;
+};
 </script>
 
 <template>
@@ -388,15 +339,19 @@ const editPermission = name => {
                   { value: 100, title: '100' },
                   { value: -1, title: 'All' },
                 ]"
-                style="width: 6.25rem;"
-                @update:model-value="options.itemsPerPage = parseInt($event, 10)"
+                style="width: 6.25rem"
+                @update:model-value="
+                  options.itemsPerPage = parseInt($event, 10)
+                "
               />
             </div>
             <VSpacer />
 
-            <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+            <div
+              class="app-user-search-filter d-flex align-center flex-wrap gap-4"
+            >
               <!-- 👉 Search  -->
-              <div style="inline-size: 10rem;">
+              <div style="inline-size: 10rem">
                 <AppTextField
                   v-model="searchQuery"
                   placeholder="Search"
@@ -441,7 +396,6 @@ const editPermission = name => {
           >
             <!--  👉 Parish -->
 
-
             <template #item.parish="{ item }">
               <div class="d-flex align-center">
                 <VAvatar
@@ -449,23 +403,25 @@ const editPermission = name => {
                   :variant="!item.raw.avatar ? 'tonal' : undefined"
                   class="me-3"
                 >
-                  <VImg
-                    v-if="item.raw.avatar"
-                    :src="item.raw.avatar"
-                  />
+                  <VImg v-if="item.raw.avatar" :src="item.raw.avatar" />
                   <span v-else>{{ avatarText(item.raw.email) }}</span>
                 </VAvatar>
 
                 <div class="d-flex flex-column">
                   <h6 class="text-base">
                     <RouterLink
-                      :to="{ name: 'apps-user-view-id', params: { id: item.raw.country } }"
+                      :to="{
+                        name: 'apps-user-view-id',
+                        params: { id: item.raw.country },
+                      }"
                       class="font-weight-medium user-list-name"
                     >
                       {{ item.raw.country }}
                     </RouterLink>
                   </h6>
-                  <span class="text-sm text-medium-emphasis">{{ item.raw.email }}</span>
+                  <span class="text-sm text-medium-emphasis">{{
+                    item.raw.email
+                  }}</span>
                 </div>
               </div>
             </template>
@@ -489,7 +445,9 @@ const editPermission = name => {
 
             <!-- 👉 Plan -->
             <template #item.plan="{ item }">
-              <span class="text-capitalize font-weight-medium">{{ item.raw.currentPlan }}</span>
+              <span class="text-capitalize font-weight-medium">{{
+                item.raw.currentPlan
+              }}</span>
             </template>
 
             <!-- Status -->
@@ -517,24 +475,18 @@ const editPermission = name => {
                 variant="text"
                 @click="openEditParishDialog(item)"
               >
-                <VIcon
-                  size="22"
-                  icon="tabler-edit"
-                />
+                <VIcon size="22" icon="tabler-edit" />
               </VBtn>
 
-              <VBtn
-                icon
-                variant="text"
-                size="small"
-                color="medium-emphasis"
-              />
+              <VBtn icon variant="text" size="small" color="medium-emphasis" />
             </template>
 
             <!-- pagination -->
             <template #bottom>
               <VDivider />
-              <div class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3">
+              <div
+                class="d-flex align-center justify-sm-space-between justify-center flex-wrap gap-3 pa-5 pt-3"
+              >
                 <p class="text-sm text-disabled mb-0">
                   {{ paginationMeta(options, totalParish) }}
                 </p>
@@ -542,7 +494,11 @@ const editPermission = name => {
                 <VPagination
                   v-model="options.page"
                   :length="Math.ceil(totalParish / options.itemsPerPage)"
-                  :total-visible="$vuetify.display.xs ? 1 : Math.ceil(totalParish / options.itemsPerPage)"
+                  :total-visible="
+                    $vuetify.display.xs
+                      ? 1
+                      : Math.ceil(totalParish / options.itemsPerPage)
+                  "
                 >
                   <template #prev="slotProps">
                     <VBtn
@@ -573,28 +529,22 @@ const editPermission = name => {
         </VCard>
 
         <!-- 👉 Create parish dialog -->
-        <VCol
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <CreateParishDialog v-model:is-dialog-visible="isCreateParishVisible" />
+        <VCol cols="12" sm="6" md="4">
+          <CreateParishDialog
+            v-model:is-dialog-visible="isCreateParishVisible"
+          />
         </VCol>
 
         <!-- 👉 Edit parish dialog -->
-        <VCol
-         
-          cols="12"
-          sm="6"
-          md="4"
-        >
+        <VCol cols="12" sm="6" md="4">
           <EditParishDialog
             v-model:is-dialog-visible="isEditParishVisible"
             :parish-data="parishData"
+            @changes="changes"
           />
         </VCol>
-      </vcol>
-    </vrow>
+      </VCol>
+    </VRow>
   </section>
 
   <!-- 👉 Confirm delete parish Dialog -->

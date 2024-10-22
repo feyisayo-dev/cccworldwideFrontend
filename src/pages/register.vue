@@ -71,6 +71,7 @@ const form = ref({
   MStatus: "Select status",
   VineyardStatus: "Select Vineyard status",
   title: "Select present title",
+  filteredTitleList: "Select present title",
   dot: "",
   selectedMinistry: "Select Ministry",
   phoneNo: "",
@@ -265,14 +266,18 @@ const fetchParishes = async (state) => {
 
 const getTitleByGender = async (getByGendervalue) => {
   try {
-    // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint
     const response = await api.get(`/getTitleByGender/${getByGendervalue}`);
+    console.log(
+      "this is the title that was fetched by gender",
+      getByGendervalue
+    );
     const data = response.data.titles;
 
     if (data && data.length > 0) {
       form.value.titleList = data.map((genderTitles) => ({
         level: genderTitles.level,
         title: genderTitles.title,
+        status: genderTitles.status,
       }));
     }
   } catch (error) {
@@ -286,28 +291,26 @@ onMounted(() => {
 });
 
 const getResidentialState = () => {
-  // form.value.stateList = []
-  // form.value.selectedState = ''
   console.log(
     "<=========This is the country id picked for residential==========>",
     form.value.selectedCountry
   );
 
   if (form.value.selectedCountry) {
-  form.value.getCountryById = form.value.countryList.find(
-    (country) => country.id === form.value.selectedCountry
-  );
-  
-  if (form.value.getCountryById) {
-    console.log(
-      "<=========This is the country picked for residential==========>",
-      form.value.getCountryById
+    form.value.getCountryById = form.value.countryList.find(
+      (country) => country.id === form.value.selectedCountry
     );
-    form.value.residentialCountry = form.value.getCountryById.name;
-  } else {
-    console.error("No country found for the selected country ID.");
+
+    if (form.value.getCountryById) {
+      console.log(
+        "<=========This is the country picked for residential==========>",
+        form.value.getCountryById
+      );
+      form.value.residentialCountry = form.value.getCountryById.name;
+    } else {
+      console.error("No country found for the selected country ID.");
+    }
   }
-}
 
   if (
     form.value.getCountryById &&
@@ -334,16 +337,15 @@ const getChurchState = () => {
       form.value.selectedchurchCountry
     );
 
-    // Find the selected church country in the country list, like in getResidentialState
     form.value.getChurchCountryById = form.value.countryList.find(
       (country) => country.id === form.value.selectedchurchCountry
     );
-    
+
     console.log(
       "<=========This is the country picked for parish==========>",
       form.value.getChurchCountryById
     );
-    form.value.churchCountryName = form.value.getChurchCountryById.name
+    form.value.churchCountryName = form.value.getChurchCountryById.name;
     form.value.churchStateList = [];
     form.value.selectedParishState = "";
 
@@ -376,6 +378,28 @@ const getGenderTitle = () => {
     getTitleByGender(gender);
   }
 };
+const filterTitleByStatus = () => {
+  console.log("Trying to filter");
+  if (form.value.MStatus) {
+    const selectedStatus = form.value.MStatus.trim().toLowerCase();
+    console.log("Selected status:", selectedStatus);
+
+    // Log titleList before filtering
+    console.log("Title list before filtering:", form.value.titleList);
+    form.value.titleList.forEach((title) => {
+      console.log("Title object:", title.status);
+    });
+    // Perform the filtering
+    form.value.filteredTitleList = form.value.titleList.filter(
+      (title) =>
+        title.status && title.status.toLowerCase().trim() === selectedStatus
+    );
+
+    console.log("This is the filtered:", form.value.filteredTitleList);
+  } else {
+    console.log("Failed to filter");
+  }
+};
 
 const getStateParish = () => {
   if (form.value.selectedParishState) {
@@ -389,24 +413,16 @@ const getStateParish = () => {
   }
 };
 
-//submit to call the register function
 const onSubmit = (message) => {
-  // eslint-disable-next-line sonarjs/no-all-duplicated-branches
   if (message) {
     register();
   }
 };
 
-// const closeDialog= () => {
-//   this.isConfirmDialogVisible = false
-//   alert('Cancelled')
-// }
-
 watch(
   () => form.value.selectedParish,
   (newValue) => {
     if (newValue) {
-      // Find the parish object corresponding to the selected parish code
       const selectedParishObject = form.value.parishList.find(
         (parish) => parish.parishcode === newValue
       );
@@ -422,13 +438,22 @@ watch(
   }
 );
 
-watchEffect(() => {
-  // getResidentialState()
-  // getChurchState()
-  getGenderTitle();
-
-  // getStateParish()
-});
+watch(
+  () => form.value.Gender,
+  (newGender) => {
+    if (newGender) {
+      getGenderTitle(newGender);
+    }
+  }
+);
+watch(
+  () => form.value.MStatus,
+  (newStatus) => {
+    if (newStatus) {
+      filterTitleByStatus(newStatus);
+    }
+  }
+);
 
 const isConfirmDialogVisible = ref(false);
 
@@ -453,13 +478,11 @@ const isStep1Valid = computed(() => {
     form.value.sname && form.value.fname && form.value.Gender && form.value.dob
   );
 });
-
 </script>
 
 <template>
   <VRow no-gutters class="auth-wrapper">
     <VCol md="1" class="d-none d-md-flex">
-      <!-- here your illustration -->
       <div class="d-flex justify-center align-center w-100 position-relative">
         <router-link to="/landing">
           <p class="mb-0">Go home &rarr;</p>
@@ -483,11 +506,8 @@ const isStep1Valid = computed(() => {
         />
         <VDivider />
         <VCardText>
-          <!-- 👉 stepper content -->
-          <!-- <AppCardActions action-refresh @refresh="refetchData" /> -->
           <VForm>
             <VWindow v-model="currentStep" class="disable-tab-transition">
-              <!-- This is account details step view -->
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
@@ -541,7 +561,6 @@ const isStep1Valid = computed(() => {
                 </VRow>
               </VWindowItem>
 
-              <!-- This is personal details step view -->
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
@@ -598,7 +617,6 @@ const isStep1Valid = computed(() => {
                 </VRow>
               </VWindowItem>
 
-              <!-- This is Anoiting details step view -->
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
@@ -639,7 +657,7 @@ const isStep1Valid = computed(() => {
                     <AppSelect
                       v-model="form.title"
                       label="Present Title"
-                      :items="form.titleList"
+                      :items="form.filteredTitleList"
                     />
                   </VCol>
 
@@ -660,7 +678,6 @@ const isStep1Valid = computed(() => {
                   </VCol>
                 </VRow>
               </VWindowItem>
-              <!-- This is Contact details step view -->
               <VWindowItem>
                 <VRow>
                   <VCol cols="12">
@@ -735,7 +752,6 @@ const isStep1Valid = computed(() => {
                   </VCol>
                 </VRow>
               </VWindowItem>
-              <!-- This is church details step view -->
               <VWindowItem>
                 <h5 class="text-h5 mt-10">Church Information</h5>
                 <p class="text-sm">Enter your current church information</p>
@@ -787,71 +803,66 @@ const isStep1Valid = computed(() => {
                 </VRow>
               </VWindowItem>
 
-              <!-- This is review & summary step view -->
               <VWindowItem>
                 <div class="text-base">
-                  <!-- <VDivider> -->
-                    <h6 class="text-base font-weight-medium mb-2">
-                      Review & Summary
-                    </h6>
+                  <h6 class="text-base font-weight-medium mb-2">
+                    Review & Summary
+                  </h6>
 
-                    <p class="mb-1">Email address {{ form.email }}</p>
+                  <p class="mb-1">Email address {{ form.email }}</p>
 
-                    <VDivider class="my-4" />
+                  <VDivider class="my-4" />
 
-                    <h6 class="text-base font-weight-medium mb-2">
-                      Personal Details
-                    </h6>
+                  <h6 class="text-base font-weight-medium mb-2">
+                    Personal Details
+                  </h6>
 
-                    <p class="mb-1 text-base">
-                      Surname Name <span>{{ form.sname }}</span>
-                    </p>
-                    <p class="mb-1 text-base">First Name {{ form.fname }}</p>
-                    <p class="mb-1 text-base">Middle Name {{ form.mname }}</p>
-                    <p class="mb-1">Gender {{ form.Gender }}</p>
-                    <p class="mb-1">DOB {{ form.dob }}</p>
+                  <p class="mb-1 text-base">
+                    Surname Name <span>{{ form.sname }}</span>
+                  </p>
+                  <p class="mb-1 text-base">First Name {{ form.fname }}</p>
+                  <p class="mb-1 text-base">Middle Name {{ form.mname }}</p>
+                  <p class="mb-1">Gender {{ form.Gender }}</p>
+                  <p class="mb-1">DOB {{ form.dob }}</p>
 
-                    <VDivider class="my-4" />
+                  <VDivider class="my-4" />
 
-                    <h6 class="text-base font-weight-medium mb-2">
-                      Joinning/Anoiting Details
-                    </h6>
+                  <h6 class="text-base font-weight-medium mb-2">
+                    Joinning/Anoiting Details
+                  </h6>
 
-                    <p class="mb-1">Member Status {{ form.MStatus }}</p>
-                    <p v-if="form.MStatus == 'Vineyard Worker'" class="mb-1">
-                      Vineyard Status {{ form.VineyardStatus }}
-                    </p>
-                    <p class="mb-1">Present Title {{ form.title }}</p>
-                    <p class="mb-1">Date of present Anoitment {{ form.dot }}</p>
-                    <p class="mb-1">Ministry {{ form.selectedMinistry }}</p>
+                  <p class="mb-1">Member Status {{ form.MStatus }}</p>
+                  <p v-if="form.MStatus == 'Vineyard Worker'" class="mb-1">
+                    Vineyard Status {{ form.VineyardStatus }}
+                  </p>
+                  <p class="mb-1">Present Title {{ form.title }}</p>
+                  <p class="mb-1">Date of present Anoitment {{ form.dot }}</p>
+                  <p class="mb-1">Ministry {{ form.selectedMinistry }}</p>
 
-                    <VDivider class="my-4" />
+                  <VDivider class="my-4" />
 
-                    <h6 class="text-base font-weight-medium mb-2">
-                      Contact Details
-                    </h6>
+                  <h6 class="text-base font-weight-medium mb-2">
+                    Contact Details
+                  </h6>
 
-                    <p class="mb-1">WhatsApp Phone number {{ form.phoneNo }}</p>
-                    <p class="mb-1">
-                      Alternative Phone number {{ form.altPhoneno }}
-                    </p>
-                    <p class="mb-1">Residential Address {{ form.address }}</p>
-                    <p class="mb-1">Country {{ form.residentialCountry }}</p>
+                  <p class="mb-1">WhatsApp Phone number {{ form.phoneNo }}</p>
+                  <p class="mb-1">
+                    Alternative Phone number {{ form.altPhoneno }}
+                  </p>
+                  <p class="mb-1">Residential Address {{ form.address }}</p>
+                  <p class="mb-1">Country {{ form.residentialCountry }}</p>
 
-                    <p class="mb-1">State {{ form.selectedState }}</p>
-                    <VDivider class="my-4" />
-                    <h6 class="text-base font-weight-medium mb-2">
-                      Church Details
-                    </h6>
+                  <p class="mb-1">State {{ form.selectedState }}</p>
+                  <VDivider class="my-4" />
+                  <h6 class="text-base font-weight-medium mb-2">
+                    Church Details
+                  </h6>
 
-                    <p class="mb-1">
-                      Country {{ form.churchCountryName }}
-                    </p>
-                    <p class="mb-1">State {{ form.selectedParishState }}</p>
-                    <p class="mb-1">
-                      Parish: {{ form.userParish }} - {{ form.userParishCode }}
-                    </p>
-                  <!-- </VDivider> -->
+                  <p class="mb-1">Country {{ form.churchCountryName }}</p>
+                  <p class="mb-1">State {{ form.selectedParishState }}</p>
+                  <p class="mb-1">
+                    Parish: {{ form.userParish }} - {{ form.userParishCode }}
+                  </p>
                 </div>
               </VWindowItem>
             </VWindow>
@@ -893,7 +904,6 @@ const isStep1Valid = computed(() => {
                 <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
               </VBtn>
             </div>
-            <!-- 👉 Confirm Dialog -->
             <ConfirmDialog
               v-model:isDialogVisible="isConfirmDialogVisible"
               :api-response="apiResponseStatus"

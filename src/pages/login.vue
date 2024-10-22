@@ -42,31 +42,9 @@ const responseMessage = ref("");
 const password = ref("");
 const rememberMe = ref(false);
 
-// The login function
-// const login = () => {
-//   axios.post('/auth/login', {
-//     email: email.value,
-//     password: password.value,
-//   }).then(r => {
-//     const { accessToken, userData, userAbilities } = r.data
-
-//     localStorage.setItem('userAbilities', JSON.stringify(userAbilities))
-//     ability.update(userAbilities)
-//     localStorage.setItem('userData', JSON.stringify(userData))
-//     localStorage.setItem('accessToken', JSON.stringify(accessToken))
-
-//     // Redirect to `to` query if exist or redirect to index route
-//     router.replace(route.query.to ? String(route.query.to) : '/')
-//   }).catch(e => {
-//     const { errors: formErrors } = e.response.data
-
-//     errors.value = formErrors
-//     console.error(e.response.data)
-//   })
-// }
 
 const login = async () => {
-  loading.value = true; // Set loading to true when login starts
+  loading.value = true; 
   try {
     const response = await api.post("/login", {
       email: email.value,
